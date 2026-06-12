@@ -140,100 +140,95 @@ function _buildInvHTML(savedInv, comp) {
   var ir = '';
   items.forEach(function (it, i) {
     ir += '<tr>' +
-      '<td style="width:28px;padding:5px 4px;text-align:center;color:#bbb;font-size:9px">' + (i+1) + '</td>' +
-      '<td style="padding:5px 4px;font-size:9px;color:#333">' + esc(it.desc) + '</td>' +
-      '<td style="width:40px;padding:5px 4px;text-align:center;font-size:9px;color:#555">' + it.qty + '</td>' +
-      '<td style="width:62px;padding:5px 4px;text-align:right;font-size:9px;color:#555">' + parseFloat(it.price).toFixed(3) + '</td>' +
-      '<td style="width:70px;padding:5px 4px;text-align:right;font-size:9px;font-weight:600;color:#222">' + it.amount + '</td></tr>';
+      '<td style="padding:6px 6px;text-align:center;color:#999;font-size:10px;border-bottom:1px solid #f0f0f0;width:30px">' + (i+1) + '</td>' +
+      '<td style="padding:6px 6px;font-size:10px;color:#333;border-bottom:1px solid #f0f0f0">' + esc(it.desc) + '</td>' +
+      '<td style="padding:6px 6px;text-align:center;font-size:10px;color:#555;border-bottom:1px solid #f0f0f0;width:45px">' + it.qty + '</td>' +
+      '<td style="padding:6px 6px;text-align:right;font-size:10px;color:#555;border-bottom:1px solid #f0f0f0;width:75px">' + parseFloat(it.price).toFixed(3) + '</td>' +
+      '<td style="padding:6px 6px;text-align:right;font-size:10px;font-weight:600;color:#222;border-bottom:1px solid #f0f0f0;width:80px">' + it.amount + '</td></tr>';
   });
-  if (!ir) ir = '<tr><td colspan="5" style="text-align:center;color:#ddd;padding:30px;font-size:10px;font-style:italic">No items</td></tr>';
+  if (!ir) ir = '<tr><td colspan="5" style="text-align:center;color:#ddd;padding:30px;font-size:11px;font-style:italic">No items</td></tr>';
 
-  return '<div style="width:210mm;min-height:297mm;padding:10mm 12mm;font-family:Arial,Helvetica,sans-serif;font-size:9.5px;color:#333;position:relative;background:#fff;line-height:1.55">' +
+  return '<div style="width:210mm;min-height:297mm;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#333;position:relative;background:#fff;line-height:1.5">' +
 
-    /* top accent stripe */
-    '<div style="height:3px;background:' + pc + ';margin:-10mm -12mm 6mm -12mm"></div>' +
-
-    /* ——— HEADER ——— */
-    '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:4mm">' +
-    (c.logo ? '<div style="flex-shrink:0"><img src="' + c.logo.replace(/"/g,'&quot;') + '" style="max-width:72px;max-height:72px;object-fit:contain"></div>' : '') +
+    /* ——— LETTERHEAD ——— */
+    '<div style="background:' + pc + ';padding:14mm 14mm 10mm;color:#fff">' +
+    '<div style="display:flex;align-items:flex-start;gap:14px">' +
+    (c.logo ? '<div style="flex-shrink:0;background:#fff;border-radius:4px;padding:4px"><img src="' + c.logo.replace(/"/g,'&quot;') + '" style="max-width:65px;max-height:65px;object-fit:contain;display:block"></div>' : '') +
     '<div style="flex:1">' +
-    '<div style="font-size:16px;font-weight:800;color:' + pc + ';letter-spacing:-.2px">' + esc(c.name) + '</div>' +
-    (c.sub ? '<div style="font-size:9px;color:#888;margin:1px 0 3px">' + esc(c.sub) + '</div>' : '') +
-    '<div style="font-size:8px;color:#aaa;line-height:1.6">' +
-    (c.loc ? esc(c.loc) + '<br>' : '') +
-    [c.tel && 'Tel: ' + c.tel, c.mob && 'Mob: ' + c.mob, c.email && 'Email: ' + c.email, c.cr && 'C.R.: ' + c.cr].filter(Boolean).join(' | ') +
+    '<div style="font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:2px">' + esc(c.name) + '</div>' +
+    (c.sub ? '<div style="font-size:11px;opacity:.85;margin-bottom:3px">' + esc(c.sub) + '</div>' : '') +
+    '<div style="font-size:9px;opacity:.7;line-height:1.6">' +
+    [c.loc, c.tel && 'Tel: ' + c.tel, c.mob && 'Mob: ' + c.mob, c.email, c.cr && 'C.R.: ' + c.cr].filter(Boolean).join(' &nbsp;|&nbsp; ') +
     '</div></div>' +
-    (c.nameAr ? '<div style="flex-shrink:0;text-align:right"><div style="font-size:16px;font-weight:800;color:' + pc + ';letter-spacing:-.2px">' + esc(c.nameAr) + '</div>' +
-    (c.subAr ? '<div style="font-size:9px;color:#888;margin:1px 0 3px">' + esc(c.subAr) + '</div>' : '') +
-    '<div style="font-size:8px;color:#aaa;line-height:1.6;direction:rtl">' +
-    [c.loc, c.tel && 'هاتف: ' + c.tel, c.mob && 'جوال: ' + c.mob, c.email && 'بريد: ' + c.email].filter(Boolean).join('<br>') +
+    (c.nameAr ? '<div style="flex-shrink:0;text-align:right;max-width:45%"><div style="font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:2px">' + esc(c.nameAr) + '</div>' +
+    (c.subAr ? '<div style="font-size:11px;opacity:.85;margin-bottom:3px">' + esc(c.subAr) + '</div>' : '') +
+    '<div style="font-size:9px;opacity:.7;line-height:1.6;direction:rtl">' +
+    [c.loc, c.tel && 'هاتف: ' + c.tel, c.mob && 'جوال: ' + c.mob, c.email && 'بريد: ' + c.email].filter(Boolean).join(' &nbsp;|&nbsp; ') +
     '</div></div>' : '') +
-    '</div>' +
+    '</div></div>' +
 
-    /* ——— TITLE ——— */
-    '<div style="border-top:1.5px solid #eee;border-bottom:1.5px solid #eee;padding:2mm 0;margin-bottom:3.5mm;display:flex;align-items:baseline;justify-content:space-between">' +
-    '<div style="font-size:18px;font-weight:800;color:' + pc + ';letter-spacing:.4px">INVOICE</div>' +
-    '<div style="font-size:10px;color:#aaa;direction:rtl">فاتورة ضريبية</div>' +
-    '</div>' +
+    /* ——— INVOICE TITLE + METADATA BAR ——— */
+    '<div style="background:#fafafa;border-bottom:1px solid #eee;padding:5mm 14mm;display:flex;align-items:center;justify-content:space-between">' +
+    '<div><div style="font-size:20px;font-weight:800;color:' + pc + ';letter-spacing:.3px">TAX INVOICE</div><div style="font-size:10px;color:#999;margin-top:1px">فاتورة ضريبية</div></div>' +
+    '<div style="text-align:right;font-size:10px;color:#555;line-height:1.8">' +
+    '<div style="display:flex;gap:10px"><span style="color:#999;min-width:72px;text-align:left">Invoice No.</span><span style="font-weight:600;color:#333">' + no + '</span></div>' +
+    '<div style="display:flex;gap:10px"><span style="color:#999;min-width:72px;text-align:left">Date</span><span style="font-weight:600;color:#333">' + dts + '</span></div>' +
+    (c.vatReg ? '<div style="display:flex;gap:10px"><span style="color:#999;min-width:72px;text-align:left">VAT Reg.</span><span style="font-weight:600;color:#333">' + c.vatReg + '</span></div>' : '') +
+    '</div></div>' +
 
-    /* ——— BILL TO + INFO ——— */
+    /* ——— BILL TO ——— */
+    '<div style="padding:5mm 14mm 4mm">' +
     '<div style="display:flex;gap:6mm;margin-bottom:4mm">' +
     '<div style="flex:1">' +
-    '<div style="font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:2px">Bill To</div>' +
-    '<div style="font-weight:700;font-size:11px;color:#222">' + esc(cust||'---') + '</div>' +
-    '<div style="font-size:9px;color:#777;margin-top:1px;line-height:1.5">' +
+    '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#aaa;margin-bottom:2px">Bill To / إلى السيد</div>' +
+    '<div style="font-weight:700;font-size:12px;color:#222;margin-bottom:2px">' + esc(cust||'---') + '</div>' +
+    '<div style="font-size:10px;color:#777;line-height:1.6">' +
     [addr, ph && 'Tel: ' + ph, cr_ && 'C.R.: ' + cr_, em].filter(Boolean).join('<br>') +
     '</div></div>' +
-    '<div style="text-align:right;font-size:9px;color:#555;line-height:1.9">' +
-    '<div style="display:flex;gap:6px"><span style="color:#aaa;min-width:70px;text-align:left">Invoice No</span><span style="font-weight:600;color:#333">' + no + '</span></div>' +
-    '<div style="display:flex;gap:6px"><span style="color:#aaa;min-width:70px;text-align:left">Date</span><span style="font-weight:600;color:#333">' + dts + '</span></div>' +
-    (c.vatReg ? '<div style="display:flex;gap:6px"><span style="color:#aaa;min-width:70px;text-align:left">VAT Reg</span><span style="font-weight:600;color:#333">' + c.vatReg + '</span></div>' : '') +
-    '</div></div>' +
+    '</div>' +
 
     /* ——— ITEMS TABLE ——— */
-    '<table style="width:100%;border-collapse:collapse;margin-bottom:0;font-size:9px">' +
-    '<thead><tr style="border-bottom:1.5px solid ' + pc + '">' +
-    '<th style="padding:2.5mm 4px 1.5mm;text-align:center;color:#aaa;font-weight:700;font-size:7px;text-transform:uppercase;letter-spacing:.4px;width:28px">#</th>' +
-    '<th style="padding:2.5mm 4px 1.5mm;text-align:left;color:#aaa;font-weight:700;font-size:7px;text-transform:uppercase;letter-spacing:.4px">Description / البيان</th>' +
-    '<th style="padding:2.5mm 4px 1.5mm;text-align:center;color:#aaa;font-weight:700;font-size:7px;text-transform:uppercase;letter-spacing:.4px;width:40px">Qty</th>' +
-    '<th style="padding:2.5mm 4px 1.5mm;text-align:right;color:#aaa;font-weight:700;font-size:7px;text-transform:uppercase;letter-spacing:.4px;width:62px">Price</th>' +
-    '<th style="padding:2.5mm 4px 1.5mm;text-align:right;color:#aaa;font-weight:700;font-size:7px;text-transform:uppercase;letter-spacing:.4px;width:70px">Amount</th>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:10px">' +
+    '<thead><tr style="background:' + pc + ';color:#fff">' +
+    '<th style="padding:7px 6px;text-align:center;font-weight:600;font-size:9px;width:30px">#</th>' +
+    '<th style="padding:7px 6px;text-align:left;font-weight:600;font-size:9px">Description / البيان</th>' +
+    '<th style="padding:7px 6px;text-align:center;font-weight:600;font-size:9px;width:45px">Qty / الكمية</th>' +
+    '<th style="padding:7px 6px;text-align:right;font-weight:600;font-size:9px;width:75px">Price / السعر</th>' +
+    '<th style="padding:7px 6px;text-align:right;font-weight:600;font-size:9px;width:80px">Amount / المبلغ</th>' +
     '</tr></thead><tbody>' + ir +
     '</tbody></table>' +
 
     /* ——— TOTALS ——— */
-    '<div style="display:flex;justify-content:flex-end;margin:1.5mm 0 2mm">' +
-    '<div style="min-width:130px">' +
-    '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:9.5px;color:#555"><span>Subtotal</span><span>' + sv + ' ' + cur.symbol + '</span></div>' +
-    (disc>0 ? '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:9.5px;color:#e53e3e"><span>Discount</span><span>-' + dv + ' ' + cur.symbol + '</span></div>' : '') +
-    (vp>0 ? '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:9.5px;color:#555"><span>VAT (' + vp + '%)</span><span>' + vv + ' ' + cur.symbol + '</span></div>' : '') +
-    '<div style="border-top:1.5px solid ' + pc + ';margin:4px 0 3px"></div>' +
-    '<div style="display:flex;justify-content:space-between;padding:2px 0 0;font-size:12px;font-weight:800;color:' + pc + '"><span>Total</span><span>' + gv + ' ' + cur.symbol + '</span></div>' +
+    '<div style="display:flex;justify-content:flex-end;margin:3mm 0">' +
+    '<div style="min-width:160px;background:#fafafa;border-radius:4px;padding:4mm 5mm">' +
+    '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px;color:#555"><span>Subtotal</span><span>' + sv + ' ' + cur.symbol + '</span></div>' +
+    (disc>0 ? '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px;color:#e53e3e"><span>Discount</span><span>-' + dv + ' ' + cur.symbol + '</span></div>' : '') +
+    (vp>0 ? '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px;color:#555"><span>VAT (' + vp + '%)</span><span>' + vv + ' ' + cur.symbol + '</span></div>' : '') +
+    '<div style="border-top:2px solid ' + pc + ';margin:4px 0"></div>' +
+    '<div style="display:flex;justify-content:space-between;padding:4px 0 0;font-size:14px;font-weight:800;color:' + pc + '"><span>Total</span><span>' + gv + ' ' + cur.symbol + '</span></div>' +
+    '<div style="font-size:9px;color:#999;font-style:italic;margin-top:4px;text-align:right">' + esc(gw) + '</div>' +
     '</div></div>' +
-
-    /* ——— WORDS ——— */
-    '<div style="font-size:8.5px;color:#999;font-style:italic;margin-bottom:3mm;text-align:right">' + esc(gw) + '</div>' +
 
     /* ——— PAYMENT / NOTES / TERMS ——— */
-    '<div style="border-top:1px solid #eee;padding-top:2.5mm">' +
-    '<div style="display:flex;gap:4mm;font-size:8.5px;color:#555">' +
-    '<div style="flex:1"><div style="font-weight:700;color:#aaa;font-size:7px;text-transform:uppercase;letter-spacing:.35px;margin-bottom:1.5px">Payment / طريقة الدفع</div><div>' + esc(pd||'—') + '</div></div>' +
-    (notes ? '<div style="flex:1"><div style="font-weight:700;color:#aaa;font-size:7px;text-transform:uppercase;letter-spacing:.35px;margin-bottom:1.5px">Notes / ملاحظات</div><div>' + esc(notes) + '</div></div>' : '') +
-    (c.invTerms ? '<div style="flex:1"><div style="font-weight:700;color:#aaa;font-size:7px;text-transform:uppercase;letter-spacing:.35px;margin-bottom:1.5px">Terms / الشروط</div><div style="color:#777">' + esc(c.invTerms) + '</div></div>' : '') +
-    '</div></div>' +
+    '<div style="display:flex;gap:4mm;margin:2mm 0 4mm;font-size:9.5px;color:#555">' +
+    '<div style="flex:1;border:1px solid #eee;border-radius:4px;padding:3mm 3.5mm"><div style="font-weight:700;color:#aaa;font-size:8px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Payment / طريقة الدفع</div><div>' + esc(pd||'—') + '</div></div>' +
+    (notes ? '<div style="flex:1;border:1px solid #eee;border-radius:4px;padding:3mm 3.5mm"><div style="font-weight:700;color:#aaa;font-size:8px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Notes / ملاحظات</div><div>' + esc(notes) + '</div></div>' : '') +
+    (c.invTerms ? '<div style="flex:1;border:1px solid #eee;border-radius:4px;padding:3mm 3.5mm"><div style="font-weight:700;color:#aaa;font-size:8px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Terms / الشروط</div><div>' + esc(c.invTerms) + '</div></div>' : '') +
+    '</div>' +
+    '</div>' +
 
     /* ——— SEAL & SIGNATURE ——— */
-    (c.seal || c.signature ? '<div style="display:flex;justify-content:space-between;align-items:end;margin-top:4mm">' +
-    (c.seal ? '<div><img src="' + c.seal.replace(/"/g,'&quot;') + '" style="max-width:75px;max-height:75px;object-fit:contain"></div>' : '<div></div>') +
-    (c.signature ? '<div style="text-align:center"><img src="' + c.signature.replace(/"/g,'&quot;') + '" style="max-width:100px;max-height:40px;object-fit:contain"><div style="font-size:7.5px;color:#aaa;margin-top:1px">Authorized Signature / التوقيع</div></div>' : '<div></div>') +
+    (c.seal || c.signature ? '<div style="padding:0 14mm;display:flex;justify-content:space-between;align-items:end;margin-bottom:4mm">' +
+    (c.seal ? '<div><img src="' + c.seal.replace(/"/g,'&quot;') + '" style="max-width:80px;max-height:80px;object-fit:contain"></div>' : '<div></div>') +
+    (c.signature ? '<div style="text-align:center"><img src="' + c.signature.replace(/"/g,'&quot;') + '" style="max-width:110px;max-height:40px;object-fit:contain"><div style="font-size:8px;color:#aaa;margin-top:1px">Authorized Signature / التوقيع</div></div>' : '<div></div>') +
     '</div>' : '') +
 
     /* ——— FOOTER ——— */
-    '<div style="position:absolute;bottom:5mm;left:12mm;right:12mm;border-top:1px solid #ddd;padding-top:2mm;display:flex;justify-content:space-between;font-size:7px;color:#bbb">' +
+    '<div style="position:absolute;bottom:0;left:0;right:0;background:#f5f5f5;padding:3mm 14mm;display:flex;justify-content:space-between;font-size:8px;color:#999">' +
     '<div>' + esc(c.name) + (c.loc ? ' | ' + esc(c.loc) : '') + '</div>' +
     '<div>' + [c.tel && 'Tel: ' + c.tel, c.email].filter(Boolean).join(' | ') + '</div>' +
     '</div>' +
-    (c.invFooter ? '<div style="position:absolute;bottom:2mm;left:12mm;right:12mm;text-align:center;font-size:6.5px;color:#ccc">' + esc(c.invFooter) + '</div>' : '') +
+    (c.invFooter ? '<div style="position:absolute;bottom:8mm;left:14mm;right:14mm;text-align:center;font-size:7px;color:#bbb">' + esc(c.invFooter) + '</div>' : '') +
     '</div>';
 }
 
