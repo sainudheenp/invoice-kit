@@ -561,8 +561,3 @@ input,select,textarea{font-family:inherit;font-size:14px}
   body{background:#fff!important;margin:0!important;padding:0!important}
   #appRoot{display:none!important}
   .print-only{display:block!important}
-  body.print-invoice{page:invoice}
-  body.print-receipt{page:receipt}
-}
-@page invoice{size:A4 portrait;margin:0}
-@page receipt{size:A5 portrait;margin:0}
