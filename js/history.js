@@ -155,11 +155,7 @@ function editSavedDoc(type, id) {
 
 /* --- backup / export all data --- */
 function backupData() {
-  var blob = new Blob([JSON.stringify(C, null, 2)], { type: 'application/json' });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'open_invoice_backup_' + new Date().toISOString().slice(0, 10) + '.json';
-  a.click();
+  fullBackup();
   var btn = document.getElementById('backupBtn');
   if (btn) { btn.textContent = '✅ Saved!'; setTimeout(function () { btn.textContent = '💾 Backup'; }, 2000); }
 }

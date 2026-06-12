@@ -246,6 +246,20 @@ function importData(ev) {
   reader.readAsText(file);
 }
 
+function handleSettingsRestore(ev) {
+  var file = ev.target.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var d = JSON.parse(e.target.result);
+      fullRestore(d).then(function () {
+        _refreshCoList(); populateSettings(); setStatus('Restored from backup!');
+      });
+    } catch (err) { setStatus('Restore error: ' + err.message, 'err'); }
+  };
+  reader.readAsText(file);
+}
+
 function setStatus(msg, type) {
   var el = document.getElementById('settingsStatus');
   el.textContent = msg;

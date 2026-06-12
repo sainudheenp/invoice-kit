@@ -148,3 +148,25 @@ function esc(s) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+/* ==========================================================
+   BACKUP / RESTORE
+   ========================================================== */
+function fullBackup() {
+  var blob = new Blob([JSON.stringify(C, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'open_invoice_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+}
+
+function fullRestore(data) {
+  C.companies = data.companies || [];
+  C.invoices  = data.invoices  || [];
+  C.receipts  = data.receipts  || [];
+  C.activeId  = data.activeId  || (C.companies.length ? C.companies[0].id : null);
+  var all = C.companies.map(function (c) { return persist('companies', c); })
+    .concat(C.invoices.map(function (i)  { return persist('invoices', i); }))
+    .concat(C.receipts.map(function (r)  { return persist('receipts', r); }));
+  return Promise.all(all);
+}

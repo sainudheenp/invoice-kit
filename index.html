@@ -435,6 +435,16 @@
 <div id="settingsStatus" class="status-bar"></div>
 </div>
 
+<div class="card">
+<div class="card-header"><h2>Backup &amp; Restore</h2></div>
+<p style="font-size:13px;color:var(--text2);margin-bottom:14px">Download a full backup of all companies, invoices, and receipts, or restore from a previous backup.</p>
+<div class="btn-row">
+<button class="btn btn-sm btn-success" onclick="fullBackup()">💾 Full Backup</button>
+<button class="btn btn-sm btn-orange" onclick="document.getElementById('restoreInput').click()">📂 Restore from Backup</button>
+<input type="file" id="restoreInput" accept=".json" style="display:none" onchange="handleSettingsRestore(event)">
+</div>
+</div>
+
 <div class="card" style="border-color:var(--red);background:#FEF2F2">
 <div class="card-header"><h2 style="color:var(--red)">Danger Zone</h2></div>
 <p style="font-size:13px;color:var(--text2);margin-bottom:14px">This will permanently delete all companies, invoices, and receipts. This action cannot be undone.</p>

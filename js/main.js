@@ -119,20 +119,13 @@ function handleWelcomeImport(ev) {
   reader.onload = function (e) {
     try {
       var d = JSON.parse(e.target.result);
-      if (!d.companies || !Array.isArray(d.companies) || !d.companies.length) {
+      if (!d.companies && !d.invoices && !d.receipts) {
         var errEl = document.getElementById('setupError');
-        errEl.textContent = 'Invalid or empty company data file.';
+        errEl.textContent = 'Not a valid backup file.';
         errEl.style.display = 'block';
         return;
       }
-      C.companies = d.companies;
-      C.invoices  = d.invoices  || [];
-      C.receipts  = d.receipts  || [];
-      C.activeId  = d.activeId  || C.companies[0].id;
-      var ops = C.companies.map(function (c) { return persist('companies', c); })
-        .concat(C.invoices.map(function (i) { return persist('invoices', i); }))
-        .concat(C.receipts.map(function (r) { return persist('receipts', r); }));
-      Promise.all(ops).then(function () {
+      fullRestore(d).then(function () {
         sessionStorage.setItem('dg_activeId', C.activeId);
         enterApp();
       });
