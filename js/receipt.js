@@ -85,42 +85,41 @@ function _buildRecHTML(savedRec, comp) {
     '</div></div>' +
     '</div>' +
 
-    '<div style="border-bottom:1px solid #ddd;margin-bottom:2.5mm"></div>' +
+    '<div style="border-bottom:1px solid #ddd;margin-bottom:3mm"></div>' +
 
     /* ——— TITLE + METADATA ——— */
-    '<div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:2.5mm">' +
+    '<div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:3mm">' +
     '<div><div style="font-size:17px;font-weight:800;color:' + pc + ';letter-spacing:.2px">RECEIPT VOUCHER</div><div style="font-size:10px;color:#999;margin-top:1px">سند قبض</div></div>' +
     '<div style="text-align:right;font-size:10px;color:' + ac + ';line-height:1.7">' +
     '<span style="color:#999">Receipt No.</span> <strong style="color:#333">' + no + '</strong><br>' +
     '<span style="color:#999">Date / التاريخ</span> <strong style="color:#333">' + dts + '</strong>' +
     '</div></div>' +
 
-    '<div style="border-bottom:1px solid #eee;margin-bottom:2.5mm"></div>' +
-
-    /* ——— FORM FIELDS ——— */
-    '<div style="margin-bottom:3mm">' +
-    '<div style="display:flex;padding:3px 0;border-bottom:1px solid #f0f0f0"><span style="min-width:85px;font-weight:600;color:' + ac + ';font-size:10px;text-transform:uppercase;letter-spacing:.3px">Received from</span><span style="flex:1;color:#444;font-size:11px">' + esc(rf||'—') + '</span><span style="min-width:55px;text-align:right;direction:rtl;color:#aaa;font-size:10px">استلمت من</span></div>' +
-    '<div style="display:flex;padding:3px 0;border-bottom:1px solid #f0f0f0"><span style="min-width:85px;font-weight:600;color:' + ac + ';font-size:10px;text-transform:uppercase;letter-spacing:.3px">Amount / ' + cur.symbol + '</span><span style="flex:1;color:#444;font-size:11px;font-weight:600">' + esc(ww) + '</span><span style="min-width:55px;text-align:right;direction:rtl;color:#aaa;font-size:10px">بمبلغ قدره</span></div>' +
-    '<div style="display:flex;padding:3px 0;border-bottom:1px solid #f0f0f0"><span style="min-width:85px;font-weight:600;color:' + ac + ';font-size:10px;text-transform:uppercase;letter-spacing:.3px">Payment</span><span style="flex:1;color:#444;font-size:11px">' + esc(pm) + (pm==='Cheque'&&ch?' / '+esc(ch):'') + '</span><span style="min-width:55px;text-align:right;direction:rtl;color:#aaa;font-size:10px">نقد / شيك</span></div>' +
-    ((bk||td) ? '<div style="display:flex;padding:3px 0;border-bottom:1px solid #f0f0f0"><span style="min-width:85px;font-weight:600;color:' + ac + ';font-size:10px;text-transform:uppercase;letter-spacing:.3px">Bank / Date</span><span style="flex:1;color:#444;font-size:11px">' + esc(bk) + (bk&&td?' / ':'') + esc(td) + '</span><span style="min-width:55px;text-align:right;direction:rtl;color:#aaa;font-size:10px">البنك / تاريخه</span></div>' : '') +
-    '<div style="display:flex;padding:3px 0;border-bottom:1px solid #f0f0f0"><span style="min-width:85px;font-weight:600;color:' + ac + ';font-size:10px;text-transform:uppercase;letter-spacing:.3px">Being / بيان</span><span style="flex:1;color:#444;font-size:11px">' + esc(bg||'—') + '</span><span style="min-width:55px;text-align:right;direction:rtl;color:#aaa;font-size:10px">بيان</span></div>' +
+    /* ——— FORM CARD ——— */
+    '<div style="background:#fafafa;border-radius:4px;padding:3mm 3.5mm;margin-bottom:3mm;border:1px solid #eee">' +
+    '<div style="font-size:9px;font-weight:700;color:' + pc + ';text-transform:uppercase;letter-spacing:.4px;margin-bottom:2.5mm">Payment Details / تفاصيل الدفع</div>' +
+    '<div style="display:flex;padding:2.5px 0"><span style="min-width:75px;font-size:9px;color:' + ac + ';font-weight:600">Received from</span><span style="font-size:11px;color:#222">' + esc(rf||'—') + '</span></div>' +
+    '<div style="display:flex;padding:2.5px 0"><span style="min-width:75px;font-size:9px;color:' + ac + ';font-weight:600">Amount / ' + cur.symbol + '</span><span style="font-size:11px;color:#222;font-weight:600">' + esc(ww) + '</span></div>' +
+    '<div style="display:flex;padding:2.5px 0"><span style="min-width:75px;font-size:9px;color:' + ac + ';font-weight:600">Payment</span><span style="font-size:11px;color:#222">' + esc(pm) + (pm==='Cheque'&&ch?' / '+esc(ch):'') + '</span></div>' +
+    ((bk||td) ? '<div style="display:flex;padding:2.5px 0"><span style="min-width:75px;font-size:9px;color:' + ac + ';font-weight:600">Bank / Date</span><span style="font-size:11px;color:#222">' + esc(bk) + (bk&&td?' / ':'') + esc(td) + '</span></div>' : '') +
+    '<div style="display:flex;padding:2.5px 0"><span style="min-width:75px;font-size:9px;color:' + ac + ';font-weight:600">Being / بيان</span><span style="font-size:11px;color:#222">' + esc(bg||'—') + '</span></div>' +
     '</div>' +
 
     /* ——— AMOUNT BOXES ——— */
-    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:2.5mm">' +
-    '<div style="text-align:center"><div style="font-size:8px;color:#999;margin-bottom:1px">' + cur.symbol + ' ' + cur.name + ' / ' + cur.namePl + '</div><div style="border-bottom:2px solid ' + ac + ';padding:2px 12px;font-size:17px;font-weight:700;color:#222;min-width:50px">' + wi + '</div></div>' +
-    '<div style="text-align:center"><div style="font-size:8px;color:#999;margin-bottom:1px">' + cur.sub + ' / ' + cur.subPl + '</div><div style="border-bottom:2px solid ' + ac + ';padding:2px 12px;font-size:17px;font-weight:700;color:#222;min-width:50px">' + String(fr).padStart(String(cur.subPer).length,'0') + '</div></div>' +
+    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:3mm">' +
+    '<div style="text-align:center"><div style="font-size:8px;color:#999;margin-bottom:1px">' + cur.symbol + ' ' + cur.name + ' / ' + cur.namePl + '</div><div style="border-bottom:2px solid ' + pc + ';padding:3px 14px;font-size:17px;font-weight:700;color:#222;min-width:50px">' + wi + '</div></div>' +
+    '<div style="text-align:center"><div style="font-size:8px;color:#999;margin-bottom:1px">' + cur.sub + ' / ' + cur.subPl + '</div><div style="border-bottom:2px solid ' + pc + ';padding:3px 14px;font-size:17px;font-weight:700;color:#222;min-width:50px">' + String(fr).padStart(String(cur.subPer).length,'0') + '</div></div>' +
     '</div>' +
 
     /* ——— SIGNATURES ——— */
-    '<div style="display:flex;gap:6mm;margin-bottom:3mm;padding-top:2mm;border-top:1px solid #eee">' +
-    '<div style="flex:1;text-align:center"><div style="border-bottom:1px solid #ddd;height:24px;margin-bottom:3px"></div><div style="font-size:10px;color:#555;font-weight:600">' + esc(rv||'______________') + '</div><div style="font-size:8px;color:#aaa">Receiver\'s Sig / توقيع المستلم</div></div>' +
-    '<div style="flex:1;text-align:center">' +
-    (c.signature ? '<div style="margin:0 auto 3px;height:24px;display:flex;align-items:center;justify-content:center"><img src="' + c.signature.replace(/"/g,'&quot;') + '" style="max-width:80px;max-height:24px;object-fit:contain"></div>' : '<div style="border-bottom:1px solid #ddd;height:24px;margin-bottom:3px"></div>') +
-    '<div style="font-size:10px;color:#555;font-weight:600">' + esc(sg||'______________') + '</div><div style="font-size:8px;color:#aaa">Authorized Sig / التوقيع المختص</div></div>' +
+    '<div style="display:flex;gap:8mm;padding-top:2.5mm;border-top:1px solid #eee">' +
+    '<div style="flex:1"><div style="border-bottom:1px solid #ccc;height:24px;margin-bottom:3px"></div><div style="font-size:10px;color:#333;font-weight:600">' + esc(rv||'______________') + '</div><div style="font-size:8px;color:#999">Receiver\'s Sig / توقيع المستلم</div></div>' +
+    '<div style="flex:1">' +
+    (c.signature ? '<div style="margin:0 auto 3px;height:24px;display:flex;align-items:center;justify-content:center"><img src="' + c.signature.replace(/"/g,'&quot;') + '" style="max-width:80px;max-height:24px;object-fit:contain"></div>' : '<div style="border-bottom:1px solid #ccc;height:24px;margin-bottom:3px"></div>') +
+    '<div style="font-size:10px;color:#333;font-weight:600">' + esc(sg||'______________') + '</div><div style="font-size:8px;color:#999">Authorized Sig / التوقيع المختص</div></div>' +
     '</div>' +
 
-    (c.seal ? '<div style="text-align:center;margin-bottom:2mm"><img src="' + c.seal.replace(/"/g,'&quot;') + '" style="max-width:110px;max-height:110px;object-fit:contain"></div>' : '') +
+    (c.seal ? '<div style="text-align:center;margin-top:3mm"><img src="' + c.seal.replace(/"/g,'&quot;') + '" style="max-width:110px;max-height:110px;object-fit:contain"></div>' : '') +
 
     /* ——— FOOTER ——— */
     '<div style="position:absolute;bottom:4mm;left:7mm;right:7mm;border-top:1px solid #ddd;padding-top:1.5mm;display:flex;justify-content:space-between;font-size:8px;color:' + ac + '">' +
