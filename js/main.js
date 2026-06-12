@@ -1,7 +1,27 @@
 /* ============================================================
+   SIDEBAR TOGGLE (mobile)
+   ============================================================ */
+function toggleSidebar() {
+  var s = document.querySelector('.sidebar');
+  var b = document.getElementById('sidebarBackdrop');
+  var h = document.getElementById('hamburgerBtn');
+  s.classList.toggle('open');
+  b.classList.toggle('show');
+  h.classList.toggle('open');
+  h.textContent = s.classList.contains('open') ? '✕' : '☰';
+}
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+  document.getElementById('hamburgerBtn').classList.remove('open');
+  document.getElementById('hamburgerBtn').textContent = '☰';
+}
+
+/* ============================================================
    PAGE SWITCHING
    ============================================================ */
 function switchPage(name) {
+  closeSidebar();
   document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
   document.querySelectorAll('.sidebar-nav button').forEach(function (b) { b.classList.remove('active'); });
   var page = document.getElementById(name + 'Page');
