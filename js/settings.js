@@ -4,7 +4,7 @@
 function populateSettings() {
   var c = getCo(); if (!c) return;
   var $ = function (id) { return document.getElementById(id); };
-  document.getElementById('sidebarCompany').textContent = c ? c.name : 'No company';
+  document.getElementById('sidebarCompany').textContent = c.name;
 
   $('s_name').value     = c.name    || '';
   $('s_nameAr').value   = c.nameAr  || '';

@@ -32,6 +32,7 @@ js/
   settings.js    — company CRUD, file uploads, export/import
   invoice.js     — invoice form, calculation, print builder
   receipt.js     — receipt voucher form, print builder
+  history.js     — documents history, reprint, delete
   main.js        — page routing, dashboard, init flow
 ```
 

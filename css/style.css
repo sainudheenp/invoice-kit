@@ -555,6 +555,8 @@ input,select,textarea{font-family:inherit;font-size:14px}
   #appRoot{display:block!important}
   .sidebar,.main .page,.main .page.active{display:none!important}
   .print-only{display:block!important}
-  body.print-invoice @page{size:A4 portrait;margin:0}
-  body.print-receipt @page{size:A5 portrait;margin:0}
+  body.print-invoice{page:invoice}
+  body.print-receipt{page:receipt}
 }
+@page invoice{size:A4 portrait;margin:0}
+@page receipt{size:A5 portrait;margin:0}
