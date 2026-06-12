@@ -110,7 +110,7 @@ function num2words(num, cur) {
   var ff = f > 0 ? (_t(f).trim() || 'Zero') : '';
   var r = ww + ' ' + (w === 1 ? cur.name : cur.namePl);
   if (f > 0) r += ' and ' + ff + ' ' + (f === 1 ? cur.sub : cur.subPl);
-  return r + ' only';
+  return r;
 }
 
 /* ==========================================================

@@ -50,6 +50,7 @@ function renderHistory() {
       '<td style="text-align:right;font-weight:700">' + amt.toFixed(3) + ' ' + esc(cur.symbol) + '</td>' +
       '<td style="text-align:right;white-space:nowrap">' +
       '<button class="btn btn-sm btn-primary" onclick="printSavedDoc(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')" style="margin-right:4px">Print</button>' +
+      '<button class="btn btn-sm btn-info" onclick="editSavedDoc(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')" style="margin-right:4px">Edit</button>' +
       '<button class="btn btn-sm btn-ghost" onclick="deleteSavedDoc(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')">Delete</button>' +
       '</td></tr>';
   });
@@ -92,4 +93,62 @@ function deleteSavedDoc(type, id) {
     removePersist('receipts', id);
   }
   renderHistory();
+}
+
+function editSavedDoc(type, id) {
+  var c = getCo(); if (!c) return;
+  if (type === 'inv') {
+    var doc = C.invoices.find(function (d) { return d.id === id; });
+    if (!doc) return;
+    switchPage('invoice');
+    document.getElementById('invNo').value = doc.invNo || '';
+    document.getElementById('invDate').value = doc.date || '';
+    document.getElementById('custName').value = (doc.customer && doc.customer.name) || '';
+    document.getElementById('custAddr').value = (doc.customer && doc.customer.address) || '';
+    document.getElementById('custPhone').value = (doc.customer && doc.customer.phone) || '';
+    document.getElementById('custCr').value = (doc.customer && doc.customer.cr) || '';
+    document.getElementById('custEmail').value = (doc.customer && doc.customer.email) || '';
+    var tb = document.getElementById('invItems');
+    tb.innerHTML = '';
+    _invRC = 0;
+    if (doc.items && doc.items.length) {
+      doc.items.forEach(function (it) {
+        addInvRow();
+        var row = tb.lastElementChild;
+        if (row) {
+          var desc = row.querySelector('._iDesc');
+          var qty = row.querySelector('._iQty');
+          var prc = row.querySelector('._iPrc');
+          if (desc) desc.value = it.desc || '';
+          if (qty) qty.value = it.qty || '1';
+          if (prc) prc.value = it.price || '0';
+        }
+      });
+    } else {
+      addInvRow();
+    }
+    document.getElementById('invVatPct').value = doc.vatPct || 0;
+    document.getElementById('invDiscount').value = doc.discount || 0;
+    document.getElementById('invPayMethod').value = doc.payMethod || 'Cash';
+    document.getElementById('invChequeNo').value = doc.payDetails || '';
+    document.getElementById('invBankName').value = doc.bankName || '';
+    document.getElementById('invNotes').value = doc.notes || '';
+    calcInv();
+  } else {
+    var doc = C.receipts.find(function (d) { return d.id === id; });
+    if (!doc) return;
+    switchPage('receipt');
+    document.getElementById('recNo').value = doc.recNo || '';
+    document.getElementById('recDate').value = doc.date || '';
+    document.getElementById('recFrom').value = doc.receivedFrom || '';
+    document.getElementById('recAmount').value = doc.amount || 0;
+    document.getElementById('recPayMethod').value = doc.payMethod || 'Cash';
+    document.getElementById('recChequeNo').value = doc.chequeNo || '';
+    document.getElementById('recBankName').value = doc.bankName || '';
+    document.getElementById('recTransDate').value = doc.transDate || '';
+    document.getElementById('recBeing').value = doc.being || '';
+    document.getElementById('recReceiver').value = doc.receiver || '';
+    document.getElementById('recSignatory').value = doc.signatory || '';
+    calcRecWords();
+  }
 }
