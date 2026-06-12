@@ -42,6 +42,14 @@ function calcInv() {
   document.getElementById('invGrand').value     = grand.toFixed(3);
   var c = getCo();
   if (c) document.getElementById('invWords').value = num2words(grand, c.currency) + ' only';
+
+  document.getElementById('sumSubtotal').textContent = sub.toFixed(3);
+  document.getElementById('sumVat').textContent = va.toFixed(3);
+  document.getElementById('sumGrand').textContent = grand.toFixed(3);
+  var discRow = document.getElementById('sumDiscRow');
+  if (disc > 0) { discRow.style.display = 'flex'; document.getElementById('sumDiscount').textContent = '-' + disc.toFixed(3); }
+  else discRow.style.display = 'none';
+  if (c) document.getElementById('sumWords').textContent = num2words(grand, c.currency) + ' only';
 }
 
 function refreshInv() {
@@ -63,45 +71,72 @@ function toggleInvFields() {
   document.getElementById('invBankField').classList.toggle('show',  pm === 'Cheque' || pm === 'Bank Transfer');
 }
 
-function _buildInvHTML() {
-  var c = getCo(); if (!c) return '';
-  var $ = function (id) { return document.getElementById(id); };
-  var no    = $('invNo').value;
-  var dt    = $('invDate').value;
-  var cust  = $('custName').value;
-  var addr  = $('custAddr').value;
-  var ph    = $('custPhone').value;
-  var cr_   = $('custCr').value;
-  var em    = $('custEmail').value;
-  var notes = $('invNotes').value;
-  var pm    = $('invPayMethod').value;
-  var ch    = ($('invChequeNo')  || {}).value || '';
-  var bk    = ($('invBankName')  || {}).value || '';
-  var disc  = parseFloat($('invDiscount').value) || 0;
-  var cur   = c.currency;
-  var dts   = dt || new Date().toISOString().slice(0,10);
+function _buildInvHTML(savedInv, comp) {
+  var c = comp || getCo(); if (!c) return '';
+  var cur = c.currency;
+  var no, dt, cust, addr, ph, cr_, em, notes, pm, ch, bk, disc, dts;
+  var items, sub, vp, va, grand;
 
-  var rows = document.querySelectorAll('#invItems tr');
+  if (savedInv) {
+    no    = savedInv.invNo;
+    dt    = savedInv.date;
+    cust  = savedInv.customer.name;
+    addr  = savedInv.customer.address;
+    ph    = savedInv.customer.phone;
+    cr_   = savedInv.customer.cr;
+    em    = savedInv.customer.email;
+    notes = savedInv.notes || '';
+    pm    = savedInv.payMethod || 'Cash';
+    ch    = savedInv.payDetails || '';
+    bk    = savedInv.bankName || '';
+    disc  = savedInv.discount || 0;
+    sub   = savedInv.subtotal || 0;
+    vp    = savedInv.vatPct || 0;
+    va    = savedInv.vatAmt || 0;
+    grand = savedInv.grand || 0;
+    items = savedInv.items || [];
+    dts   = dt || new Date().toISOString().slice(0,10);
+  } else {
+    var $ = function (id) { return document.getElementById(id); };
+    no    = $('invNo').value;
+    dt    = $('invDate').value;
+    cust  = $('custName').value;
+    addr  = $('custAddr').value;
+    ph    = $('custPhone').value;
+    cr_   = $('custCr').value;
+    em    = $('custEmail').value;
+    notes = $('invNotes').value;
+    pm    = $('invPayMethod').value;
+    ch    = ($('invChequeNo')  || {}).value || '';
+    bk    = ($('invBankName')  || {}).value || '';
+    disc  = parseFloat($('invDiscount').value) || 0;
+    sub   = parseFloat($('invSubtotal').value) || 0;
+    vp    = parseFloat($('invVatPct').value)   || 0;
+    va    = parseFloat($('invVatAmt').value)   || 0;
+    grand = parseFloat($('invGrand').value)    || 0;
+    dts   = dt || new Date().toISOString().slice(0,10);
+    items = [];
+    document.querySelectorAll('#invItems tr').forEach(function (r) {
+      items.push({
+        desc: (r.querySelector('._iDesc') || {}).value || '',
+        qty:  (r.querySelector('._iQty')  || {}).value || '0',
+        price:(r.querySelector('._iPrc')  || {}).value || '0',
+        amount:(r.querySelector('._iAmt') || {}).textContent || '0.000'
+      });
+    });
+  }
+
+  var gw = num2words(grand, cur) + ' only';
   var ih = '';
-  rows.forEach(function (r, i) {
-    var d = (r.querySelector('._iDesc') || {}).value || '';
-    var q = (r.querySelector('._iQty')  || {}).value || '0';
-    var p = (r.querySelector('._iPrc')  || {}).value || '0';
-    var a = (r.querySelector('._iAmt')  || {}).textContent || '0.000';
+  items.forEach(function (it, i) {
     ih += '<tr>' +
       '<td style="text-align:center;padding:6px 4px">' + (i+1) + '</td>' +
-      '<td style="padding:6px 4px">' + esc(d) + '</td>' +
-      '<td style="text-align:center;padding:6px 4px">' + q + '</td>' +
-      '<td style="text-align:right;padding:6px 4px">' + parseFloat(p).toFixed(3) + '</td>' +
-      '<td style="text-align:right;padding:6px 4px;font-weight:700">' + a + '</td></tr>';
+      '<td style="padding:6px 4px">' + esc(it.desc) + '</td>' +
+      '<td style="text-align:center;padding:6px 4px">' + it.qty + '</td>' +
+      '<td style="text-align:right;padding:6px 4px">' + parseFloat(it.price).toFixed(3) + '</td>' +
+      '<td style="text-align:right;padding:6px 4px;font-weight:700">' + it.amount + '</td></tr>';
   });
   if (!ih) ih = '<tr><td colspan="5" style="text-align:center;color:#999;padding:16px">No items</td></tr>';
-
-  var sub   = parseFloat($('invSubtotal').value) || 0;
-  var vp    = parseFloat($('invVatPct').value)   || 0;
-  var va    = parseFloat($('invVatAmt').value)   || 0;
-  var grand = parseFloat($('invGrand').value)    || 0;
-  var gw    = num2words(grand, cur) + ' only';
 
   var pd = pm;
   if (pm === 'Cheque' && ch) pd += ' No.' + ch;

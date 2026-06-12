@@ -5,6 +5,9 @@ function calcRecWords() {
   var c = getCo(); if (!c) return;
   var a = parseFloat(document.getElementById('recAmount').value) || 0;
   document.getElementById('recWords').value = num2words(a, c.currency) + ' only';
+  document.getElementById('sumRecAmt').textContent = a.toFixed(3);
+  document.getElementById('sumRecTotal').textContent = a.toFixed(3);
+  if (c) document.getElementById('sumRecWords').textContent = num2words(a, c.currency) + ' only';
 }
 
 function toggleRecFields() {
@@ -26,23 +29,34 @@ function refreshRec() {
   calcRecWords();
 }
 
-function _buildRecHTML() {
-  var c = getCo(); if (!c) return '';
-  var $ = function (id) { return document.getElementById(id); };
-  var no = $('recNo').value;
-  var dt = $('recDate').value;
-  var rf = $('recFrom').value;
-  var am = parseFloat($('recAmount').value) || 0;
-  var ww = num2words(am, c.currency) + ' only';
-  var pm = $('recPayMethod').value;
-  var ch = ($('recChequeNo')   || {}).value || '';
-  var bk = ($('recBankName')   || {}).value || '';
-  var td = ($('recTransDate')  || {}).value || '';
-  var bg = $('recBeing').value;
-  var rv = $('recReceiver').value;
-  var sg = $('recSignatory').value;
-  var dts = dt || new Date().toISOString().slice(0, 10);
+function _buildRecHTML(savedRec, comp) {
+  var c = comp || getCo(); if (!c) return '';
   var cur = c.currency;
+  var no, dt, rf, am, ww, pm, ch, bk, td, bg, rv, sg, dts;
+  if (savedRec) {
+    no = savedRec.recNo;
+    dt = savedRec.date;
+    rf = savedRec.receivedFrom;
+    am = savedRec.amount || 0;
+    ww = savedRec.amountWords || (num2words(am, cur) + ' only');
+    pm = savedRec.payMethod || 'Cash';
+    ch = savedRec.chequeNo || '';
+    bk = savedRec.bankName || '';
+    td = savedRec.transDate || '';
+    bg = savedRec.being || '';
+    rv = savedRec.receiver || '';
+    sg = savedRec.signatory || '';
+    dts = dt || new Date().toISOString().slice(0,10);
+  } else {
+    var $ = function (id) { return document.getElementById(id); };
+    no = $('recNo').value; dt = $('recDate').value;
+    rf = $('recFrom').value; am = parseFloat($('recAmount').value) || 0;
+    ww = num2words(am, c.currency) + ' only';
+    pm = $('recPayMethod').value; ch = ($('recChequeNo') || {}).value || '';
+    bk = ($('recBankName') || {}).value || ''; td = ($('recTransDate') || {}).value || '';
+    bg = $('recBeing').value; rv = $('recReceiver').value; sg = $('recSignatory').value;
+    dts = dt || new Date().toISOString().slice(0, 10);
+  }
   var pc  = c.pcolor || '#1b4d3d';
   var wi  = Math.floor(am);
   var fr  = Math.round((am - wi) * cur.subPer);

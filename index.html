@@ -3,20 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>OpenInvoice</title>
+<title>openBilling</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- ===== WELCOME OVERLAY (shown on first run) ===== -->
+<!-- ===== WELCOME OVERLAY ===== -->
 <div id="welcomeOverlay" class="welcome-overlay">
 <div class="welcome-card">
 <div class="welcome-icon">
-<svg viewBox="0 0 100 100" width="64" height="64"><circle cx="50" cy="50" r="46" fill="#f5c842" stroke="#1a3a2c" stroke-width="3"/><text x="50" y="40" text-anchor="middle" fill="#1a3a2c" font-size="28" font-weight="bold">OI</text><text x="50" y="62" text-anchor="middle" fill="#1a3a2c" font-size="8" font-weight="bold">Open</text></svg>
+<svg viewBox="0 0 100 100" width="64" height="64"><circle cx="50" cy="50" r="46" fill="#f5c842" stroke="#1a3a2c" stroke-width="3"/><text x="50" y="40" text-anchor="middle" fill="#1a3a2c" font-size="28" font-weight="bold">OB</text><text x="50" y="62" text-anchor="middle" fill="#1a3a2c" font-size="8" font-weight="bold">open</text></svg>
 </div>
-<h1>Welcome to OpenInvoice</h1>
+<h1>Welcome to openBilling</h1>
 <p class="welcome-sub">Set up your company to start creating invoices and receipts. You can add more details later in Settings.</p>
-
 <div class="setup-form" id="setupForm">
 <div class="form-row">
 <div class="fg"><label>Company Name *</label><input id="setupName" placeholder="e.g. Your Company LLC" autofocus></div>
@@ -48,108 +47,252 @@
 <option value="BHD">BHD — Bahraini Dinar (د.ب)</option>
 <option value="EGP">EGP — Egyptian Pound (ج.م)</option>
 </select></div>
-
 <div class="btn-row" style="margin-top:22px">
 <button class="btn btn-primary" onclick="completeSetup()" style="font-size:15px;padding:14px 32px">&#10003; Save &amp; Get Started</button>
 </div>
-<p id="setupError" style="color:var(--danger);font-size:13px;margin-top:8px;display:none">Please enter at least a company name.</p>
+<p id="setupError" style="color:var(--red);font-size:13px;margin-top:8px;display:none">Please enter at least a company name.</p>
 </div>
 </div>
 </div>
-
-<!-- ===== HEADER ===== -->
-<header class="header">
-<div class="header-brand">
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="#f5c842" stroke="#fff" stroke-width="3"/><text x="50" y="42" text-anchor="middle" fill="#1a3a2c" font-size="24" font-weight="bold">DM</text><text x="50" y="60" text-anchor="middle" fill="#1a3a2c" font-size="7" font-weight="bold">DOCS</text></svg>
-<span>OpenInvoice</span>
-</div>
-<div class="header-right">
-<span id="headerCompany" style="font-weight:600;color:#fff">—</span>
-</div>
-</header>
-
-<!-- ===== TAB BAR ===== -->
-<nav class="tab-bar" id="tabBar">
-<button class="active" data-page="dashboard" onclick="switchPage('dashboard')">
-<span class="tab-icon">&#9632;</span> Dashboard
-</button>
-<button data-page="settings" onclick="switchPage('settings')">
-<span class="tab-icon">&#9881;</span> Settings
-</button>
-<button data-page="invoice" onclick="switchPage('invoice')">
-<span class="tab-icon">&#128196;</span> Invoice
-</button>
-<button data-page="receipt" onclick="switchPage('receipt')">
-<span class="tab-icon">&#128203;</span> Receipt
-</button>
-</nav>
 
 <!-- ===== LOADER ===== -->
 <div id="loader" class="loader">
 <div class="spinner"></div>
-<p style="color:var(--muted);font-size:14px">Loading database…</p>
+<p style="color:var(--text2);font-size:14px">Loading database…</p>
 </div>
 
-<!-- ===== APP CONTENT ===== -->
-<div id="appContent" style="display:none">
+<!-- ===== APP ROOT ===== -->
+<div id="appRoot" style="display:none">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar">
+<div class="sidebar-header">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="#f5c842" stroke="#fff" stroke-width="3"/><text x="50" y="42" text-anchor="middle" fill="#1a3a2c" font-size="24" font-weight="bold">OB</text><text x="50" y="60" text-anchor="middle" fill="#1a3a2c" font-size="7" font-weight="bold">open</text></svg>
+<span>open<span class="gold">Billing</span></span>
+</div>
+<nav class="sidebar-nav">
+<button data-page="dashboard" class="active" onclick="switchPage('dashboard')"><span class="nav-icon">▣</span><span>Dashboard</span></button>
+<button data-page="invoice" onclick="switchPage('invoice')"><span class="nav-icon">📄</span><span>Invoice</span></button>
+<button data-page="receipt" onclick="switchPage('receipt')"><span class="nav-icon">🧾</span><span>Receipt</span></button>
+<button data-page="history" onclick="switchPage('history')"><span class="nav-icon">📋</span><span>Documents</span></button>
+<button data-page="settings" onclick="switchPage('settings')"><span class="nav-icon">⚙️</span><span>Settings</span></button>
+</nav>
+<div class="sidebar-footer">
+<div class="sidebar-company">
+<span class="dot"></span>
+<span class="name" id="sidebarCompany">—</span>
+</div>
+</div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
 
 <!-- ============ DASHBOARD ============ -->
 <div id="dashboardPage" class="page active">
+<div class="page-header">
+<h1>Dashboard</h1>
+<p>Overview of your documents and company</p>
+</div>
 
-<div class="dash-grid">
-<div class="dash-card">
-<div class="num" id="dashCompanies">0</div>
-<div class="lbl">Companies</div>
-</div>
-<div class="dash-card accent">
-<div class="num" id="dashInvoices">0</div>
-<div class="lbl">Invoices</div>
-</div>
-<div class="dash-card info">
-<div class="num" id="dashReceipts">0</div>
-<div class="lbl">Receipts</div>
-</div>
-</div>
+<div class="stats-grid" id="dashStats"></div>
 
 <div class="card">
-<div class="card-header">
-<h2>Quick Actions</h2>
-</div>
-<div class="quick-actions">
+<div class="card-header"><h2>Quick Actions</h2></div>
+<div class="quick-grid">
 <div class="qa-card" onclick="switchPage('invoice')">
-<div class="qa-icon">&#128196;</div>
+<div class="qa-icon">📄</div>
 <div class="qa-lbl">New Invoice</div>
+<div class="qa-sub">Generate a tax invoice</div>
 </div>
 <div class="qa-card" onclick="switchPage('receipt')">
-<div class="qa-icon">&#128203;</div>
+<div class="qa-icon">🧾</div>
 <div class="qa-lbl">New Receipt</div>
+<div class="qa-sub">Record a payment voucher</div>
 </div>
 <div class="qa-card" onclick="switchPage('settings')">
-<div class="qa-icon">&#9881;</div>
+<div class="qa-icon">⚙️</div>
 <div class="qa-lbl">Settings</div>
+<div class="qa-sub">Manage company profiles</div>
 </div>
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="dashCoCard">
 <div class="card-header">
 <h2>Active Company</h2>
+<span class="badge" id="dashCurrencyBadge">OMR</span>
 </div>
-<div id="dashCompany">
-<p style="color:var(--muted)">No company selected.</p>
+<div id="dashCompany"><p style="color:var(--text2)">No company selected.</p></div>
+</div>
+</div>
+
+<!-- ============ INVOICE ============ -->
+<div id="invoicePage" class="page">
+<div class="page-header">
+<h1>New Invoice</h1>
+<p>Create a professional tax invoice</p>
+</div>
+
+<div class="invoice-layout">
+<div class="invoice-form">
+<div class="card">
+<div class="card-header"><h2>Invoice Details</h2><span class="badge" id="invCurrencyLabel">OMR</span></div>
+<div class="form-row">
+<div class="fg"><label>Invoice No.</label><input id="invNo"></div>
+<div class="fg"><label>Date</label><input id="invDate" type="date"></div>
+</div>
+<h3>Customer</h3>
+<div class="fg"><label>Customer Name</label><input id="custName"></div>
+<div class="form-row">
+<div class="fg"><label>Address</label><input id="custAddr"></div>
+<div class="fg"><label>Phone</label><input id="custPhone" type="tel"></div>
+</div>
+<div class="form-row">
+<div class="fg"><label>C.R.</label><input id="custCr"></div>
+<div class="fg"><label>Email</label><input id="custEmail" type="email"></div>
+</div>
+<h3>Line Items</h3>
+<div class="table-wrap">
+<table><thead><tr>
+<th style="width:36px">#</th><th>Description</th><th style="width:65px">Qty</th><th style="width:100px">Price</th><th style="width:100px">Amount</th>
+</tr></thead>
+<tbody id="invItems"></tbody></table>
+</div>
+<div class="btn-row">
+<button class="btn btn-sm btn-outline" onclick="addInvRow()">+ Add Row</button>
+<button class="btn btn-sm btn-ghost" onclick="removeInvRow()">− Remove</button>
+</div>
+<h3>Summary</h3>
+<div class="form-row">
+<div class="fg"><label>Subtotal</label><input id="invSubtotal" readonly></div>
+<div class="fg fg-sm"><label>VAT %</label><input id="invVatPct" type="number" oninput="calcInv()"></div>
+<div class="fg"><label>VAT Amount</label><input id="invVatAmt" readonly></div>
+</div>
+<div class="form-row">
+<div class="fg fg-sm"><label>Discount</label><input id="invDiscount" type="number" value="0" step="0.001" oninput="calcInv()"></div>
+<div class="fg"><label>Grand Total</label><input id="invGrand" readonly></div>
+</div>
+<h3>Additional</h3>
+<div class="fg"><label>Amount in Words</label><input id="invWords" readonly></div>
+<div class="fg"><label>Payment Method</label>
+<select id="invPayMethod"><option>Cash</option><option>Cheque</option><option>Bank Transfer</option></select></div>
+<div class="form-row">
+<div class="fg cond" id="invChequeField"><label>Cheque No.</label><input id="invChequeNo"></div>
+<div class="fg cond" id="invBankField"><label>Bank</label><input id="invBankName"></div>
+</div>
+<div class="fg"><label>Notes</label><textarea id="invNotes" rows="2"></textarea></div>
+</div>
+</div>
+
+<div class="invoice-summary">
+<div class="summary-card">
+<h3>Total Summary</h3>
+<div id="invPreviewSummary">
+<div class="summary-line"><span>Subtotal</span><span class="val" id="sumSubtotal">0.000</span></div>
+<div class="summary-line" id="sumDiscRow" style="display:none"><span>Discount</span><span class="val" id="sumDiscount">-0.000</span></div>
+<div class="summary-line"><span>VAT</span><span class="val" id="sumVat">0.000</span></div>
+<div class="summary-divider"></div>
+<div class="summary-total"><span>Total</span><span class="val" id="sumGrand">0.000</span></div>
+<div class="summary-words" id="sumWords">Zero only</div>
+</div>
+</div>
+<div class="btn-row" style="margin-top:0">
+<button class="btn btn-primary" onclick="saveInvoice()" style="flex:1">Save</button>
+<button class="btn btn-outline" onclick="printInvoice()">Print</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ RECEIPT ============ -->
+<div id="receiptPage" class="page">
+<div class="page-header">
+<h1>Receipt Voucher</h1>
+<p>Record a payment receipt</p>
+</div>
+
+<div class="invoice-layout">
+<div class="invoice-form">
+<div class="card">
+<div class="card-header"><h2>Receipt Details</h2><span class="badge" id="recCurrencyLabel">OMR</span></div>
+<div class="form-row">
+<div class="fg"><label>Receipt No.</label><input id="recNo"></div>
+<div class="fg"><label>Date</label><input id="recDate" type="date"></div>
+</div>
+<div class="fg"><label>Received From</label><input id="recFrom"></div>
+<div class="form-row">
+<div class="fg"><label>Amount</label><input id="recAmount" type="number" step="0.001" oninput="calcRecWords()"></div>
+<div class="fg"><label>Amount in Words</label><input id="recWords" readonly></div>
+</div>
+<div class="fg"><label>Payment Method</label>
+<select id="recPayMethod" onchange="toggleRecFields()"><option>Cash</option><option>Cheque</option><option>Bank Transfer</option></select></div>
+<div class="form-row">
+<div class="fg cond" id="recChequeField"><label>Cheque No.</label><input id="recChequeNo"></div>
+<div class="fg cond" id="recBankField"><label>Bank</label><input id="recBankName"></div>
+<div class="fg cond" id="recTransDateField"><label>Date</label><input id="recTransDate" type="date"></div>
+</div>
+<div class="fg"><label>Being (Purpose)</label><input id="recBeing"></div>
+<div class="form-row">
+<div class="fg"><label>Receiver Name</label><input id="recReceiver"></div>
+<div class="fg"><label>Authorized Signatory</label><input id="recSignatory"></div>
+</div>
+</div>
+</div>
+
+<div class="invoice-summary">
+<div class="summary-card">
+<h3>Receipt Summary</h3>
+<div id="recPreviewSummary">
+<div class="summary-line"><span>Amount</span><span class="val" id="sumRecAmt">0.000</span></div>
+<div class="summary-divider"></div>
+<div class="summary-total"><span>Total</span><span class="val" id="sumRecTotal">0.000</span></div>
+<div class="summary-words" id="sumRecWords">Zero only</div>
+</div>
+</div>
+<div class="btn-row" style="margin-top:0">
+<button class="btn btn-primary" onclick="saveReceipt()" style="flex:1">Save</button>
+<button class="btn btn-outline" onclick="printReceipt()">Print</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ HISTORY ============ -->
+<div id="historyPage" class="page">
+<div class="page-header">
+<h1>Documents</h1>
+<p>View and reprint saved invoices and receipts</p>
+</div>
+
+<div class="card">
+<div class="card-header">
+<h2>Saved Documents</h2>
+<span class="badge" id="historyCount">0</span>
+</div>
+<div style="display:flex;gap:8px;margin-bottom:14px">
+<button class="btn btn-sm btn-primary" data-tab="inv" onclick="switchDocTab('inv')">Invoices</button>
+<button class="btn btn-sm btn-outline" data-tab="rec" onclick="switchDocTab('rec')">Receipts</button>
+</div>
+<div id="historyList">
+<p style="color:var(--text2);text-align:center;padding:24px">No documents saved yet.</p>
 </div>
 </div>
 </div>
 
 <!-- ============ SETTINGS ============ -->
 <div id="settingsPage" class="page">
+<div class="page-header">
+<h1>Settings</h1>
+<p>Manage company profiles and preferences</p>
+</div>
 
 <div class="card">
 <div class="card-header"><h2>Company Profiles</h2></div>
 <div class="comp-bar">
 <select id="companySelect" onchange="switchCompany(this.value)"></select>
 <button class="btn btn-sm btn-success" onclick="newCompany()">+ New</button>
-<button class="btn btn-sm btn-danger" onclick="deleteCompany()">Del</button>
+<button class="btn btn-sm btn-danger" onclick="deleteCompany()">Delete</button>
 <button class="btn btn-sm btn-info" onclick="exportData()">Export</button>
 <button class="btn btn-sm btn-orange" onclick="document.getElementById('importFile').click()">Import</button>
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
@@ -268,88 +411,8 @@
 </div>
 </div>
 
-<!-- ============ INVOICE ============ -->
-<div id="invoicePage" class="page">
-<div class="card">
-<div class="card-header"><h2>Invoice Generator</h2><span class="chip" id="invCurrencyLabel">OMR</span></div>
-<div class="form-row">
-<div class="fg"><label>Invoice No.</label><input id="invNo" readonly></div>
-<div class="fg"><label>Date</label><input id="invDate" type="date"></div>
-</div>
-<div class="fg"><label>Customer Name</label><input id="custName"></div>
-<div class="form-row">
-<div class="fg"><label>Address</label><input id="custAddr"></div>
-<div class="fg"><label>Phone</label><input id="custPhone" type="tel"></div>
-</div>
-<div class="form-row">
-<div class="fg"><label>C.R.</label><input id="custCr"></div>
-<div class="fg"><label>Email</label><input id="custEmail" type="email"></div>
-</div>
-<div class="table-wrap">
-<table><thead><tr><th style="width:36px">#</th><th>Description</th><th style="width:65px">Qty</th><th style="width:100px">Price</th><th style="width:100px">Amount</th></tr></thead>
-<tbody id="invItems"></tbody></table>
-</div>
-<div class="btn-row">
-<button class="btn btn-sm btn-success" onclick="addInvRow()">+ Add Row</button>
-<button class="btn btn-sm btn-danger" onclick="removeInvRow()">− Remove</button>
-</div>
-<div class="form-row">
-<div class="fg"><label>Subtotal</label><input id="invSubtotal" readonly></div>
-<div class="fg fg-sm"><label>VAT %</label><input id="invVatPct" type="number" oninput="calcInv()"></div>
-<div class="fg"><label>VAT Amount</label><input id="invVatAmt" readonly></div>
-</div>
-<div class="form-row">
-<div class="fg fg-sm"><label>Discount</label><input id="invDiscount" type="number" value="0" step="0.001" oninput="calcInv()"></div>
-<div class="fg"><label>Grand Total</label><input id="invGrand" readonly style="font-weight:800;font-size:17px;border:2px solid var(--primary);color:var(--primary)"></div>
-</div>
-<div class="fg"><label>Amount in Words</label><input id="invWords" readonly style="font-size:12px"></div>
-<div class="fg"><label>Payment Method</label>
-<select id="invPayMethod"><option>Cash</option><option>Cheque</option><option>Bank Transfer</option></select></div>
-<div class="form-row">
-<div class="fg cond" id="invChequeField"><label>Cheque No.</label><input id="invChequeNo"></div>
-<div class="fg cond" id="invBankField"><label>Bank</label><input id="invBankName"></div>
-</div>
-<div class="fg"><label>Notes</label><textarea id="invNotes" rows="2"></textarea></div>
-<div class="btn-row">
-<button class="btn btn-info" onclick="printInvoice()">&#128424; Print / PDF</button>
-<button class="btn btn-success" onclick="saveInvoice()">&#128190; Save &amp; Next</button>
-</div>
-</div>
-</div>
-
-<!-- ============ RECEIPT ============ -->
-<div id="receiptPage" class="page">
-<div class="card">
-<div class="card-header"><h2>Receipt Voucher</h2><span class="chip" id="recCurrencyLabel">OMR</span></div>
-<div class="form-row">
-<div class="fg"><label>Receipt No.</label><input id="recNo" readonly></div>
-<div class="fg"><label>Date</label><input id="recDate" type="date"></div>
-</div>
-<div class="fg"><label>Received From</label><input id="recFrom"></div>
-<div class="form-row">
-<div class="fg"><label>Amount</label><input id="recAmount" type="number" step="0.001" oninput="calcRecWords()"></div>
-<div class="fg"><label>Amount in Words</label><input id="recWords" readonly style="font-size:12px"></div>
-</div>
-<div class="fg"><label>Payment Method</label>
-<select id="recPayMethod" onchange="toggleRecFields()"><option>Cash</option><option>Cheque</option><option>Bank Transfer</option></select></div>
-<div class="form-row">
-<div class="fg cond" id="recChequeField"><label>Cheque No.</label><input id="recChequeNo"></div>
-<div class="fg cond" id="recBankField"><label>Bank</label><input id="recBankName"></div>
-<div class="fg cond" id="recTransDateField"><label>Date</label><input id="recTransDate" type="date"></div>
-</div>
-<div class="fg"><label>Being (Purpose)</label><input id="recBeing"></div>
-<div class="form-row">
-<div class="fg"><label>Receiver Name</label><input id="recReceiver"></div>
-<div class="fg"><label>Authorized Signatory</label><input id="recSignatory"></div>
-</div>
-<div class="btn-row">
-<button class="btn btn-info" onclick="printReceipt()">&#128424; Print / PDF</button>
-<button class="btn btn-success" onclick="saveReceipt()">&#128190; Save &amp; Next</button>
-</div>
-</div>
-</div>
-
-</div><!-- /appContent -->
+</main>
+</div><!-- /appRoot -->
 
 <!-- ===== PRINT AREAS ===== -->
 <div class="print-only" id="invoicePrintArea"></div>
@@ -361,7 +424,7 @@
 <script src="js/settings.js"></script>
 <script src="js/invoice.js"></script>
 <script src="js/receipt.js"></script>
+<script src="js/history.js"></script>
 <script src="js/main.js"></script>
-
 </body>
 </html>
