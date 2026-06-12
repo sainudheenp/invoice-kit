@@ -80,11 +80,11 @@ function _buildInvHTML(savedInv, comp) {
   if (savedInv) {
     no    = savedInv.invNo;
     dt    = savedInv.date;
-    cust  = savedInv.customer.name;
-    addr  = savedInv.customer.address;
-    ph    = savedInv.customer.phone;
-    cr_   = savedInv.customer.cr;
-    em    = savedInv.customer.email;
+    cust  = (savedInv.customer && savedInv.customer.name) || '';
+    addr  = (savedInv.customer && savedInv.customer.address) || '';
+    ph    = (savedInv.customer && savedInv.customer.phone) || '';
+    cr_   = (savedInv.customer && savedInv.customer.cr) || '';
+    em    = (savedInv.customer && savedInv.customer.email) || '';
     notes = savedInv.notes || '';
     pm    = savedInv.payMethod || 'Cash';
     ch    = savedInv.payDetails || '';
@@ -144,7 +144,7 @@ function _buildInvHTML(savedInv, comp) {
       '<td style="padding:6px 8px;text-align:center;color:#999;font-size:13px;border-bottom:1px solid #e5e5e5;width:30px">' + (i+1) + '</td>' +
       '<td style="padding:6px 8px;font-size:13px;color:#333;border-bottom:1px solid #e5e5e5">' + esc(it.desc) + '</td>' +
       '<td style="padding:6px 8px;text-align:center;font-size:13px;color:#555;border-bottom:1px solid #e5e5e5;width:45px">' + it.qty + '</td>' +
-      '<td style="padding:6px 8px;text-align:right;font-size:13px;color:#555;border-bottom:1px solid #e5e5e5;width:75px">' + parseFloat(it.price).toFixed(3) + '</td>' +
+      '<td style="padding:6px 8px;text-align:right;font-size:13px;color:#555;border-bottom:1px solid #e5e5e5;width:75px">' + (parseFloat(it.price) || 0).toFixed(3) + '</td>' +
       '<td style="padding:6px 8px;text-align:right;font-size:13px;font-weight:600;color:#222;border-bottom:1px solid #e5e5e5;width:80px">' + it.amount + '</td></tr>';
   });
   if (!ir) ir = '<tr><td colspan="5" style="text-align:center;color:#ccc;padding:30px;font-size:15px;font-style:italic">No items</td></tr>';

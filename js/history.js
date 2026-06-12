@@ -41,7 +41,7 @@ function renderHistory() {
     var label = _docTab === 'inv' ? d.invNo : d.recNo;
     var date = (d.date || '').slice(0, 10);
     var party = _docTab === 'inv' ? (d.customer ? d.customer.name : '') : d.receivedFrom;
-    var amt = _docTab === 'inv' ? (d.grand || 0) : (d.amount || 0);
+    var amt = _docTab === 'inv' ? Number(d.grand || 0) : Number(d.amount || 0);
     var cur = c.currency;
     h += '<tr>' +
       '<td style="font-weight:600">' + esc(label) + '</td>' +

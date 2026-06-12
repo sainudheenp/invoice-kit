@@ -235,9 +235,9 @@ function importData(ev) {
     try {
       var d = JSON.parse(e.target.result);
       if (!d.companies || !Array.isArray(d.companies)) { setStatus('Invalid file', 'err'); return; }
-      C.companies = d.companies || [];
-      C.invoices  = d.invoices  || [];
-      C.receipts  = d.receipts  || [];
+      C.companies = d.companies;
+      C.invoices  = Array.isArray(d.invoices) ? d.invoices : [];
+      C.receipts  = Array.isArray(d.receipts) ? d.receipts : [];
       C.activeId  = d.activeId  || (C.companies.length ? C.companies[0].id : null);
       var all = C.companies.map(function (c)  { return persist('companies', c); })
         .concat(C.invoices.map(function (i)   { return persist('invoices', i); }))

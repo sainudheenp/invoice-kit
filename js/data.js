@@ -102,6 +102,7 @@ function _t(n) {
 }
 
 function num2words(num, cur) {
+  if (!cur) return '';
   if (isNaN(num) || num < 0) return 'Zero ' + cur.name;
   var w = Math.floor(num);
   var f = Math.round((num - w) * cur.subPer);
@@ -161,9 +162,9 @@ function fullBackup() {
 }
 
 function fullRestore(data) {
-  C.companies = data.companies || [];
-  C.invoices  = data.invoices  || [];
-  C.receipts  = data.receipts  || [];
+  C.companies = Array.isArray(data.companies) ? data.companies : [];
+  C.invoices  = Array.isArray(data.invoices)  ? data.invoices  : [];
+  C.receipts  = Array.isArray(data.receipts)  ? data.receipts  : [];
   C.activeId  = data.activeId  || (C.companies.length ? C.companies[0].id : null);
   var all = C.companies.map(function (c) { return persist('companies', c); })
     .concat(C.invoices.map(function (i)  { return persist('invoices', i); }))
