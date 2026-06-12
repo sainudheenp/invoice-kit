@@ -95,15 +95,17 @@ function _buildRecHTML(savedRec, comp) {
     '<span style="color:#999">Date / التاريخ</span> <strong style="color:#333">' + dts + '</strong>' +
     '</div></div>' +
 
-    /* ——— FORM CARD ——— */
-    '<div style="background:#fafafa;border-radius:4px;padding:3mm 3.5mm;margin-bottom:3mm;border:1px solid #eee">' +
-    '<div style="font-size:9px;font-weight:700;color:' + pc + ';text-transform:uppercase;letter-spacing:.4px;margin-bottom:2.5mm">Payment Details / تفاصيل الدفع</div>' +
-    '<div style="display:flex;padding:2.5px 0"><span style="min-width:75px;font-size:9px;color:' + ac + ';font-weight:600">Received from</span><span style="font-size:11px;color:#222">' + esc(rf||'—') + '</span></div>' +
-    '<div style="display:flex;padding:2.5px 0"><span style="min-width:75px;font-size:9px;color:' + ac + ';font-weight:600">Amount / ' + cur.symbol + '</span><span style="font-size:11px;color:#222;font-weight:600">' + esc(ww) + '</span></div>' +
-    '<div style="display:flex;padding:2.5px 0"><span style="min-width:75px;font-size:9px;color:' + ac + ';font-weight:600">Payment</span><span style="font-size:11px;color:#222">' + esc(pm) + (pm==='Cheque'&&ch?' / '+esc(ch):'') + '</span></div>' +
-    ((bk||td) ? '<div style="display:flex;padding:2.5px 0"><span style="min-width:75px;font-size:9px;color:' + ac + ';font-weight:600">Bank / Date</span><span style="font-size:11px;color:#222">' + esc(bk) + (bk&&td?' / ':'') + esc(td) + '</span></div>' : '') +
-    '<div style="display:flex;padding:2.5px 0"><span style="min-width:75px;font-size:9px;color:' + ac + ';font-weight:600">Being / بيان</span><span style="font-size:11px;color:#222">' + esc(bg||'—') + '</span></div>' +
-    '</div>' +
+    /* ——— FORM FIELDS ——— */
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:3mm">' +
+    '<tr><td style="padding:3mm 3.5mm;background:#fafafa;border:1px solid #eee;border-radius:4px" colspan="2">' +
+    '<table style="width:100%;border-collapse:collapse">' +
+    '<tr><td style="width:80px;font-size:9px;color:' + ac + ';font-weight:600;padding:2.5px 0;vertical-align:top">Received from</td><td style="font-size:11px;color:#222;padding:2.5px 0">' + esc(rf||'—') + '</td></tr>' +
+    '<tr><td style="width:80px;font-size:9px;color:' + ac + ';font-weight:600;padding:2.5px 0;vertical-align:top">Amount / ' + cur.symbol + '</td><td style="font-size:11px;color:#222;font-weight:600;padding:2.5px 0">' + esc(ww) + '</td></tr>' +
+    '<tr><td style="width:80px;font-size:9px;color:' + ac + ';font-weight:600;padding:2.5px 0;vertical-align:top">Payment</td><td style="font-size:11px;color:#222;padding:2.5px 0">' + esc(pm) + (pm==='Cheque'&&ch?' / '+esc(ch):'') + '</td></tr>' +
+    ((bk||td) ? '<tr><td style="width:80px;font-size:9px;color:' + ac + ';font-weight:600;padding:2.5px 0;vertical-align:top">Bank / Date</td><td style="font-size:11px;color:#222;padding:2.5px 0">' + esc(bk) + (bk&&td?' / ':'') + esc(td) + '</td></tr>' : '') +
+    '<tr><td style="width:80px;font-size:9px;color:' + ac + ';font-weight:600;padding:2.5px 0;vertical-align:top">Being / بيان</td><td style="font-size:11px;color:#222;padding:2.5px 0">' + esc(bg||'—') + '</td></tr>' +
+    '</table></td></tr>' +
+    '</table>' +
 
     /* ——— AMOUNT BOXES ——— */
     '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:3mm">' +
@@ -112,12 +114,16 @@ function _buildRecHTML(savedRec, comp) {
     '</div>' +
 
     /* ——— SIGNATURES ——— */
-    '<div style="display:flex;gap:8mm;padding-top:2.5mm;border-top:1px solid #eee">' +
-    '<div style="flex:1"><div style="border-bottom:1px solid #ccc;height:24px;margin-bottom:3px"></div><div style="font-size:10px;color:#333;font-weight:600">' + esc(rv||'______________') + '</div><div style="font-size:8px;color:#999">Receiver\'s Sig / توقيع المستلم</div></div>' +
-    '<div style="flex:1">' +
-    (c.signature ? '<div style="margin:0 auto 3px;height:24px;display:flex;align-items:center;justify-content:center"><img src="' + c.signature.replace(/"/g,'&quot;') + '" style="max-width:80px;max-height:24px;object-fit:contain"></div>' : '<div style="border-bottom:1px solid #ccc;height:24px;margin-bottom:3px"></div>') +
-    '<div style="font-size:10px;color:#333;font-weight:600">' + esc(sg||'______________') + '</div><div style="font-size:8px;color:#999">Authorized Sig / التوقيع المختص</div></div>' +
-    '</div>' +
+    '<table style="width:100%;border-collapse:collapse;border-top:1px solid #eee">' +
+    '<tr><td style="width:50%;padding-top:2.5mm;text-align:center">' +
+    '<div style="border-bottom:1px solid #ccc;height:24px;margin-bottom:3px;max-width:160px;margin-left:auto;margin-right:auto"></div>' +
+    '<div style="font-size:10px;color:#333;font-weight:600">' + esc(rv||'______________') + '</div>' +
+    '<div style="font-size:8px;color:#999">Receiver\'s Sig / توقيع المستلم</div>' +
+    '</td><td style="width:50%;padding-top:2.5mm;text-align:center">' +
+    (c.signature ? '<div style="margin:0 auto 3px;height:24px;display:flex;align-items:center;justify-content:center"><img src="' + c.signature.replace(/"/g,'&quot;') + '" style="max-width:80px;max-height:24px;object-fit:contain"></div>' : '<div style="border-bottom:1px solid #ccc;height:24px;margin-bottom:3px;max-width:160px;margin-left:auto;margin-right:auto"></div>') +
+    '<div style="font-size:10px;color:#333;font-weight:600">' + esc(sg||'______________') + '</div>' +
+    '<div style="font-size:8px;color:#999">Authorized Sig / التوقيع المختص</div>' +
+    '</td></tr></table>' +
 
     (c.seal ? '<div style="text-align:center;margin-top:3mm"><img src="' + c.seal.replace(/"/g,'&quot;') + '" style="max-width:110px;max-height:110px;object-fit:contain"></div>' : '') +
 
