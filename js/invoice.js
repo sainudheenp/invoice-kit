@@ -149,7 +149,7 @@ function _buildInvHTML(savedInv, comp) {
   });
   if (!ir) ir = '<tr><td colspan="5" style="text-align:center;color:#ccc;padding:30px;font-size:13px;font-style:italic">No items</td></tr>';
 
-  return '<div style="width:210mm;min-height:297mm;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#333;position:relative;background:#fff;line-height:1.5;padding:14mm 14mm 0">' +
+  return '<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#333;position:relative;background:#fff;line-height:1.5;min-height:100vh;padding:14mm 14mm 0">' +
 
     /* ——— TOP ACCENT BAR ——— */
     '<div style="position:absolute;top:0;left:0;right:0;height:4px;background:' + pc + '"></div>' +

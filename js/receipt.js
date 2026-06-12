@@ -62,7 +62,7 @@ function _buildRecHTML(savedRec, comp) {
   var wi = Math.floor(am);
   var fr = Math.round((am - wi) * cur.subPer);
 
-  return '<div style="width:148mm;min-height:210mm;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#333;position:relative;background:#fff;line-height:1.5;padding:6mm 7mm 0">' +
+  return '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#333;position:relative;background:#fff;line-height:1.5;min-height:100vh;padding:6mm 7mm 0">' +
 
     /* ——— TOP ACCENT BAR ——— */
     '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:' + pc + '"></div>' +
