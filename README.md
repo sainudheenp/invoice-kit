@@ -1,4 +1,4 @@
-# openBilling
+# invoicekit
 
 A fully offline, single-page webapp for generating bilingual (EN/AR) invoices and receipt vouchers. No frameworks, no CDN, no server required — just open `index.html` in any modern browser.
 
