@@ -127,113 +127,113 @@ function _buildInvHTML(savedInv, comp) {
   }
 
   var gw = num2words(grand, cur) + ' only';
-  var ih = '';
-  items.forEach(function (it, i) {
-    ih += '<tr>' +
-      '<td style="text-align:center;padding:5px 4px;color:#777">' + (i+1) + '</td>' +
-      '<td style="padding:5px 4px">' + esc(it.desc) + '</td>' +
-      '<td style="text-align:center;padding:5px 4px;color:#555">' + it.qty + '</td>' +
-      '<td style="text-align:right;padding:5px 4px">' + parseFloat(it.price).toFixed(3) + '</td>' +
-      '<td style="text-align:right;padding:5px 4px;font-weight:600">' + it.amount + '</td></tr>';
-  });
-  if (!ih) ih = '<tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px;font-size:11px">No items</td></tr>';
-
   var pd = pm;
-  if (pm === 'Cheque' && ch) pd += ' No.' + ch;
-  if (bk) pd += ' - ' + bk;
+  if (pm === 'Cheque' && ch) pd += ' / ' + ch;
+  if (bk) pd += ' — ' + bk;
 
   var pc = c.pcolor || '#D97706';
+  var sv = sub.toFixed(3);
+  var vv = va.toFixed(3);
+  var dv = disc.toFixed(3);
+  var gv = grand.toFixed(3);
 
-  var contactInfo = [c.tel && 'Tel: ' + c.tel, c.mob && 'Mob: ' + c.mob, c.email && 'Email: ' + c.email, c.cr && 'C.R.: ' + c.cr].filter(Boolean).join(' | ');
+  var ir = '';
+  items.forEach(function (it, i) {
+    ir += '<tr>' +
+      '<td style="width:28px;padding:4px 3px;text-align:center;color:#999;font-size:9px">' + (i+1) + '</td>' +
+      '<td style="padding:4px 3px;font-size:9px;color:#333">' + esc(it.desc) + '</td>' +
+      '<td style="width:38px;padding:4px 3px;text-align:center;font-size:9px;color:#555">' + it.qty + '</td>' +
+      '<td style="width:62px;padding:4px 3px;text-align:right;font-size:9px;color:#555">' + parseFloat(it.price).toFixed(3) + '</td>' +
+      '<td style="width:68px;padding:4px 3px;text-align:right;font-size:9px;font-weight:600;color:#222">' + it.amount + '</td></tr>';
+  });
+  if (!ir) ir = '<tr><td colspan="5" style="text-align:center;color:#ccc;padding:24px;font-size:10px;font-style:italic">No items</td></tr>';
 
-  return '<div style="width:210mm;min-height:297mm;padding:10mm 12mm;font-family:Arial,sans-serif;font-size:10px;color:#333;position:relative;background:#fff;line-height:1.5">' +
+  return '<div style="width:210mm;min-height:297mm;padding:8mm 10mm;font-family:Arial,sans-serif;font-size:9.5px;color:#333;position:relative;background:#fff;line-height:1.55">' +
 
-    /* top accent bar */
-    '<div style="height:4px;background:' + pc + ';margin:-10mm -12mm 8mm -12mm"></div>' +
+    /* top accent stripe */
+    '<div style="height:3px;background:' + pc + ';margin:-8mm -10mm 6mm -10mm"></div>' +
 
-    /* header: logo + company info side by side */
-    '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:6mm">' +
-    (c.logo ? '<div style="flex-shrink:0"><img src="' + c.logo.replace(/"/g,'&quot;') + '" style="max-width:80px;max-height:80px;object-fit:contain"></div>' : '') +
+    /* ——— HEADER ——— */
+    '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:5mm">' +
+    (c.logo ? '<div style="flex-shrink:0"><img src="' + c.logo.replace(/"/g,'&quot;') + '" style="max-width:72px;max-height:72px;object-fit:contain"></div>' : '') +
     '<div style="flex:1">' +
-    '<div style="font-size:18px;font-weight:800;color:' + pc + ';letter-spacing:-.3px;margin-bottom:2px">' + esc(c.name) + '</div>' +
-    (c.sub ? '<div style="font-size:10px;color:#777;margin-bottom:4px">' + esc(c.sub) + '</div>' : '') +
-    '<div style="font-size:8.5px;color:#999;line-height:1.6">' + [c.loc, contactInfo].filter(Boolean).join('<br>') + '</div></div>' +
-    '<div style="flex-shrink:0;text-align:right;max-width:50%">' +
-    '<div style="font-size:18px;font-weight:800;color:' + pc + ';letter-spacing:-.3px;margin-bottom:2px">' + esc(c.nameAr) + '</div>' +
-    (c.subAr ? '<div style="font-size:10px;color:#777;margin-bottom:4px">' + esc(c.subAr) + '</div>' : '') +
-    '<div style="font-size:8.5px;color:#999;line-height:1.6;direction:rtl">' + [c.loc, 'هاتف : ' + c.tel, 'جوال : ' + c.mob, 'البريد : ' + c.email].filter(function(s){return s.replace(/^[^:]+:\s*/,'') !== '' && s !== c.loc}).join('<br>') + '</div></div></div>' +
+    '<div style="font-size:17px;font-weight:800;color:' + pc + ';letter-spacing:-.25px">' + esc(c.name) + '</div>' +
+    (c.sub ? '<div style="font-size:9.5px;color:#888;margin:1px 0 3px">' + esc(c.sub) + '</div>' : '') +
+    '<div style="font-size:8px;color:#aaa;line-height:1.65">' +
+    (c.loc ? esc(c.loc) + '<br>' : '') +
+    [c.tel && 'Tel: ' + c.tel, c.mob && 'Mob: ' + c.mob, c.email && 'Email: ' + c.email, c.cr && 'C.R.: ' + c.cr].filter(Boolean).join(' | ') +
+    '</div></div>' +
+    (c.nameAr ? '<div style="flex-shrink:0;text-align:right"><div style="font-size:17px;font-weight:800;color:' + pc + ';letter-spacing:-.25px">' + esc(c.nameAr) + '</div>' +
+    (c.subAr ? '<div style="font-size:9.5px;color:#888;margin:1px 0 3px">' + esc(c.subAr) + '</div>' : '') +
+    '<div style="font-size:8px;color:#aaa;line-height:1.65;direction:rtl">' +
+    [c.loc, c.tel && 'هاتف: ' + c.tel, c.mob && 'جوال: ' + c.mob, c.email && 'بريد: ' + c.email].filter(Boolean).join('<br>') +
+    '</div></div>' : '') +
+    '</div>' +
 
-    /* thin separator */
-    '<div style="height:1px;background:#eee;margin:0 0 5mm 0"></div>' +
+    /* ——— TITLE ——— */
+    '<div style="border-top:1px solid #eee;border-bottom:1px solid #eee;padding:2.5mm 0;margin-bottom:4mm;display:flex;align-items:baseline;justify-content:space-between">' +
+    '<div style="font-size:20px;font-weight:800;color:' + pc + ';letter-spacing:.5px">INVOICE</div>' +
+    '<div style="font-size:11px;color:#999;direction:rtl">فاتورة ضريبية</div>' +
+    '</div>' +
 
-    /* title row: TAX INVOICE + invoice details */
-    '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4mm">' +
-    '<div><div style="font-size:20px;font-weight:800;color:' + pc + ';letter-spacing:1px">TAX INVOICE</div>' +
-    '<div style="font-size:12px;color:' + pc + ';margin-top:1px">فاتورة ضريبية</div></div>' +
-    '<div style="text-align:right;font-size:10px;color:#666;line-height:1.8">' +
-    '<div><strong style="color:#333">Invoice No:</strong> ' + no + '</div>' +
-    '<div><strong style="color:#333">Date:</strong> ' + dts + '</div>' +
-    (c.vatReg ? '<div><strong style="color:#333">VAT Reg:</strong> ' + c.vatReg + '</div>' : '') +
+    /* ——— BILL TO + INFO ——— */
+    '<div style="display:flex;gap:6mm;margin-bottom:5mm">' +
+    '<div style="flex:1">' +
+    '<div style="font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#aaa;margin-bottom:2px">Bill To</div>' +
+    '<div style="font-weight:700;font-size:12px;color:#222">' + esc(cust||'---') + '</div>' +
+    '<div style="font-size:9px;color:#777;margin-top:1px">' +
+    [addr, ph && 'Tel: ' + ph, cr_ && 'C.R.: ' + cr_, em].filter(Boolean).join('<br>') +
+    '</div></div>' +
+    '<div style="text-align:right;font-size:9px;color:#555;line-height:1.9">' +
+    '<div style="display:flex;gap:6px"><span style="color:#aaa;min-width:72px;text-align:left">Invoice No</span><span style="font-weight:600;color:#333">' + no + '</span></div>' +
+    '<div style="display:flex;gap:6px"><span style="color:#aaa;min-width:72px;text-align:left">Date</span><span style="font-weight:600;color:#333">' + dts + '</span></div>' +
+    (c.vatReg ? '<div style="display:flex;gap:6px"><span style="color:#aaa;min-width:72px;text-align:left">VAT Reg</span><span style="font-weight:600;color:#333">' + c.vatReg + '</span></div>' : '') +
     '</div></div>' +
 
-    /* bill-to card */
-    '<div style="border:1px solid #eee;border-left:3px solid ' + pc + ';border-radius:3px;padding:3mm 4mm;margin-bottom:4mm">' +
-    '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#999;margin-bottom:3px">Bill To / إلى السيد</div>' +
-    '<div style="font-weight:700;font-size:12px;color:#222;margin-bottom:2px">' + (cust||'---') + '</div>' +
-    '<div style="font-size:9px;color:#666">' + [addr, ph && 'Tel: ' + ph, cr_ && 'C.R.: ' + cr_, em].filter(Boolean).join(' | ') + '</div></div>' +
-
-    /* items table */
-    '<table style="width:100%;border-collapse:collapse;margin-bottom:4mm;font-size:9.5px">' +
-    '<thead><tr style="border-bottom:2px solid ' + pc + '">' +
-    '<th style="padding:4px 4px;text-align:center;color:#888;font-weight:600;font-size:8px;text-transform:uppercase;letter-spacing:.3px;width:28px">#</th>' +
-    '<th style="padding:4px 4px;text-align:left;color:#888;font-weight:600;font-size:8px;text-transform:uppercase;letter-spacing:.3px">Description / البيان</th>' +
-    '<th style="padding:4px 4px;text-align:center;color:#888;font-weight:600;font-size:8px;text-transform:uppercase;letter-spacing:.3px;width:40px">Qty / الكمية</th>' +
-    '<th style="padding:4px 4px;text-align:right;color:#888;font-weight:600;font-size:8px;text-transform:uppercase;letter-spacing:.3px;width:65px">Price / السعر</th>' +
-    '<th style="padding:4px 4px;text-align:right;color:#888;font-weight:600;font-size:8px;text-transform:uppercase;letter-spacing:.3px;width:70px">Amount / المبلغ</th>' +
-    '</tr></thead><tbody>' + ih +
-    '<tr style="border-top:1px solid #eee"><td colspan="4" style="padding:5px 4px;text-align:right;font-weight:600;font-size:9px;color:#555">Subtotal</td>' +
-    '<td style="padding:5px 4px;text-align:right;font-weight:600;font-size:9px">' + sub.toFixed(3) + '</td></tr>' +
-    (disc>0 ? '<tr><td colspan="4" style="padding:3px 4px;text-align:right;font-weight:500;font-size:9px;color:#e53e3e">Discount</td>' +
-    '<td style="padding:3px 4px;text-align:right;font-weight:500;font-size:9px;color:#e53e3e">-' + disc.toFixed(3) + '</td></tr>' : '') +
-    (vp>0 ? '<tr><td colspan="4" style="padding:3px 4px;text-align:right;font-weight:500;font-size:9px;color:#555">VAT (' + vp + '%)</td>' +
-    '<td style="padding:3px 4px;text-align:right;font-weight:500;font-size:9px">' + va.toFixed(3) + '</td></tr>' : '') +
-    '<tr style="border-top:2px solid ' + pc + '"><td colspan="4" style="padding:5px 4px;text-align:right;font-weight:800;font-size:11px;color:' + pc + '">Grand Total / الإجمالي</td>' +
-    '<td style="padding:5px 4px;text-align:right;font-weight:800;font-size:11px;color:' + pc + '">' + grand.toFixed(3) + ' ' + cur.symbol + '</td></tr>' +
+    /* ——— ITEMS TABLE ——— */
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:3mm;font-size:9px">' +
+    '<thead><tr style="border-bottom:1.5px solid ' + pc + '">' +
+    '<th style="padding:3mm 3px 2mm;text-align:center;color:#aaa;font-weight:700;font-size:7px;text-transform:uppercase;letter-spacing:.5px;width:28px">#</th>' +
+    '<th style="padding:3mm 3px 2mm;text-align:left;color:#aaa;font-weight:700;font-size:7px;text-transform:uppercase;letter-spacing:.5px">Description / البيان</th>' +
+    '<th style="padding:3mm 3px 2mm;text-align:center;color:#aaa;font-weight:700;font-size:7px;text-transform:uppercase;letter-spacing:.5px;width:38px">Qty</th>' +
+    '<th style="padding:3mm 3px 2mm;text-align:right;color:#aaa;font-weight:700;font-size:7px;text-transform:uppercase;letter-spacing:.5px;width:62px">Price</th>' +
+    '<th style="padding:3mm 3px 2mm;text-align:right;color:#aaa;font-weight:700;font-size:7px;text-transform:uppercase;letter-spacing:.5px;width:68px">Amount</th>' +
+    '</tr></thead><tbody>' + ir +
     '</tbody></table>' +
 
-    /* amount in words */
-    '<div style="font-size:9px;color:#888;font-style:italic;margin-bottom:4mm;text-align:right">' + esc(gw) + '</div>' +
+    /* ——— TOTALS ——— */
+    '<div style="display:flex;justify-content:flex-end;margin-bottom:2mm">' +
+    '<div style="min-width:130px">' +
+    '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:9.5px;color:#555"><span>Subtotal</span><span>' + sv + ' ' + cur.symbol + '</span></div>' +
+    (disc>0 ? '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:9.5px;color:#e53e3e"><span>Discount</span><span>-' + dv + ' ' + cur.symbol + '</span></div>' : '') +
+    (vp>0 ? '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:9.5px;color:#555"><span>VAT (' + vp + '%)</span><span>' + vv + ' ' + cur.symbol + '</span></div>' : '') +
+    '<div style="border-top:1.5px solid ' + pc + ';margin:4px 0 3px"></div>' +
+    '<div style="display:flex;justify-content:space-between;padding:3px 0 0;font-size:13px;font-weight:800;color:' + pc + '"><span>Total</span><span>' + gv + ' ' + cur.symbol + '</span></div>' +
+    '</div></div>' +
 
-    /* details row: payment + notes */
-    '<div style="display:flex;gap:4mm;margin-bottom:4mm">' +
-    '<div style="flex:1;border:1px solid #eee;border-radius:3px;padding:2.5mm 3mm">' +
-    '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#999;margin-bottom:2px">Payment / طريقة الدفع</div>' +
-    '<div style="font-size:9.5px;color:#444">' + esc(pd) + '</div></div>' +
-    (notes ? '<div style="flex:1;border:1px solid #eee;border-radius:3px;padding:2.5mm 3mm">' +
-    '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#999;margin-bottom:2px">Notes / ملاحظات</div>' +
-    '<div style="font-size:9.5px;color:#444">' + esc(notes) + '</div></div>' : '') +
-    (c.invTerms && !notes ? '<div style="flex:1;border:1px solid #eee;border-radius:3px;padding:2.5mm 3mm">' +
-    '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#999;margin-bottom:2px">Terms / الشروط</div>' +
-    '<div style="font-size:9.5px;color:#444">' + esc(c.invTerms) + '</div></div>' : '') +
-    '</div>' +
+    /* ——— WORDS ——— */
+    '<div style="font-size:8.5px;color:#999;font-style:italic;margin-bottom:4mm;text-align:right;padding-right:2px">' + esc(gw) + '</div>' +
 
-    /* terms standalone if notes already took the spot */
-    (c.invTerms && notes ? '<div style="border:1px solid #eee;border-radius:3px;padding:2.5mm 3mm;margin-bottom:4mm">' +
-    '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#999;margin-bottom:2px">Terms / الشروط</div>' +
-    '<div style="font-size:9.5px;color:#444">' + esc(c.invTerms) + '</div></div>' : '') +
+    /* ——— FOOTER INFO (payment / notes / terms) ——— */
+    '<div style="border-top:1px solid #eee;padding-top:3mm;margin-top:auto">' +
+    '<div style="display:flex;gap:4mm;font-size:8.5px;color:#555">' +
+    '<div style="flex:1"><div style="font-weight:700;color:#aaa;font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Payment</div><div>' + esc(pd||'—') + '</div></div>' +
+    (notes ? '<div style="flex:1"><div style="font-weight:700;color:#aaa;font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Notes</div><div>' + esc(notes) + '</div></div>' : '') +
+    (c.invTerms ? '<div style="flex:1"><div style="font-weight:700;color:#aaa;font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Terms</div><div style="color:#777">' + esc(c.invTerms) + '</div></div>' : '') +
+    '</div></div>' +
 
-    /* seal + signature */
-    (c.seal || c.signature ? '<div style="display:flex;justify-content:space-between;align-items:end;margin-top:6mm;margin-bottom:6mm">' +
-    (c.seal ? '<div><img src="' + c.seal.replace(/"/g,'&quot;') + '" style="max-width:85px;max-height:85px;object-fit:contain"></div>' : '<div></div>') +
-    (c.signature ? '<div style="text-align:center"><img src="' + c.signature.replace(/"/g,'&quot;') + '" style="max-width:110px;max-height:45px;object-fit:contain"><div style="font-size:8px;color:#999;margin-top:2px">Authorized Signature / التوقيع</div></div>' : '<div></div>') +
+    /* ——— SEAL & SIGNATURE ——— */
+    (c.seal || c.signature ? '<div style="display:flex;justify-content:space-between;align-items:end;margin-top:5mm">' +
+    (c.seal ? '<div><img src="' + c.seal.replace(/"/g,'&quot;') + '" style="max-width:80px;max-height:80px;object-fit:contain"></div>' : '<div></div>') +
+    (c.signature ? '<div style="text-align:center"><img src="' + c.signature.replace(/"/g,'&quot;') + '" style="max-width:100px;max-height:40px;object-fit:contain"><div style="font-size:7.5px;color:#aaa;margin-top:1px">Authorized Signature / التوقيع</div></div>' : '<div></div>') +
     '</div>' : '') +
 
-    /* footer */
-    '<div style="position:absolute;bottom:6mm;left:12mm;right:12mm;border-top:1px solid #ddd;padding-top:2.5mm;display:flex;justify-content:space-between;font-size:7.5px;color:#aaa">' +
+    /* ——— FOOTER ——— */
+    '<div style="position:absolute;bottom:5mm;left:10mm;right:10mm;border-top:1px solid #ddd;padding-top:2mm;display:flex;justify-content:space-between;font-size:7px;color:#bbb">' +
     '<div>' + esc(c.name) + (c.loc ? ' | ' + esc(c.loc) : '') + '</div>' +
-    '<div>' + [c.tel && 'Tel: ' + c.tel, c.email && 'Email: ' + c.email].filter(Boolean).join(' | ') + '</div>' +
+    '<div>' + [c.tel && 'Tel: ' + c.tel, c.email].filter(Boolean).join(' | ') + '</div>' +
     '</div>' +
-    (c.invFooter ? '<div style="position:absolute;bottom:2.5mm;left:12mm;right:12mm;text-align:center;font-size:7.5px;color:#bbb">' + esc(c.invFooter) + '</div>' : '') +
+    (c.invFooter ? '<div style="position:absolute;bottom:2mm;left:10mm;right:10mm;text-align:center;font-size:7px;color:#ccc">' + esc(c.invFooter) + '</div>' : '') +
     '</div>';
 }
 
