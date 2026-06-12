@@ -576,7 +576,8 @@ input,select,textarea{font-family:inherit;font-size:14px}
    PRINT
    ============================================================ */
 .print-only{display:none}
+@page{margin:0}
 @media print{
   body{background:#fff!important;margin:0!important;padding:0!important}
   #appRoot{display:none!important}
-  .print-only{display:block!important}
+  .print-only{display:block!important}}
