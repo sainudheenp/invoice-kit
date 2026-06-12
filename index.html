@@ -271,7 +271,10 @@
 <div class="card">
 <div class="card-header">
 <h2>Saved Documents</h2>
+<div style="display:flex;align-items:center;gap:8px">
 <span class="badge" id="historyCount">0</span>
+<button class="btn btn-sm btn-success" id="backupBtn" onclick="backupData()">💾 Backup</button>
+</div>
 </div>
 <div style="display:flex;gap:8px;margin-bottom:14px">
 <button class="btn btn-sm btn-primary" data-tab="inv" onclick="switchDocTab('inv')">Invoices</button>
