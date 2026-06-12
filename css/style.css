@@ -149,10 +149,10 @@ input,select,textarea{font-family:inherit;font-size:14px}
   background:var(--bg);
   min-height:100dvh;
 }
-@media(max-width:960px){
+@media only screen and (max-width:960px){
   .main{padding:24px}
 }
-@media(max-width:768px){
+@media only screen and (max-width:768px){
   .hamburger{display:flex}
   .sidebar{transform:translateX(-100%);transition:transform .3s ease;will-change:transform}
   .sidebar.open{transform:translateX(0)}
@@ -320,7 +320,7 @@ input,select,textarea{font-family:inherit;font-size:14px}
    SETTINGS GRID
    ============================================================ */
 .set-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}
-@media(max-width:720px){.set-grid{grid-template-columns:1fr}}
+@media only screen and (max-width:720px){.set-grid{grid-template-columns:1fr}}
 
 /* ============================================================
    INVOICE TWO-COLUMN LAYOUT
@@ -331,7 +331,7 @@ input,select,textarea{font-family:inherit;font-size:14px}
   gap:22px;
   align-items:start;
 }
-@media(max-width:900px){
+@media only screen and (max-width:900px){
   .invoice-layout{grid-template-columns:1fr}
 }
 .invoice-form{padding-bottom:40px}
@@ -462,7 +462,7 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .btn-ghost{color:var(--text2);background:transparent;border-radius:var(--radius-sm)}
 .btn-ghost:hover{background:var(--bg);color:var(--text)}
 
-@media(max-width:720px){
+@media only screen and (max-width:720px){
   .btn{width:100%;justify-content:center;padding:12px 18px}
   .btn-sm{width:auto;padding:8px 14px}
   .btn-row{flex-direction:column}
@@ -505,7 +505,7 @@ input,select,textarea{font-family:inherit;font-size:14px}
   margin-bottom:16px;
 }
 .comp-bar select{flex:1;min-width:160px;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:14px;min-height:38px;background:var(--card);appearance:auto}
-@media(max-width:720px){.comp-bar{flex-direction:column}.comp-bar select{width:100%}}
+@media only screen and (max-width:720px){.comp-bar{flex-direction:column}.comp-bar select{width:100%}}
 
 /* ============================================================
    STATUS
@@ -566,7 +566,7 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .welcome-divider::before,.welcome-divider::after{
   content:''; flex:1; height:1px; background:var(--border);
 }
-@media(max-width:500px){
+@media only screen and (max-width:500px){
   .welcome-overlay{padding:0;align-items:flex-start}
   .welcome-card{border-radius:0;width:100%;max-width:none;min-height:100dvh;box-shadow:none;padding:24px 16px 32px}
   .welcome-card h1{font-size:20px}

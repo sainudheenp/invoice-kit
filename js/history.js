@@ -50,6 +50,7 @@ function renderHistory() {
       '<td style="text-align:right;font-weight:700">' + amt.toFixed(3) + ' ' + esc(cur.symbol) + '</td>' +
       '<td style="text-align:right;white-space:nowrap">' +
       '<button class="btn btn-sm btn-primary" onclick="printSavedDoc(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')" style="margin-right:4px">Print</button>' +
+      '<button class="btn btn-sm btn-info" onclick="downloadSavedDocPDF(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')" style="margin-right:4px">PDF</button>' +
       '<button class="btn btn-sm btn-info" onclick="editSavedDoc(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')" style="margin-right:4px">Edit</button>' +
       '<button class="btn btn-sm btn-ghost" onclick="deleteSavedDoc(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')">Delete</button>' +
       '</td></tr>';
