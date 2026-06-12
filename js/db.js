@@ -137,5 +137,17 @@ var IDB = {
         req.onerror   = function (e) { rej(e.target.error); };
       });
     });
+  },
+
+  /* wipe all stores and reset database */
+  wipeAll: function () {
+    var self = this;
+    return self.ready.then(function () {
+      return new Promise(function (res, rej) {
+        var del = indexedDB.deleteDatabase(DB_NAME);
+        del.onsuccess = function () { self._db = null; self.ready = null; res(); };
+        del.onerror   = function (e) { rej(e.target.error); };
+      });
+    });
   }
 };

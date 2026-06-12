@@ -252,3 +252,67 @@ function setStatus(msg, type) {
   el.className = 'status-bar ' + (type === 'err' ? 'err' : 'ok');
   if (msg) setTimeout(function () { el.className = 'status-bar'; el.textContent = ''; }, 3000);
 }
+
+/* ===========================================================
+   RESET / DANGER ZONE
+   =========================================================== */
+function showResetConfirm() {
+  var c = getCo();
+  document.getElementById('resetConfirmName').textContent = c ? c.name : '(no company)';
+  document.getElementById('resetConfirmInput').value = '';
+  document.getElementById('resetError').style.display = 'none';
+  document.getElementById('resetConfirmBtn').disabled = true;
+  document.getElementById('resetModal').style.display = 'flex';
+  document.getElementById('resetConfirmInput').focus();
+}
+
+function hideResetConfirm() {
+  document.getElementById('resetModal').style.display = 'none';
+}
+
+/* listen for matching input */
+(function () {
+  var inp = document.getElementById('resetConfirmInput');
+  if (inp) inp.addEventListener('input', function () {
+    var c = getCo();
+    var match = c && this.value.trim() === c.name;
+    document.getElementById('resetConfirmBtn').disabled = !match;
+    document.getElementById('resetError').style.display = match ? 'none' : 'block';
+  });
+})();
+
+function executeReset() {
+  var c = getCo();
+  var entered = document.getElementById('resetConfirmInput').value.trim();
+  if (!c || entered !== c.name) {
+    document.getElementById('resetError').style.display = 'block';
+    return;
+  }
+  hideResetConfirm();
+
+  IDB.wipeAll().then(function () {
+    /* reset in-memory cache */
+    C.companies = [];
+    C.invoices  = [];
+    C.receipts  = [];
+    C.activeId  = null;
+    sessionStorage.removeItem('dg_activeId');
+
+    /* hide app, show welcome */
+    document.getElementById('appRoot').style.display = 'none';
+    document.getElementById('welcomeOverlay').classList.remove('hidden');
+
+    /* reopen DB fresh for next use */
+    IDB._db = null;
+    IDB.ready = null;
+    return IDB.open();
+  }).then(function () {
+    /* clear any stale form state */
+    document.getElementById('setupName').value = '';
+    document.getElementById('setupName').focus();
+    document.getElementById('setupError').style.display = 'none';
+    document.getElementById('loader').style.display = 'none';
+  }).catch(function (err) {
+    alert('Reset error: ' + err.message + ' — try clearing site data manually.');
+  });
+}
