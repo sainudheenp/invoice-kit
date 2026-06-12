@@ -116,25 +116,22 @@ function num2words(num, cur) {
 /* ==========================================================
    DEFAULT COMPANY
    ========================================================== */
-function defCo() {
+function defCo(name) {
   var now = Date.now();
   return {
     id: uid(),
-    name:'ABU NAFA TRADING', nameAr:'أبو نافع للتجارة',
-    sub:'Marine Engine & Spare Parts', subAr:'محركات بحرية وقطع الغيار',
-    tel:'26730582', fax:'26730582', mob:'99447247',
-    cr:'9909434', pobox:'481, PC: 811', loc:'Musandam, Khasab, S. of Oman',
-    email:'abunafatrading@gmail.com', website:'',
+    name: name || 'My Company', nameAr:'',
+    sub:'', subAr:'',
+    tel:'', fax:'', mob:'',
+    cr:'', pobox:'', loc:'',
+    email:'', website:'',
     logo:'', seal:'', signature:'',
     pcolor:'#1b4d3d', acolor:'#f5c842',
     currency: JSON.parse(JSON.stringify(CUR_PRESETS.OMR)),
-    vatReg:'', vatPct:5,
+    vatReg:'', vatPct:0,
     bankName:'', bankAccName:'', bankAcc:'', bankIban:'', bankSwift:'', bankBranch:'',
     invPref:'INV-', invNext:1, recPref:'RV-', recNext:1,
-    invNotes:'Payment due within 15 days. Thank you.',
-    invTerms:'All disputes subject to local jurisdiction.',
-    invFooter:'E.&O.E. | Goods once sold will not be taken back.',
-    recBeing:'Payment against invoice',
+    invNotes:'', invTerms:'', invFooter:'', recBeing:'',
     createdAt: now, updatedAt: now
   };
 }

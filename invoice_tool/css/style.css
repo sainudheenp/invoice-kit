@@ -479,6 +479,51 @@ input,select,textarea{font-family:inherit;font-size:15px}
 @media(max-width:720px){.scroll-y{max-height:none;overflow:visible}}
 
 /* ============================================================
+   WELCOME / ONBOARDING
+   ============================================================ */
+.welcome-overlay{
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, #f0f4f2 0%, #dce8e0 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+.welcome-overlay.hidden{display:none}
+.welcome-card{
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 36px 32px;
+  max-width: 620px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0,0,0,.1), 0 2px 10px rgba(0,0,0,.06);
+  text-align: center;
+}
+.welcome-icon{margin-bottom:12px}
+.welcome-card h1{
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+.welcome-sub{
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 28px;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.setup-form{text-align:left}
+.setup-form .fg{margin-bottom:12px}
+.setup-form .fg label{font-size:11px}
+.setup-form .btn-row{justify-content:center}
+@media(max-width:500px){
+  .welcome-card{padding:28px 20px 24px;border-radius:16px}
+  .welcome-card h1{font-size:21px}
+}
+
+/* ============================================================
    PRINT
    ============================================================ */
 .print-only{display:none}

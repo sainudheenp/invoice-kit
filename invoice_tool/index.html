@@ -8,11 +8,60 @@
 </head>
 <body>
 
+<!-- ===== WELCOME OVERLAY (shown on first run) ===== -->
+<div id="welcomeOverlay" class="welcome-overlay">
+<div class="welcome-card">
+<div class="welcome-icon">
+<svg viewBox="0 0 100 100" width="64" height="64"><circle cx="50" cy="50" r="46" fill="#f5c842" stroke="#1a3a2c" stroke-width="3"/><text x="50" y="42" text-anchor="middle" fill="#1a3a2c" font-size="24" font-weight="bold">DM</text><text x="50" y="60" text-anchor="middle" fill="#1a3a2c" font-size="7" font-weight="bold">DOCS</text></svg>
+</div>
+<h1>Welcome to OpenInvoice</h1>
+<p class="welcome-sub">Set up your company to start creating invoices and receipts. You can add more details later in Settings.</p>
+
+<div class="setup-form" id="setupForm">
+<div class="form-row">
+<div class="fg"><label>Company Name *</label><input id="setupName" placeholder="e.g. Your Company LLC" autofocus></div>
+<div class="fg"><label>Company Name (Arabic)</label><input id="setupNameAr" dir="rtl" placeholder="اسم الشركة"></div>
+</div>
+<div class="form-row">
+<div class="fg"><label>Subtitle</label><input id="setupSub" placeholder="e.g. Trading &amp; Contracting"></div>
+<div class="fg"><label>Subtitle (Arabic)</label><input id="setupSubAr" dir="rtl"></div>
+</div>
+<div class="form-row">
+<div class="fg"><label>Telephone</label><input id="setupTel" type="tel" placeholder="+968 2..."></div>
+<div class="fg"><label>Mobile</label><input id="setupMob" type="tel" placeholder="+968 9..."></div>
+</div>
+<div class="form-row">
+<div class="fg"><label>Email</label><input id="setupEmail" type="email" placeholder="company@example.com"></div>
+<div class="fg"><label>C.R. Number</label><input id="setupCr" placeholder="Trade registration"></div>
+</div>
+<div class="fg"><label>Location / Address</label><input id="setupLoc" placeholder="City, Street, Building"></div>
+<div class="fg"><label>Currency</label>
+<select id="setupCurrency">
+<option value="OMR">OMR — Omani Rial (ر.ع.)</option>
+<option value="USD">USD — US Dollar ($)</option>
+<option value="EUR">EUR — Euro (€)</option>
+<option value="GBP">GBP — Pound Sterling (£)</option>
+<option value="SAR">SAR — Saudi Riyal (﷼)</option>
+<option value="AED">AED — UAE Dirham (د.إ)</option>
+<option value="KWD">KWD — Kuwaiti Dinar (د.ك)</option>
+<option value="QAR">QAR — Qatari Riyal (﷼)</option>
+<option value="BHD">BHD — Bahraini Dinar (د.ب)</option>
+<option value="EGP">EGP — Egyptian Pound (ج.م)</option>
+</select></div>
+
+<div class="btn-row" style="margin-top:22px">
+<button class="btn btn-primary" onclick="completeSetup()" style="font-size:15px;padding:14px 32px">&#10003; Save &amp; Get Started</button>
+</div>
+<p id="setupError" style="color:var(--danger);font-size:13px;margin-top:8px;display:none">Please enter at least a company name.</p>
+</div>
+</div>
+</div>
+
 <!-- ===== HEADER ===== -->
 <header class="header">
 <div class="header-brand">
 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="#f5c842" stroke="#fff" stroke-width="3"/><text x="50" y="42" text-anchor="middle" fill="#1a3a2c" font-size="24" font-weight="bold">DM</text><text x="50" y="60" text-anchor="middle" fill="#1a3a2c" font-size="7" font-weight="bold">DOCS</text></svg>
-<span>DocManager</span>
+<span>OpenInvoice</span>
 </div>
 <div class="header-right">
 <span id="headerCompany" style="font-weight:600;color:#fff">—</span>

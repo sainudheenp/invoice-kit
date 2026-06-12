@@ -14,6 +14,53 @@ function switchPage(name) {
 }
 
 /* ============================================================
+   SETUP / ONBOARDING
+   ============================================================ */
+function completeSetup() {
+  var name = document.getElementById('setupName').value.trim();
+  if (!name) {
+    document.getElementById('setupError').style.display = 'block';
+    document.getElementById('setupName').focus();
+    return;
+  }
+  document.getElementById('setupError').style.display = 'none';
+
+  var curVal = document.getElementById('setupCurrency').value;
+  var cur = CUR_PRESETS[curVal] || CUR_PRESETS.OMR;
+
+  var c = defCo(name);
+  c.nameAr   = document.getElementById('setupNameAr').value.trim();
+  c.sub      = document.getElementById('setupSub').value.trim();
+  c.subAr    = document.getElementById('setupSubAr').value.trim();
+  c.tel      = document.getElementById('setupTel').value.trim();
+  c.mob      = document.getElementById('setupMob').value.trim();
+  c.email    = document.getElementById('setupEmail').value.trim();
+  c.cr       = document.getElementById('setupCr').value.trim();
+  c.loc      = document.getElementById('setupLoc').value.trim();
+  c.currency = JSON.parse(JSON.stringify(cur));
+
+  C.companies.push(c);
+  C.activeId = c.id;
+  persist('companies', c);
+  sessionStorage.setItem('dg_activeId', c.id);
+
+  enterApp();
+}
+
+function enterApp() {
+  document.getElementById('welcomeOverlay').classList.add('hidden');
+  document.getElementById('appContent').style.display = 'block';
+  _refreshCoList();
+  populateSettings();
+  addInvRow();
+  addInvRow();
+  refreshInv();
+  refreshRec();
+  refreshDashboard();
+  switchPage('dashboard');
+}
+
+/* ============================================================
    DASHBOARD
    ============================================================ */
 function refreshDashboard() {
@@ -53,6 +100,9 @@ document.getElementById('invPayMethod').addEventListener('change', function () {
 });
 document.getElementById('recPayMethod').addEventListener('change', toggleRecFields);
 document.getElementById('recAmount').addEventListener('input', calcRecWords);
+document.getElementById('setupName').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') completeSetup();
+});
 
 /* ============================================================
    INIT
@@ -60,22 +110,16 @@ document.getElementById('recAmount').addEventListener('input', calcRecWords);
 IDB.open().then(function () {
   return loadAllFromDB();
 }).then(function () {
-  if (C.companies.length === 0) {
-    var d = defCo();
-    C.companies.push(d);
-    C.activeId = d.id;
-    persist('companies', d);
-  }
-
-  _refreshCoList();
   document.getElementById('loader').style.display = 'none';
-  document.getElementById('appContent').style.display = 'block';
-  populateSettings();
-  addInvRow();
-  addInvRow();
-  refreshInv();
-  refreshRec();
-  refreshDashboard();
+
+  if (C.companies.length > 0) {
+    /* already has data — go straight to app */
+    if (!C.activeId || !C.companies.some(function (c) { return c.id === C.activeId; })) {
+      C.activeId = C.companies[0].id;
+    }
+    enterApp();
+  }
+  /* else: welcome overlay stays visible, user fills setup form */
 }).catch(function (err) {
   document.getElementById('loader').innerHTML =
     '<div style="color:#c62828;font-size:15px;font-weight:600;margin-bottom:8px">Database Error</div>' +
