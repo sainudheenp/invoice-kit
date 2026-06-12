@@ -68,18 +68,21 @@ function _buildRecHTML(savedRec, comp) {
     '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:' + pc + '"></div>' +
 
     /* ——— HEADER ——— */
-    '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:3.5mm">' +
+    '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:3mm">' +
     (c.logo ? '<div style="flex-shrink:0"><img src="' + c.logo.replace(/"/g,'&quot;') + '" style="max-width:42px;max-height:42px;object-fit:contain;display:block"></div>' : '') +
-    '<div style="flex:1">' +
+    '<div style="flex:1;min-width:0">' +
+    '<div style="display:flex;justify-content:space-between;align-items:baseline">' +
+    '<div>' +
     '<div style="font-size:18px;font-weight:800;letter-spacing:-.2px;color:#222;margin-bottom:1px">' + esc(c.name) + '</div>' +
-    (c.sub ? '<div style="font-size:10px;color:#888;margin-bottom:1px">' + esc(c.sub) + '</div>' : '') +
+    (c.sub ? '<div style="font-size:12px;font-style:italic;color:#888;margin-bottom:1px">' + esc(c.sub) + '</div>' : '') +
+    '</div>' +
+    (c.nameAr ? '<div style="text-align:right"><div style="font-size:18px;font-weight:800;letter-spacing:-.2px;color:#222;margin-bottom:1px">' + esc(c.nameAr) + '</div>' +
+    (c.subAr ? '<div style="font-size:10px;color:#888;margin-bottom:1px;direction:rtl">' + esc(c.subAr) + '</div>' : '') +
+    '</div>' : '') +
+    '</div>' +
     '<div style="font-size:8px;color:' + ac + ';line-height:1.6">' +
     [c.loc, c.tel && 'Tel: ' + c.tel, c.email, c.cr && 'C.R.: ' + c.cr].filter(Boolean).join(' &nbsp;|&nbsp; ') +
     '</div></div>' +
-    (c.nameAr ? '<div style="flex-shrink:0;text-align:right;max-width:40%"><div style="font-size:18px;font-weight:800;letter-spacing:-.2px;color:#222;margin-bottom:1px">' + esc(c.nameAr) + '</div>' +
-    '<div style="font-size:8px;color:' + ac + ';line-height:1.6;direction:rtl">' +
-    [c.loc, c.tel && 'هاتف: ' + c.tel, c.email && 'بريد: ' + c.email].filter(Boolean).join(' &nbsp;|&nbsp; ') +
-    '</div></div>' : '') +
     '</div>' +
 
     '<div style="border-bottom:1px solid #ddd;margin-bottom:2.5mm"></div>' +
