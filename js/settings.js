@@ -204,9 +204,13 @@ function deleteCompany() {
   if (!confirm('Delete this company and all its documents?')) return;
   var id = C.activeId;
   C.companies = C.companies.filter(function (c) { return c.id !== id; });
+  var removedInvs = C.invoices.filter(function (i) { return i.companyId === id; });
+  var removedRecs = C.receipts.filter(function (r) { return r.companyId === id; });
   C.invoices  = C.invoices.filter(function (i) { return i.companyId !== id; });
   C.receipts  = C.receipts.filter(function (r) { return r.companyId !== id; });
   removePersist('companies', id);
+  removedInvs.forEach(function (i) { removePersist('invoices', i.id); });
+  removedRecs.forEach(function (r) { removePersist('receipts', r.id); });
   C.activeId = C.companies[0].id;
   persist('companies', C.companies[0]);
   _refreshCoList();

@@ -15,7 +15,7 @@ function uid() {
 
 /* persist one record to IndexedDB (fire & forget) */
 function persist(store, data) {
-  IDB._put(store, data).catch(function (e) {
+  return IDB._put(store, data).catch(function (e) {
     console.warn('IDB write error:', e);
   });
 }
