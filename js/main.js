@@ -106,6 +106,46 @@ document.getElementById('setupName').addEventListener('keydown', function (e) {
 });
 
 /* ============================================================
+   WELCOME IMPORT
+   ============================================================ */
+function welcomeImportData() {
+  document.getElementById('welcomeImportInput').value = '';
+  document.getElementById('welcomeImportInput').click();
+}
+
+function handleWelcomeImport(ev) {
+  var file = ev.target.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var d = JSON.parse(e.target.result);
+      if (!d.companies || !Array.isArray(d.companies) || !d.companies.length) {
+        var errEl = document.getElementById('setupError');
+        errEl.textContent = 'Invalid or empty company data file.';
+        errEl.style.display = 'block';
+        return;
+      }
+      C.companies = d.companies;
+      C.invoices  = d.invoices  || [];
+      C.receipts  = d.receipts  || [];
+      C.activeId  = d.activeId  || C.companies[0].id;
+      var ops = C.companies.map(function (c) { return persist('companies', c); })
+        .concat(C.invoices.map(function (i) { return persist('invoices', i); }))
+        .concat(C.receipts.map(function (r) { return persist('receipts', r); }));
+      Promise.all(ops).then(function () {
+        sessionStorage.setItem('dg_activeId', C.activeId);
+        enterApp();
+      });
+    } catch (err) {
+      var errEl = document.getElementById('setupError');
+      errEl.textContent = 'Import error: ' + err.message;
+      errEl.style.display = 'block';
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ============================================================
    INIT
    ============================================================ */
 IDB.open().then(function () {

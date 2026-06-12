@@ -50,6 +50,9 @@
 <div class="btn-row" style="margin-top:22px">
 <button class="btn btn-primary" onclick="completeSetup()" style="font-size:15px;padding:14px 32px">&#10003; Save &amp; Get Started</button>
 </div>
+<div class="welcome-divider"><span>or</span></div>
+<button class="btn btn-outline" onclick="welcomeImportData()" style="font-size:14px;padding:12px 24px;width:100%">📂 Import from File</button>
+<input type="file" id="welcomeImportInput" accept=".json" style="display:none" onchange="handleWelcomeImport(event)">
 <p id="setupError" style="color:var(--red);font-size:13px;margin-top:8px;display:none">Please enter at least a company name.</p>
 </div>
 </div>
