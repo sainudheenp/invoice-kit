@@ -3,10 +3,10 @@
    ============================================================ */
 :root {
   --side-w: 232px;
-  --primary: #6366F1;
-  --primary-dark: #4F46E5;
-  --primary-bg: #EEF2FF;
-  --primary-ring: rgba(99,102,241,.18);
+  --primary: #D97706;
+  --primary-dark: #B45309;
+  --primary-bg: #FFFBEB;
+  --primary-ring: rgba(217,119,6,.18);
   --amber: #F59E0B;
   --amber-bg: #FFFBEB;
   --green: #10B981;
@@ -15,18 +15,18 @@
   --red: #EF4444;
   --red-bg: #FEF2F2;
   --blue: #3B82F6;
-  --bg: #F7F8FA;
+  --bg: #FAF8F5;
   --card: #FFFFFF;
-  --border: #E6E7ED;
-  --text: #18181B;
-  --text2: #6B7280;
-  --text3: #9CA3AF;
-  --side-bg: #0F0E17;
-  --side-text: #8B8A9E;
+  --border: #E7E5E4;
+  --text: #1C1917;
+  --text2: #78716C;
+  --text3: #A8A29E;
+  --side-bg: #1C1917;
+  --side-text: #A8A29E;
   --side-hover: rgba(255,255,255,.05);
-  --side-active: #EEF2FF;
-  --input-bg: #FAFBFC;
-  --input-border: #D1D5DB;
+  --side-active: #FFFBEB;
+  --input-bg: #FAFAF9;
+  --input-border: #D6D3D1;
   --radius: 14px;
   --radius-sm: 8px;
   --radius-pill: 999px;
@@ -56,7 +56,7 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .sidebar{
   width:var(--side-w);
   background: var(--side-bg);
-  background-image: linear-gradient(180deg, var(--side-bg) 0%, #13122A 100%);
+  background-image: linear-gradient(180deg, var(--side-bg) 0%, #292524 100%);
   display:flex; flex-direction:column;
   position:fixed; top:0; left:0; bottom:0;
   z-index:100;
@@ -517,7 +517,7 @@ input,select,textarea{font-family:inherit;font-size:14px}
    WELCOME
    ============================================================ */
 .welcome-overlay{
-  background: linear-gradient(145deg, #F2F0FD 0%, #E8E5F5 100%);
+  background: linear-gradient(145deg, #FAF8F5 0%, #F5F0EB 100%);
   display:flex;align-items:center;justify-content:center;
   padding:20px;min-height:100dvh;overflow-y:auto;
 }

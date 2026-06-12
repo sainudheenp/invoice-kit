@@ -18,8 +18,8 @@ function populateSettings() {
   $('s_pobox').value    = c.pobox   || '';
   $('s_loc').value      = c.loc     || '';
   $('s_website').value  = c.website || '';
-  $('s_pcolor').value   = c.pcolor  || '#1b4d3d';
-  $('s_acolor').value   = c.acolor  || '#f5c842';
+  $('s_pcolor').value   = c.pcolor  || '#D97706';
+  $('s_acolor').value   = c.acolor  || '#78716C';
 
   $('s_curCode').value   = c.currency.code   || '';
   $('s_curSym').value    = c.currency.symbol  || '';
@@ -74,8 +74,8 @@ function saveCompany() {
   c.mob      = $('s_mob');     c.email   = $('s_email');
   c.cr       = $('s_cr');      c.pobox   = $('s_pobox');
   c.loc      = $('s_loc');     c.website = $('s_website');
-  c.pcolor   = document.getElementById('s_pcolor').value || '#1b4d3d';
-  c.acolor   = document.getElementById('s_acolor').value || '#f5c842';
+  c.pcolor   = document.getElementById('s_pcolor').value || '#D97706';
+  c.acolor   = document.getElementById('s_acolor').value || '#78716C';
 
   c.currency.code   = $('s_curCode');
   c.currency.symbol = $('s_curSym');

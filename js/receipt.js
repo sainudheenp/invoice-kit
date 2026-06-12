@@ -57,7 +57,7 @@ function _buildRecHTML(savedRec, comp) {
     bg = $('recBeing').value; rv = $('recReceiver').value; sg = $('recSignatory').value;
     dts = dt || new Date().toISOString().slice(0, 10);
   }
-  var pc  = c.pcolor || '#1b4d3d';
+  var pc  = c.pcolor || '#D97706';
   var wi  = Math.floor(am);
   var fr  = Math.round((am - wi) * cur.subPer);
 
@@ -66,7 +66,7 @@ function _buildRecHTML(savedRec, comp) {
   if (bk) pl += ' / ' + bk;
   if (td && (pm === 'Cheque' || pm === 'Bank Transfer')) pl += ' / ' + td;
 
-  return '<div style="width:210mm;min-height:297mm;padding:14mm 16mm;font-family:Arial,sans-serif;font-size:11px;color:#222;position:relative;background:#d6ecd2">' +
+  return '<div style="width:210mm;min-height:297mm;padding:14mm 16mm;font-family:Arial,sans-serif;font-size:11px;color:#222;position:relative;background:#F5F0EB">' +
     /* header */
     '<div style="display:flex;align-items:flex-start;border-bottom:2px solid #333;padding-bottom:8px;margin-bottom:6px">' +
     '<div style="flex:1">' +

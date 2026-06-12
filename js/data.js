@@ -126,7 +126,7 @@ function defCo(name) {
     cr:'', pobox:'', loc:'',
     email:'', website:'',
     logo:'', seal:'', signature:'',
-    pcolor:'#6366F1', acolor:'#F59E0B',
+    pcolor:'#D97706', acolor:'#78716C',
     currency: JSON.parse(JSON.stringify(CUR_PRESETS.OMR)),
     vatReg:'', vatPct:0,
     bankName:'', bankAccName:'', bankAcc:'', bankIban:'', bankSwift:'', bankBranch:'',

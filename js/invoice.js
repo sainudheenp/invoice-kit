@@ -142,8 +142,8 @@ function _buildInvHTML(savedInv, comp) {
   if (pm === 'Cheque' && ch) pd += ' No.' + ch;
   if (bk) pd += ' - ' + bk;
 
-  var pc = c.pcolor || '#1b4d3d';
-  var ac = c.acolor || '#f5c842';
+  var pc = c.pcolor || '#D97706';
+  var ac = c.acolor || '#78716C';
 
   return '<div style="width:210mm;min-height:297mm;padding:12mm 14mm;font-family:Arial,sans-serif;font-size:11px;color:#222;position:relative;background:#fff">' +
     /* header */
@@ -168,7 +168,7 @@ function _buildInvHTML(savedInv, comp) {
     '</div>' +
 
     /* bill-to */
-    '<div style="margin:10px 0;padding:8px 10px;background:#f5faf5;border-left:4px solid ' + pc + ';border-radius:3px">' +
+    '<div style="margin:10px 0;padding:8px 10px;background:#FFFBEB;border-left:4px solid ' + pc + ';border-radius:3px">' +
     '<div style="font-size:11px;font-weight:700;color:' + pc + ';margin-bottom:3px">Bill To / إلى السيد</div>' +
     '<div style="font-weight:700;font-size:13px">' + (cust||'---') + '</div>' +
     '<div style="font-size:10px;color:#555">' + (addr||'') + (addr&&ph?' | ':'') + (ph?'Tel: '+ph:'') + (cr_?((addr||ph)?' | ':'')+'C.R.: '+cr_:'') + (em?((addr||ph||cr_)?' | ':'')+em:'') + '</div></div>' +
@@ -183,7 +183,7 @@ function _buildInvHTML(savedInv, comp) {
     '</tr></thead><tbody>' + ih + '</tbody></table>' +
 
     /* totals */
-    '<div style="text-align:right;margin:10px 0;padding:8px 12px;background:#f5faf5;border-radius:4px">' +
+    '<div style="text-align:right;margin:10px 0;padding:8px 12px;background:#FFFBEB;border-radius:4px">' +
     '<div style="font-size:12px;margin:3px 0">Subtotal: <strong>' + sub.toFixed(3) + '</strong> ' + cur.symbol + '</div>' +
     (disc>0 ? '<div style="font-size:12px;margin:3px 0">Discount: <strong>-' + disc.toFixed(3) + '</strong> ' + cur.symbol + '</div>' : '') +
     '<div style="font-size:12px;margin:3px 0">VAT (' + vp + '%): <strong>' + va.toFixed(3) + '</strong> ' + cur.symbol + '</div>' +
