@@ -8,13 +8,13 @@ function toggleSidebar() {
   s.classList.toggle('open');
   b.classList.toggle('show');
   h.classList.toggle('open');
-  h.textContent = s.classList.contains('open') ? '✕' : '☰';
+  h.innerHTML = s.classList.contains('open') ? icon('close') : icon('menu');
 }
 function closeSidebar() {
   document.querySelector('.sidebar').classList.remove('open');
   document.getElementById('sidebarBackdrop').classList.remove('show');
   document.getElementById('hamburgerBtn').classList.remove('open');
-  document.getElementById('hamburgerBtn').textContent = '☰';
+  document.getElementById('hamburgerBtn').innerHTML = icon('menu');
 }
 
 /* ============================================================
@@ -84,9 +84,9 @@ function refreshDashboard() {
   var c = getCo();
 
   var statsHtml =
-    '<div class="stat-card"><div class="stat-icon indigo">🏢</div><div><div class="stat-num">' + C.companies.length + '</div><div class="stat-lbl">Companies</div></div></div>' +
-    '<div class="stat-card"><div class="stat-icon green">📄</div><div><div class="stat-num">' + C.invoices.filter(function (i) { return i.companyId === C.activeId; }).length + '</div><div class="stat-lbl">Invoices</div></div></div>' +
-    '<div class="stat-card"><div class="stat-icon amber">🧾</div><div><div class="stat-num">' + C.receipts.filter(function (r) { return r.companyId === C.activeId; }).length + '</div><div class="stat-lbl">Receipts</div></div></div>';
+    '<div class="stat-card"><div class="stat-icon indigo">' + icon('building') + '</div><div><div class="stat-num">' + C.companies.length + '</div><div class="stat-lbl">Companies</div></div></div>' +
+    '<div class="stat-card"><div class="stat-icon green">' + icon('file') + '</div><div><div class="stat-num">' + C.invoices.filter(function (i) { return i.companyId === C.activeId; }).length + '</div><div class="stat-lbl">Invoices</div></div></div>' +
+    '<div class="stat-card"><div class="stat-icon amber">' + icon('receipt') + '</div><div><div class="stat-num">' + C.receipts.filter(function (r) { return r.companyId === C.activeId; }).length + '</div><div class="stat-lbl">Receipts</div></div></div>';
   document.getElementById('dashStats').innerHTML = statsHtml;
 
   var badge = document.getElementById('dashCurrencyBadge');

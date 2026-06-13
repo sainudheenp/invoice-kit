@@ -149,7 +149,7 @@ function _buildInvHTML(savedInv, comp) {
   });
   if (!ir) ir = '<tr><td colspan="5" style="text-align:center;color:#ccc;padding:30px;font-size:15px;font-style:italic">No items</td></tr>';
 
-  return '<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#333;position:relative;background:#fff;line-height:1.5;min-height:100vh;padding:14mm 14mm 0">' +
+  return '<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#333;position:relative;background:#fff;line-height:1.8;min-height:100vh;padding:14mm 14mm 0;-webkit-font-smoothing:antialiased;font-kerning:normal;word-spacing:normal">' +
 
     /* ——— TOP ACCENT BAR ——— */
     '<div style="position:absolute;top:0;left:0;right:0;height:4px;background:' + pc + '"></div>' +
@@ -163,8 +163,8 @@ function _buildInvHTML(savedInv, comp) {
     '<div style="font-size:26px;font-weight:800;letter-spacing:-.3px;color:#222;margin-bottom:1px">' + esc(c.name) + '</div>' +
     (c.sub ? '<div style="font-size:15px;font-style:italic;color:#888;margin-bottom:2px">' + esc(c.sub) + '</div>' : '') +
     '</div>' +
-    (c.nameAr ? '<div style="text-align:right"><div style="font-size:26px;font-weight:800;letter-spacing:-.3px;color:#222;margin-bottom:1px">' + esc(c.nameAr) + '</div>' +
-    (c.subAr ? '<div style="font-size:13px;color:#888;margin-bottom:2px;direction:rtl">' + esc(c.subAr) + '</div>' : '') +
+    (c.nameAr ? '<div style="text-align:right"><div dir="rtl" unicode-bidi="embed" style="font-size:26px;font-weight:800;color:#222;margin-bottom:1px">' + esc(c.nameAr) + '</div>' +
+    (c.subAr ? '<div dir="rtl" unicode-bidi="embed" style="font-size:13px;color:#888;margin-bottom:2px">' + esc(c.subAr) + '</div>' : '') +
     '</div>' : '') +
     '</div>' +
     '<div style="font-size:11px;color:' + ac + ';line-height:1.6">' +
@@ -176,7 +176,7 @@ function _buildInvHTML(savedInv, comp) {
 
     /* ——— INVOICE TITLE + METADATA ——— */
     '<div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:4mm">' +
-    '<div><div style="font-size:24px;font-weight:800;color:' + pc + ';letter-spacing:.3px">TAX INVOICE</div><div style="font-size:12px;color:#999;margin-top:1px">فاتورة ضريبية</div></div>' +
+    '<div><div style="font-size:24px;font-weight:800;color:' + pc + ';letter-spacing:.3px">TAX INVOICE</div><div dir="rtl" unicode-bidi="embed" style="font-size:12px;color:#999;margin-top:1px">فاتورة ضريبية</div></div>' +
     '<div style="text-align:right;font-size:12px;color:' + ac + ';line-height:1.8">' +
     '<span style="color:#999">Invoice No.</span> <strong style="color:#333">' + no + '</strong><br>' +
     '<span style="color:#999">Date</span> <strong style="color:#333">' + dts + '</strong>' +
@@ -187,7 +187,7 @@ function _buildInvHTML(savedInv, comp) {
 
     /* ——— BILL TO ——— */
     '<div style="margin-bottom:5mm">' +
-    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:' + ac + ';margin-bottom:2px">Bill To / إلى السيد</div>' +
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1px;color:' + ac + ';margin-bottom:2px">Bill To / إلى السيد</div>' +
     '<div style="font-weight:700;font-size:15px;color:#222;margin-bottom:2px">' + esc(cust||'---') + '</div>' +
     '<div style="font-size:13px;color:#777;line-height:1.6">' +
     [addr, ph && 'Tel: ' + ph, cr_ && 'C.R.: ' + cr_, em].filter(Boolean).join('<br>') +
@@ -197,10 +197,10 @@ function _buildInvHTML(savedInv, comp) {
     '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:5mm">' +
     '<thead><tr style="background:#f7f7f7;border-bottom:2px solid #333">' +
     '<th style="padding:7px 8px;text-align:center;font-weight:600;font-size:12px;color:#555;width:30px">#</th>' +
-    '<th style="padding:7px 8px;text-align:left;font-weight:600;font-size:12px;color:#555">Description / البيان</th>' +
-    '<th style="padding:7px 8px;text-align:center;font-weight:600;font-size:12px;color:#555;width:45px">Qty / الكمية</th>' +
-    '<th style="padding:7px 8px;text-align:right;font-weight:600;font-size:12px;color:#555;width:75px">Price / السعر</th>' +
-    '<th style="padding:7px 8px;text-align:right;font-weight:600;font-size:12px;color:#555;width:80px">Amount / المبلغ</th>' +
+    '<th style="padding:7px 8px;text-align:left;font-weight:600;font-size:12px;color:#555">Description / <span dir="rtl" unicode-bidi="embed">البيان</span></th>' +
+    '<th style="padding:7px 8px;text-align:center;font-weight:600;font-size:12px;color:#555;width:45px">Qty / <span dir="rtl" unicode-bidi="embed">الكمية</span></th>' +
+    '<th style="padding:7px 8px;text-align:right;font-weight:600;font-size:12px;color:#555;width:75px">Price / <span dir="rtl" unicode-bidi="embed">السعر</span></th>' +
+    '<th style="padding:7px 8px;text-align:right;font-weight:600;font-size:12px;color:#555;width:80px">Amount / <span dir="rtl" unicode-bidi="embed">المبلغ</span></th>' +
     '</tr></thead><tbody>' + ir +
     '</tbody></table>' +
 
@@ -225,7 +225,7 @@ function _buildInvHTML(savedInv, comp) {
     /* ——— SEAL & SIGNATURE ——— */
     (c.seal || c.signature ? '<div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:6mm">' +
     (c.seal ? '<div><img src="' + c.seal.replace(/"/g,'&quot;') + '" style="max-width:130px;max-height:130px;object-fit:contain"></div>' : '<div></div>') +
-    (c.signature ? '<div style="text-align:center"><img src="' + c.signature.replace(/"/g,'&quot;') + '" style="max-width:100px;max-height:36px;object-fit:contain"><div style="font-size:11px;color:#999;margin-top:1px">Authorized Signature / التوقيع</div></div>' : '<div></div>') +
+    (c.signature ? '<div style="text-align:center"><img src="' + c.signature.replace(/"/g,'&quot;') + '" style="max-width:100px;max-height:36px;object-fit:contain"><div style="font-size:11px;color:#999;margin-top:1px">Authorized Signature / <span dir="rtl" unicode-bidi="embed">التوقيع</span></div></div>' : '<div></div>') +
     '</div>' : '') +
 
     /* ——— FOOTER ——— */
@@ -238,16 +238,7 @@ function _buildInvHTML(savedInv, comp) {
 }
 
 function printInvoice() {
-  var d = document.getElementById('invoicePrintArea');
-  d.innerHTML = _buildInvHTML();
-  d.style.display = 'block';
-  document.body.classList.add('print-invoice');
-  document.body.classList.remove('print-receipt');
-  setTimeout(function () {
-    window.print();
-    document.body.classList.remove('print-invoice');
-    d.style.display = 'none'; d.innerHTML = '';
-  }, 300);
+  window.printInvoiceHTML('inv');
 }
 
 function saveInvoice() {

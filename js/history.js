@@ -51,6 +51,7 @@ function renderHistory() {
       '<td style="text-align:right;white-space:nowrap">' +
       '<button class="btn btn-sm btn-primary" onclick="printSavedDoc(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')" style="margin-right:4px">Print</button>' +
       '<button class="btn btn-sm btn-info" onclick="downloadSavedDocPDF(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')" style="margin-right:4px">PDF</button>' +
+'<button class="btn btn-sm btn-info" onclick="downloadSavedDocText(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')" style="margin-right:4px">Text</button>' +
       '<button class="btn btn-sm btn-info" onclick="editSavedDoc(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')" style="margin-right:4px">Edit</button>' +
       '<button class="btn btn-sm btn-ghost" onclick="deleteSavedDoc(\'' + (_docTab === 'inv' ? 'inv' : 'rec') + '\',\'' + d.id + '\')">Delete</button>' +
       '</td></tr>';
@@ -61,27 +62,7 @@ function renderHistory() {
 }
 
 function printSavedDoc(type, id) {
-  var c = getCo(); if (!c) return;
-  var doc, html;
-  if (type === 'inv') {
-    doc = C.invoices.find(function (d) { return d.id === id; });
-    if (!doc) return;
-    html = _buildInvHTML(doc, c);
-  } else {
-    doc = C.receipts.find(function (d) { return d.id === id; });
-    if (!doc) return;
-    html = _buildRecHTML(doc, c);
-  }
-  var area = document.getElementById(type === 'inv' ? 'invoicePrintArea' : 'receiptPrintArea');
-  area.innerHTML = html;
-  area.style.display = 'block';
-  document.body.classList.add(type === 'inv' ? 'print-invoice' : 'print-receipt');
-  document.body.classList.remove(type === 'inv' ? 'print-receipt' : 'print-invoice');
-  setTimeout(function () {
-    window.print();
-    document.body.classList.remove('print-invoice', 'print-receipt');
-    area.style.display = 'none'; area.innerHTML = '';
-  }, 300);
+  window.printSavedHTML(type, id);
 }
 
 function deleteSavedDoc(type, id) {
@@ -158,5 +139,5 @@ function editSavedDoc(type, id) {
 function backupData() {
   fullBackup();
   var btn = document.getElementById('backupBtn');
-  if (btn) { btn.textContent = '✅ Saved!'; setTimeout(function () { btn.textContent = '💾 Backup'; }, 2000); }
+  if (btn) { btn.innerHTML = icon('check') + ' Saved!'; setTimeout(function () { btn.innerHTML = icon('save') + ' Backup'; }, 2000); }
 }
