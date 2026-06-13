@@ -16,7 +16,9 @@ var URLS = [
   'js/pdf.js',
   'lib/jspdf.umd.min.js',
   'lib/html2canvas.min.js',
-  'icons/icon.svg'
+  'icons/icon.svg',
+  'icons/icon-192.png',
+  'icons/icon-512.png'
 ];
 
 self.addEventListener('install', function (e) {
@@ -25,6 +27,8 @@ self.addEventListener('install', function (e) {
       return c.addAll(URLS);
     }).then(function () {
       return self.skipWaiting();
+    }).catch(function (e) {
+      console.warn('SW install cache error:', e);
     })
   );
 });
@@ -44,11 +48,15 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   e.respondWith(
     caches.match(e.request).then(function (r) {
-      return r || fetch(e.request).then(function (res) {
-        return caches.open(CACHE).then(function (c) {
-          c.put(e.request, res.clone());
-          return res;
-        });
+      if (r) return r;
+      return fetch(e.request).then(function (res) {
+        if (res && res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+        }
+        return res;
+      }).catch(function () {
+        return caches.match('app.html');
       });
     })
   );
