@@ -164,13 +164,13 @@ function _buildInvHTML(savedInv, comp) {
 
   var ir = '';
   items.forEach(function (it, i) {
-    var bg = i % 2 === 0 ? '#fff' : '#f8f8f8';
-    ir += '<tr style="background:' + bg + '">' +
-      '<td style="padding:9px 10px;text-align:center;color:#999;font-size:13px;border-bottom:1px solid #e8e8e8;width:32px">' + (i+1) + '</td>' +
-      '<td style="padding:9px 10px;font-size:13px;color:#222;border-bottom:1px solid #e8e8e8">' + esc(it.desc) + '</td>' +
-      '<td style="padding:9px 10px;text-align:center;font-size:13px;color:#444;border-bottom:1px solid #e8e8e8;width:50px">' + it.qty + '</td>' +
-      '<td style="padding:9px 10px;text-align:right;font-size:13px;color:#444;border-bottom:1px solid #e8e8e8;width:85px">' + (parseFloat(it.price) || 0).toFixed(3) + '</td>' +
-      '<td style="padding:9px 10px;text-align:right;font-size:14px;font-weight:700;color:#111;border-bottom:1px solid #e8e8e8;width:90px">' + it.amount + '</td></tr>';
+    var b = i % 2 === 0 ? '#fff' : '#FAFAFA';
+    ir += '<tr style="background:' + b + '">' +
+      '<td style="padding:10px 10px;text-align:center;color:#555;font-size:13px;border-bottom:1px solid #eee;width:32px">' + (i+1) + '</td>' +
+      '<td style="padding:10px 10px;font-size:13px;color:#333;border-bottom:1px solid #eee">' + esc(it.desc) + '</td>' +
+      '<td style="padding:10px 10px;text-align:center;font-size:13px;color:#555;border-bottom:1px solid #eee;width:50px">' + it.qty + '</td>' +
+      '<td style="padding:10px 10px;text-align:right;font-size:13px;color:#555;border-bottom:1px solid #eee;width:85px">' + (parseFloat(it.price) || 0).toFixed(3) + '</td>' +
+      '<td style="padding:10px 10px;text-align:right;font-size:14px;font-weight:700;color:#111;border-bottom:1px solid #eee;width:90px">' + it.amount + '</td></tr>';
   });
   if (!ir) ir = '<tr style="background:#fafafa"><td colspan="5" style="text-align:center;color:#bbb;padding:32px;font-size:14px;font-style:italic">No items</td></tr>';
 
@@ -221,12 +221,12 @@ function _buildInvHTML(savedInv, comp) {
 
     /* ——— ITEMS TABLE ——— */
     '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:5mm">' +
-    '<thead><tr style="background:#eaeaea;border-bottom:3px solid #333">' +
-    '<th style="padding:10px 10px;text-align:center;font-weight:700;font-size:12.5px;color:#333;width:32px">#</th>' +
-    '<th style="padding:10px 10px;text-align:left;font-weight:700;font-size:12.5px;color:#333">Description / <span dir="rtl" unicode-bidi="embed">البيان</span></th>' +
-    '<th style="padding:10px 10px;text-align:center;font-weight:700;font-size:12.5px;color:#333;width:50px">Qty / <span dir="rtl" unicode-bidi="embed">الكمية</span></th>' +
-    '<th style="padding:10px 10px;text-align:right;font-weight:700;font-size:12.5px;color:#333;width:85px">Price / <span dir="rtl" unicode-bidi="embed">السعر</span></th>' +
-    '<th style="padding:10px 10px;text-align:right;font-weight:700;font-size:12.5px;color:#333;width:90px">Amount / <span dir="rtl" unicode-bidi="embed">المبلغ</span></th>' +
+    '<thead><tr style="background:' + pc + '">' +
+    '<th style="padding:10px 10px;text-align:center;font-weight:700;font-size:12px;color:#fff;width:32px">#</th>' +
+    '<th style="padding:10px 10px;text-align:left;font-weight:700;font-size:12px;color:#fff">Description / <span dir="rtl" unicode-bidi="embed">البيان</span></th>' +
+    '<th style="padding:10px 10px;text-align:center;font-weight:700;font-size:12px;color:#fff;width:50px">Qty / <span dir="rtl" unicode-bidi="embed">الكمية</span></th>' +
+    '<th style="padding:10px 10px;text-align:right;font-weight:700;font-size:12px;color:#fff;width:85px">Price / <span dir="rtl" unicode-bidi="embed">السعر</span></th>' +
+    '<th style="padding:10px 10px;text-align:right;font-weight:700;font-size:12px;color:#fff;width:90px">Amount / <span dir="rtl" unicode-bidi="embed">المبلغ</span></th>' +
     '</tr></thead><tbody>' + ir +
     '</tbody></table>' +
 

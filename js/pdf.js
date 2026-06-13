@@ -123,15 +123,6 @@
     return { html: html, name: name };
   }
 
-  var _printTimer = null;
-
-  function _cleanPrint(area) {
-    if (_printTimer) { clearTimeout(_printTimer); _printTimer = null; }
-    window.removeEventListener('afterprint', _cleanPrint);
-    document.body.classList.remove('print-invoice', 'print-receipt');
-    if (area) { area.style.display = 'none'; area.innerHTML = ''; }
-  }
-
   function _printHTML(html, type) {
     var area = document.getElementById(type === 'inv' ? 'invoicePrintArea' : 'receiptPrintArea');
     if (!area) return;
@@ -139,12 +130,25 @@
     area.style.display = 'block';
     document.body.classList.add('print-' + (type === 'inv' ? 'invoice' : 'receipt'));
 
-    window.addEventListener('afterprint', function () { _cleanPrint(area); });
-    _printTimer = setTimeout(function () { _cleanPrint(area); }, 30000);
+    void area.offsetHeight;
 
-    requestAnimationFrame(function () {
+    var cleaned = false;
+    function clean() {
+      if (cleaned) return;
+      cleaned = true;
+      window.removeEventListener('afterprint', clean);
+      document.body.classList.remove('print-invoice', 'print-receipt');
+      area.style.display = 'none';
+      area.innerHTML = '';
+    }
+
+    window.addEventListener('afterprint', clean);
+    var fallbackTimer = setTimeout(clean, 10000);
+
+    setTimeout(function () {
       window.print();
-    });
+      if (!cleaned) setTimeout(clean, 5000);
+    }, 0);
   }
 
   window.printInvoiceHTML = function (type) {
