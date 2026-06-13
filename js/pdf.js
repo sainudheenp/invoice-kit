@@ -51,9 +51,13 @@
         var pages = Math.ceil(imgH / pagePx);
 
         for (var i = 0; i < pages; i++) {
-          if (i > 0) pdf.addPage();
           var sy = Math.floor(i * pagePx);
           var sh = Math.ceil(Math.min(pagePx, imgH - sy));
+
+          /* skip near-empty pages (rounding artifact that causes blank page) */
+          if (sh < 20) break;
+
+          if (i > 0) pdf.addPage();
 
           var pc = document.createElement('canvas');
           pc.width = imgW;
