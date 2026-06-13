@@ -426,6 +426,8 @@ input,select,textarea{font-family:inherit;font-size:14px}
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:var(--card);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.02),0 1px 3px rgba(0,0,0,.03);
+  border-top:2px solid var(--primary);
 }
 .table-wrap table{width:100%;border-collapse:collapse;font-size:13px;min-width:440px}
 .table-wrap th{
