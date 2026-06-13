@@ -84,9 +84,9 @@ function refreshDashboard() {
   var c = getCo();
 
   var statsHtml =
-    '<div class="stat-card"><div class="stat-icon indigo">' + icon('building') + '</div><div><div class="stat-num">' + C.companies.length + '</div><div class="stat-lbl">Companies</div></div></div>' +
-    '<div class="stat-card"><div class="stat-icon green">' + icon('file') + '</div><div><div class="stat-num">' + C.invoices.filter(function (i) { return i.companyId === C.activeId; }).length + '</div><div class="stat-lbl">Invoices</div></div></div>' +
-    '<div class="stat-card"><div class="stat-icon amber">' + icon('receipt') + '</div><div><div class="stat-num">' + C.receipts.filter(function (r) { return r.companyId === C.activeId; }).length + '</div><div class="stat-lbl">Receipts</div></div></div>';
+    '<div class="stat-card"><div class="stat-inner"><div class="stat-icon indigo">' + icon('building') + '</div><div class="stat-info"><div class="stat-num">' + C.companies.length + '</div><div class="stat-lbl">Companies</div></div></div><span class="stat-bar indigo"></span></div>' +
+    '<div class="stat-card"><div class="stat-inner"><div class="stat-icon green">' + icon('file') + '</div><div class="stat-info"><div class="stat-num">' + C.invoices.filter(function (i) { return i.companyId === C.activeId; }).length + '</div><div class="stat-lbl">Invoices</div></div></div><span class="stat-bar green"></span></div>' +
+    '<div class="stat-card"><div class="stat-inner"><div class="stat-icon amber">' + icon('receipt') + '</div><div class="stat-info"><div class="stat-num">' + C.receipts.filter(function (r) { return r.companyId === C.activeId; }).length + '</div><div class="stat-lbl">Receipts</div></div></div><span class="stat-bar amber"></span></div>';
   document.getElementById('dashStats').innerHTML = statsHtml;
 
   var badge = document.getElementById('dashCurrencyBadge');
@@ -95,19 +95,21 @@ function refreshDashboard() {
   var el = document.getElementById('dashCompany');
   if (c) {
     el.innerHTML =
-      '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">' +
-      (c.logo ? '<img src="' + c.logo.replace(/"/g,'&quot;') + '" style="max-width:56px;max-height:56px;object-fit:contain;border-radius:8px">' : '') +
-      '<div><div style="font-weight:700;font-size:16px;color:var(--text)">' + esc(c.name) + '</div>' +
-      '<div style="font-size:13px;color:var(--text2)">' + esc(c.sub) + '</div>' +
-      '<div style="font-size:12px;color:var(--text2);margin-top:4px">' +
-      (c.tel ? 'Tel: ' + c.tel : '') + (c.email ? ' | Email: ' + c.email : '') +
+      '<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">' +
+      (c.logo ? '<div style="flex-shrink:0"><img src="' + c.logo.replace(/"/g,'&quot;') + '" style="width:60px;height:60px;object-fit:contain;border-radius:12px;border:1px solid var(--border);padding:4px;background:var(--bg)"></div>' : '<div style="width:60px;height:60px;border-radius:12px;border:1px solid var(--border);background:var(--primary-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:24px;font-weight:800;color:var(--primary)">' + (c.name ? c.name.charAt(0).toUpperCase() : '?') + '</span></div>') +
+      '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:17px;color:var(--text)">' + esc(c.name) + '</div>' +
+      (c.sub ? '<div style="font-size:13px;color:var(--text2);margin-top:1px">' + esc(c.sub) + '</div>' : '') +
+      '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:var(--text3)">' +
+      (c.tel ? '<span style="display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' + esc(c.tel) + '</span>' : '') +
+      (c.email ? '<span style="display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' + esc(c.email) + '</span>' : '') +
+      (c.loc ? '<span style="display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(c.loc) + '</span>' : '') +
       '</div></div></div>';
     if (c.currency) {
       document.getElementById('invCurrencyLabel').textContent = c.currency.code + ' ' + c.currency.symbol;
       document.getElementById('recCurrencyLabel').textContent = c.currency.code + ' ' + c.currency.symbol;
     }
   } else {
-    el.innerHTML = '<p style="color:var(--text2)">No company selected. Go to Settings to create one.</p>';
+    el.innerHTML = '<div style="text-align:center;padding:16px 0"><div style="font-size:40px;margin-bottom:10px;opacity:.3">' + icon('building') + '</div><p style="color:var(--text2);font-size:14px">No company selected.</p><p style="color:var(--text3);font-size:12px;margin-top:4px">Go to Settings to create one.</p></div>';
   }
 
   document.getElementById('sidebarCompany').textContent = c ? c.name : 'No company';
@@ -189,6 +191,7 @@ IDB.open().then(function () {
   return loadAllFromDB();
 }).then(function () {
   document.getElementById('loader').style.display = 'none';
+  try { localStorage.setItem('_visited', '1'); } catch(e) {} /* mark visited for SEO landing redirect */
   if (C.companies.length > 0) {
     if (!C.activeId || !C.companies.some(function (c) { return c.id === C.activeId; })) {
       C.activeId = C.companies[0].id;

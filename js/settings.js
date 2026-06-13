@@ -272,6 +272,20 @@ function setStatus(msg, type) {
 }
 
 /* ===========================================================
+   DARK MODE
+   =========================================================== */
+function toggleDarkMode() {
+  var on = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('_darkMode', on ? '1' : '');
+  document.getElementById('darkModeToggle').textContent = on ? 'On' : 'Off';
+}
+(function () {
+  var btn = document.getElementById('darkModeToggle');
+  if (localStorage.getItem('_darkMode') === '1') { document.documentElement.classList.add('dark'); if (btn) btn.textContent = 'On'; }
+  else { if (btn) btn.textContent = 'Off'; }
+})();
+
+/* ===========================================================
    RESET / DANGER ZONE
    =========================================================== */
 function showResetConfirm() {

@@ -3,6 +3,20 @@
    ========================================================== */
 var _invRC = 0;
 
+/* saved customers autocomplete */
+function loadSavedCustomers() {
+  var list = document.getElementById('custNameList');
+  if (!list) return;
+  try { var names = JSON.parse(localStorage.getItem('_savedCust') || '[]'); } catch(e){ var names = []; }
+  list.innerHTML = names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join('');
+}
+function _saveCustomer(name) {
+  if (!name) return;
+  try { var names = JSON.parse(localStorage.getItem('_savedCust') || '[]'); } catch(e){ var names = []; }
+  if (names.indexOf(name) === -1) { names.push(name); localStorage.setItem('_savedCust', JSON.stringify(names)); }
+  loadSavedCustomers();
+}
+
 function addInvRow() {
   var tb = document.getElementById('invItems');
   var tr = document.createElement('tr');
@@ -54,6 +68,7 @@ function calcInv() {
 
 function refreshInv() {
   var c = getCo(); if (!c) return;
+  loadSavedCustomers();
   var d = document.getElementById('invDate');
   if (!d.value) {
     var t = new Date();
@@ -293,6 +308,7 @@ function saveInvoice() {
   c.invNext = (parseInt(c.invNext) || 1) + 1;
   persist('invoices', inv);
   persist('companies', c);
+  _saveCustomer(document.getElementById('custName').value);
   refreshInv();
   alert('Invoice #' + no + ' saved. Next: ' + c.invPref + c.invNext);
 }
