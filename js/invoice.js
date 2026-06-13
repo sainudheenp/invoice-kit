@@ -278,9 +278,13 @@ function printInvoice() {
 function saveInvoice() {
   var c = getCo(); if (!c) { showToast('No active company', 'err'); return; }
   var no = document.getElementById('invNo').value;
-  if (C.invoices.some(function (i) { return i.invNo === no && i.companyId === c.id; })) {
-    showToast('Invoice #' + no + ' already exists', 'err'); return;
-  }
+
+  /* duplicate check — exclude the doc being edited */
+  var editing = _editingDoc && _editingDoc.type === 'inv';
+  var dup = C.invoices.some(function (i) { return i.invNo === no && i.companyId === c.id && (!editing || i.id !== _editingDoc.id); });
+  if (dup) { showToast('Invoice #' + no + ' already exists', 'err'); return; }
+
+  var oldDoc = editing ? C.invoices.find(function (i) { return i.id === _editingDoc.id; }) : null;
   var rows = document.querySelectorAll('#invItems tr');
   var items = [];
   rows.forEach(function (r) {
@@ -292,10 +296,11 @@ function saveInvoice() {
     });
   });
   var inv = {
-    id: uid(), companyId: c.id, invNo: no,
+    id: oldDoc ? oldDoc.id : uid(),
+    companyId: c.id, invNo: no,
     date: document.getElementById('invDate').value,
     dueDate: document.getElementById('invDueDate').value,
-    paid: false,
+    paid: oldDoc ? oldDoc.paid : false,
     customer: {
       name:    document.getElementById('custName').value,
       address: document.getElementById('custAddr').value,
@@ -313,14 +318,27 @@ function saveInvoice() {
     payMethod: document.getElementById('invPayMethod').value,
     payDetails:(document.getElementById('invChequeNo') || {}).value || '',
     bankName:  (document.getElementById('invBankName') || {}).value || '',
-    createdAt: Date.now()
+    createdAt: oldDoc ? oldDoc.createdAt : Date.now()
   };
-  C.invoices.push(inv);
-  c.invNext = (parseInt(c.invNext) || 1) + 1;
-  persist('invoices', inv);
-  persist('companies', c);
-  _saveCustomer(document.getElementById('custName').value);
-  refreshInv();
-  markFormClean();
-  showToast('Invoice #' + no + ' saved. Next: ' + c.invPref + c.invNext);
+
+  if (editing) {
+    /* remove old doc, insert updated in its place */
+    C.invoices = C.invoices.filter(function (i) { return i.id !== oldDoc.id; });
+    C.invoices.push(inv);
+    removePersist('invoices', oldDoc.id);
+    persist('invoices', inv);
+    clearEditing();
+    refreshInv();
+    markFormClean();
+    showToast('Invoice #' + no + ' updated');
+  } else {
+    C.invoices.push(inv);
+    c.invNext = (parseInt(c.invNext) || 1) + 1;
+    persist('invoices', inv);
+    persist('companies', c);
+    _saveCustomer(document.getElementById('custName').value);
+    refreshInv();
+    markFormClean();
+    showToast('Invoice #' + no + ' saved. Next: ' + c.invPref + c.invNext);
+  }
 }

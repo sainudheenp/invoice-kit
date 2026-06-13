@@ -153,11 +153,15 @@ function printReceipt() {
 function saveReceipt() {
   var c = getCo(); if (!c) { showToast('No active company', 'err'); return; }
   var recNo = document.getElementById('recNo').value;
-  if (C.receipts.some(function (r) { return r.recNo === recNo && r.companyId === c.id; })) {
-    showToast('Receipt #' + recNo + ' already exists', 'err'); return;
-  }
+
+  var editing = _editingDoc && _editingDoc.type === 'rec';
+  var dup = C.receipts.some(function (r) { return r.recNo === recNo && r.companyId === c.id && (!editing || r.id !== _editingDoc.id); });
+  if (dup) { showToast('Receipt #' + recNo + ' already exists', 'err'); return; }
+
+  var oldDoc = editing ? C.receipts.find(function (r) { return r.id === _editingDoc.id; }) : null;
   var rec = {
-    id: uid(), companyId: c.id,
+    id: oldDoc ? oldDoc.id : uid(),
+    companyId: c.id,
     recNo:        recNo,
     date:         document.getElementById('recDate').value,
     receivedFrom: document.getElementById('recFrom').value,
@@ -170,13 +174,25 @@ function saveReceipt() {
     being:        document.getElementById('recBeing').value,
     receiver:     document.getElementById('recReceiver').value,
     signatory:    document.getElementById('recSignatory').value,
-    createdAt:    Date.now()
+    createdAt:    oldDoc ? oldDoc.createdAt : Date.now()
   };
-  C.receipts.push(rec);
-  c.recNext = (parseInt(c.recNext) || 1) + 1;
-  persist('receipts', rec);
-  persist('companies', c);
-  refreshRec();
-  markFormClean();
-  showToast('Receipt #' + rec.recNo + ' saved. Next: ' + c.recPref + c.recNext);
+
+  if (editing) {
+    C.receipts = C.receipts.filter(function (r) { return r.id !== oldDoc.id; });
+    C.receipts.push(rec);
+    removePersist('receipts', oldDoc.id);
+    persist('receipts', rec);
+    clearEditing();
+    refreshRec();
+    markFormClean();
+    showToast('Receipt #' + recNo + ' updated');
+  } else {
+    C.receipts.push(rec);
+    c.recNext = (parseInt(c.recNext) || 1) + 1;
+    persist('receipts', rec);
+    persist('companies', c);
+    refreshRec();
+    markFormClean();
+    showToast('Receipt #' + rec.recNo + ' saved. Next: ' + c.recPref + c.recNext);
+  }
 }

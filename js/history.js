@@ -114,6 +114,7 @@ function deleteSavedDoc(type, id) {
 
 function editSavedDoc(type, id) {
   var c = getCo(); if (!c) return;
+  _editingDoc = { type: type, id: id };
   if (type === 'inv') {
     var doc = C.invoices.find(function (d) { return d.id === id; });
     if (!doc) return;

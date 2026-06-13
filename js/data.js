@@ -188,6 +188,12 @@ function markFormDirty() { _formDirty = true; }
 function markFormClean() { _formDirty = false; }
 
 /* ==========================================================
+   EDIT TRACKING — set by editSavedDoc, used by saveInvoice/saveReceipt
+   ========================================================== */
+var _editingDoc = null; /* { type: 'inv'|'rec', id: '...' } or null */
+function clearEditing() { _editingDoc = null; }
+
+/* ==========================================================
    BACKUP / RESTORE
    ========================================================== */
 function fullBackup() {
