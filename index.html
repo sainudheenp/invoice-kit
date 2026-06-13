@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>if(localStorage.getItem('_visited')==='1'){location.href='app.html'}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>invoicekit — Free Offline Invoice &amp; Receipt Generator for Small Business</title>
 <meta name="description" content="invoicekit is a free, offline-first invoicing app for small businesses. Create tax invoices and receipt vouchers with multi-currency, VAT, bilingual support, PDF export. No signup, no server, no internet required.">
@@ -139,20 +140,9 @@ invoicekit — free offline invoicing tool. &copy; 2026
 </div>
 
 <script>
-(function () {
-  /* auto-redirect returning visitors to the app */
-  try {
-    if (localStorage.getItem('_visited') === '1') {
-      window.location.href = 'app.html';
-      return;
-    }
-  } catch(e) {}
-
-  /* set visited flag on "Get Started" click */
-  document.getElementById('startBtn').addEventListener('click', function () {
-    try { localStorage.setItem('_visited', '1'); } catch(e) {}
-  });
-})();
+document.getElementById('startBtn').addEventListener('click', function () {
+  try { localStorage.setItem('_visited', '1'); } catch(e) {}
+});
 </script>
 </body>
 </html>
