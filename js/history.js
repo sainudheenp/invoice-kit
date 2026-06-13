@@ -59,6 +59,7 @@ function renderHistory() {
     var party = _docTab === 'inv' ? (d.customer ? d.customer.name : '') : d.receivedFrom;
     var amt = _docTab === 'inv' ? Number(d.grand || 0) : Number(d.amount || 0);
     var cur = c.currency;
+    var dp = _dp(cur && cur.subPer);
     var statusHtml = '';
     var markBtn = '';
     if (_docTab === 'inv') {
@@ -71,7 +72,7 @@ function renderHistory() {
       '<td style="font-weight:600">' + esc(label) + '</td>' +
       '<td>' + esc(date) + '</td>' +
       '<td>' + esc(party) + '</td>' +
-      '<td style="text-align:right;font-weight:700">' + amt.toFixed(3) + ' ' + esc(cur.symbol) + '</td>' +
+      '<td style="text-align:right;font-weight:700">' + amt.toFixed(dp) + ' ' + esc(cur.symbol) + '</td>' +
       (_docTab === 'inv' ? statusHtml : '') +
       '<td style="text-align:right;white-space:nowrap">' +
       markBtn +
@@ -152,6 +153,7 @@ function editSavedDoc(type, id) {
     document.getElementById('invNotes').value = doc.notes || '';
     toggleInvFields();
     calcInv();
+    markFormClean();
   } else {
     var doc = C.receipts.find(function (d) { return d.id === id; });
     if (!doc) return;
@@ -168,6 +170,7 @@ function editSavedDoc(type, id) {
     document.getElementById('recReceiver').value = doc.receiver || '';
     document.getElementById('recSignatory').value = doc.signatory || '';
     calcRecWords();
+    markFormClean();
   }
 }
 

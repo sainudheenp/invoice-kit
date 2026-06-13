@@ -90,6 +90,7 @@ function refreshInv() {
   document.getElementById('invVatPct').value = c.vatPct || 0;
   document.getElementById('invNotes').value  = c.invNotes || '';
   calcInv();
+  markFormClean();
 }
 
 function toggleInvFields() {
@@ -320,5 +321,6 @@ function saveInvoice() {
   persist('companies', c);
   _saveCustomer(document.getElementById('custName').value);
   refreshInv();
+  markFormClean();
   showToast('Invoice #' + no + ' saved. Next: ' + c.invPref + c.invNext);
 }

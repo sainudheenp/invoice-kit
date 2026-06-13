@@ -246,6 +246,7 @@ function importData(ev) {
         _refreshCoList(); populateSettings(); setStatus('Imported!');
       });
     } catch (err) { setStatus('Import error: ' + err.message, 'err'); }
+    ev.target.value = '';
   };
   reader.readAsText(file);
 }
@@ -260,6 +261,7 @@ function handleSettingsRestore(ev) {
         _refreshCoList(); populateSettings(); setStatus('Restored from backup!');
       });
     } catch (err) { setStatus('Restore error: ' + err.message, 'err'); }
+    ev.target.value = '';
   };
   reader.readAsText(file);
 }

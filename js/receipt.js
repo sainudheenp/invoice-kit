@@ -4,9 +4,10 @@
 function calcRecWords() {
   var c = getCo(); if (!c) return;
   var a = parseFloat(document.getElementById('recAmount').value) || 0;
+  var dp = _dp(c.currency && c.currency.subPer);
   document.getElementById('recWords').value = num2words(a, c.currency) + ' only';
-  document.getElementById('sumRecAmt').textContent = a.toFixed(3);
-  document.getElementById('sumRecTotal').textContent = a.toFixed(3);
+  document.getElementById('sumRecAmt').textContent = a.toFixed(dp);
+  document.getElementById('sumRecTotal').textContent = a.toFixed(dp);
   if (c) document.getElementById('sumRecWords').textContent = num2words(a, c.currency) + ' only';
 }
 
@@ -27,6 +28,7 @@ function refreshRec() {
   document.getElementById('recNo').value   = c.recPref + c.recNext;
   document.getElementById('recBeing').value = c.recBeing || '';
   calcRecWords();
+  markFormClean();
 }
 
 function _buildRecHTML(savedRec, comp) {
@@ -175,5 +177,6 @@ function saveReceipt() {
   persist('receipts', rec);
   persist('companies', c);
   refreshRec();
+  markFormClean();
   showToast('Receipt #' + rec.recNo + ' saved. Next: ' + c.recPref + c.recNext);
 }
