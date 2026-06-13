@@ -149,10 +149,14 @@ function printReceipt() {
 }
 
 function saveReceipt() {
-  var c = getCo(); if (!c) { alert('No active company'); return; }
+  var c = getCo(); if (!c) { showToast('No active company', 'err'); return; }
+  var recNo = document.getElementById('recNo').value;
+  if (C.receipts.some(function (r) { return r.recNo === recNo && r.companyId === c.id; })) {
+    showToast('Receipt #' + recNo + ' already exists', 'err'); return;
+  }
   var rec = {
     id: uid(), companyId: c.id,
-    recNo:        document.getElementById('recNo').value,
+    recNo:        recNo,
     date:         document.getElementById('recDate').value,
     receivedFrom: document.getElementById('recFrom').value,
     amount:       parseFloat(document.getElementById('recAmount').value) || 0,
@@ -171,5 +175,5 @@ function saveReceipt() {
   persist('receipts', rec);
   persist('companies', c);
   refreshRec();
-  alert('Receipt #' + rec.recNo + ' saved. Next: ' + c.recPref + c.recNext);
+  showToast('Receipt #' + rec.recNo + ' saved. Next: ' + c.recPref + c.recNext);
 }

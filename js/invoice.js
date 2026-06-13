@@ -3,6 +3,9 @@
    ========================================================== */
 var _invRC = 0;
 
+/* decimal places from currency subPer */
+function _dp(sp) { return Math.log10(sp || 1000); }
+
 /* saved customers autocomplete */
 function loadSavedCustomers() {
   var list = document.getElementById('custNameList');
@@ -26,24 +29,28 @@ function addInvRow() {
     '<td><input class="_iDesc" placeholder="Description" oninput="calcInv()" style="min-width:80px"></td>' +
     '<td><input class="_iQty" type="number" min="1" value="1" style="width:55px" oninput="calcInv()"></td>' +
     '<td><input class="_iPrc" type="number" min="0" step="0.001" value="0" style="width:85px" oninput="calcInv()"></td>' +
-    '<td class="amt-cell _iAmt" style="padding-top:8px">0.000</td>';
+    '<td class="amt-cell _iAmt" style="padding-top:8px">0</td>';
   tb.appendChild(tr);
+  markFormDirty();
   calcInv();
 }
 
 function removeInvRow() {
   var tb = document.getElementById('invItems');
-  if (tb.children.length) { tb.removeChild(tb.lastChild); _invRC--; calcInv(); }
+  if (tb.children.length) { tb.removeChild(tb.lastChild); _invRC--; markFormDirty(); calcInv(); }
 }
 
 function calcInv() {
   var rows = document.querySelectorAll('#invItems tr');
   var sub = 0;
+  var c = getCo();
+  var dp = _dp(c && c.currency && c.currency.subPer);
   rows.forEach(function (r) {
-    var q = parseFloat(r.querySelector('._iQty').value) || 0;
-    var p = parseFloat(r.querySelector('._iPrc').value) || 0;
+    var q = parseFloat((r.querySelector('._iQty') || {}).value) || 0;
+    var p = parseFloat((r.querySelector('._iPrc') || {}).value) || 0;
     var a = q * p;
-    r.querySelector('._iAmt').textContent = a.toFixed(3);
+    var amtEl = r.querySelector('._iAmt');
+    if (amtEl) amtEl.textContent = a.toFixed(dp);
     sub += a;
   });
   var vp  = parseFloat(document.getElementById('invVatPct').value) || 0;
@@ -51,17 +58,16 @@ function calcInv() {
   var ad  = sub - disc;
   var va  = ad * vp / 100;
   var grand = ad + va;
-  document.getElementById('invSubtotal').value = sub.toFixed(3);
-  document.getElementById('invVatAmt').value    = va.toFixed(3);
-  document.getElementById('invGrand').value     = grand.toFixed(3);
-  var c = getCo();
+  document.getElementById('invSubtotal').value = sub.toFixed(dp);
+  document.getElementById('invVatAmt').value    = va.toFixed(dp);
+  document.getElementById('invGrand').value     = grand.toFixed(dp);
   if (c) document.getElementById('invWords').value = num2words(grand, c.currency) + ' only';
 
-  document.getElementById('sumSubtotal').textContent = sub.toFixed(3);
-  document.getElementById('sumVat').textContent = va.toFixed(3);
-  document.getElementById('sumGrand').textContent = grand.toFixed(3);
+  document.getElementById('sumSubtotal').textContent = sub.toFixed(dp);
+  document.getElementById('sumVat').textContent = va.toFixed(dp);
+  document.getElementById('sumGrand').textContent = grand.toFixed(dp);
   var discRow = document.getElementById('sumDiscRow');
-  if (disc > 0) { discRow.style.display = 'flex'; document.getElementById('sumDiscount').textContent = '-' + disc.toFixed(3); }
+  if (disc > 0) { discRow.style.display = 'flex'; document.getElementById('sumDiscount').textContent = '-' + disc.toFixed(dp); }
   else discRow.style.display = 'none';
   if (c) document.getElementById('sumWords').textContent = num2words(grand, c.currency) + ' only';
 }
@@ -145,7 +151,7 @@ function _buildInvHTML(savedInv, comp) {
         desc: (r.querySelector('._iDesc') || {}).value || '',
         qty:  (r.querySelector('._iQty')  || {}).value || '0',
         price:(r.querySelector('._iPrc')  || {}).value || '0',
-        amount:(r.querySelector('._iAmt') || {}).textContent || '0.000'
+        amount:(r.querySelector('._iAmt') || {}).textContent || '0'
       });
     });
   }
@@ -157,10 +163,11 @@ function _buildInvHTML(savedInv, comp) {
 
   var pc = c.pcolor || '#D97706';
   var ac = c.acolor || '#78716C';
-  var sv = sub.toFixed(3);
-  var vv = va.toFixed(3);
-  var dv = disc.toFixed(3);
-  var gv = grand.toFixed(3);
+  var dp = _dp(cur.subPer);
+  var sv = sub.toFixed(dp);
+  var vv = va.toFixed(dp);
+  var dv = disc.toFixed(dp);
+  var gv = grand.toFixed(dp);
 
   var ir = '';
   items.forEach(function (it, i) {
@@ -169,7 +176,7 @@ function _buildInvHTML(savedInv, comp) {
       '<td style="padding:10px 10px;text-align:center;color:#555;font-size:13px;border-bottom:1px solid #eee;width:32px">' + (i+1) + '</td>' +
       '<td style="padding:10px 10px;font-size:13px;color:#333;border-bottom:1px solid #eee">' + esc(it.desc) + '</td>' +
       '<td style="padding:10px 10px;text-align:center;font-size:13px;color:#555;border-bottom:1px solid #eee;width:50px">' + it.qty + '</td>' +
-      '<td style="padding:10px 10px;text-align:right;font-size:13px;color:#555;border-bottom:1px solid #eee;width:85px">' + (parseFloat(it.price) || 0).toFixed(3) + '</td>' +
+      '<td style="padding:10px 10px;text-align:right;font-size:13px;color:#555;border-bottom:1px solid #eee;width:85px">' + (parseFloat(it.price) || 0).toFixed(dp) + '</td>' +
       '<td style="padding:10px 10px;text-align:right;font-size:14px;font-weight:700;color:#111;border-bottom:1px solid #eee;width:90px">' + it.amount + '</td></tr>';
   });
   if (!ir) ir = '<tr style="background:#fafafa"><td colspan="5" style="text-align:center;color:#bbb;padding:32px;font-size:14px;font-style:italic">No items</td></tr>';
@@ -268,8 +275,11 @@ function printInvoice() {
 }
 
 function saveInvoice() {
-  var c = getCo(); if (!c) { alert('No active company'); return; }
+  var c = getCo(); if (!c) { showToast('No active company', 'err'); return; }
   var no = document.getElementById('invNo').value;
+  if (C.invoices.some(function (i) { return i.invNo === no && i.companyId === c.id; })) {
+    showToast('Invoice #' + no + ' already exists', 'err'); return;
+  }
   var rows = document.querySelectorAll('#invItems tr');
   var items = [];
   rows.forEach(function (r) {
@@ -310,5 +320,5 @@ function saveInvoice() {
   persist('companies', c);
   _saveCustomer(document.getElementById('custName').value);
   refreshInv();
-  alert('Invoice #' + no + ' saved. Next: ' + c.invPref + c.invNext);
+  showToast('Invoice #' + no + ' saved. Next: ' + c.invPref + c.invNext);
 }

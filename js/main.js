@@ -32,7 +32,15 @@ function switchPage(name) {
   if (name === 'invoice')   refreshInv();
   if (name === 'receipt')   refreshRec();
   if (name === 'history')   renderHistory();
+  /* update URL hash */
+  if (location.hash !== '#/' + name) history.pushState(null, '', '#/' + name);
 }
+
+/* restore page from URL hash on back/forward */
+window.addEventListener('popstate', function () {
+  var page = location.hash.replace('#/', '') || 'dashboard';
+  if (document.getElementById(page + 'Page')) switchPage(page);
+});
 
 /* ============================================================
    SETUP / ONBOARDING
@@ -74,7 +82,10 @@ function enterApp() {
   refreshInv();
   refreshRec();
   refreshDashboard();
-  switchPage('dashboard');
+  /* restore page from URL hash, default to dashboard */
+  var initPage = location.hash.replace('#/', '') || 'dashboard';
+  if (!document.getElementById(initPage + 'Page')) initPage = 'dashboard';
+  switchPage(initPage);
 }
 
 /* ============================================================
@@ -133,6 +144,8 @@ document.getElementById('setupName').addEventListener('keydown', function (e) {
 document.addEventListener('keydown', function (e) {
   var ctrl = e.ctrlKey || e.metaKey;
   if (!ctrl) return;
+  var tag = (e.target || {}).tagName || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
   var activePage = document.querySelector('.page.active');
   if (!activePage) return;
   var id = activePage.id;
@@ -183,6 +196,27 @@ function handleWelcomeImport(ev) {
   };
   reader.readAsText(file);
 }
+
+/* ============================================================
+   DIRTY FORM TRACKING — mark dirty on any input/change
+   ============================================================ */
+document.getElementById('appRoot').addEventListener('change', function (e) {
+  var tag = (e.target || {}).tagName || '';
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') markFormDirty();
+});
+document.getElementById('appRoot').addEventListener('input', function (e) {
+  var tag = (e.target || {}).tagName || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA') markFormDirty();
+});
+
+/* ============================================================
+   BEFOREUNLOAD — warn when form is dirty
+   ============================================================ */
+window.addEventListener('beforeunload', function (e) {
+  if (!_formDirty) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
 
 /* ============================================================
    INIT

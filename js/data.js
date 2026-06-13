@@ -151,6 +151,43 @@ function esc(s) {
 }
 
 /* ==========================================================
+   TOAST
+   ========================================================== */
+function showToast(msg, type) {
+  type = type || 'ok';
+  var c = document.getElementById('toastContainer');
+  if (!c) return;
+  var t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  requestAnimationFrame(function () { t.classList.add('show'); });
+  setTimeout(function () {
+    t.classList.remove('show');
+    setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 300);
+  }, 3000);
+}
+
+/* ==========================================================
+   PDF PROGRESS OVERLAY
+   ========================================================== */
+function showPDFOverlay() {
+  var el = document.getElementById('pdfProgressOverlay');
+  if (el) el.style.display = 'flex';
+}
+function hidePDFOverlay() {
+  var el = document.getElementById('pdfProgressOverlay');
+  if (el) el.style.display = 'none';
+}
+
+/* ==========================================================
+   DIRTY FORM TRACKING
+   ========================================================== */
+var _formDirty = false;
+function markFormDirty() { _formDirty = true; }
+function markFormClean() { _formDirty = false; }
+
+/* ==========================================================
    BACKUP / RESTORE
    ========================================================== */
 function fullBackup() {

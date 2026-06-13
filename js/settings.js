@@ -345,6 +345,6 @@ function executeReset() {
     document.getElementById('setupError').style.display = 'none';
     document.getElementById('loader').style.display = 'none';
   }).catch(function (err) {
-    alert('Reset error: ' + err.message + ' — try clearing site data manually.');
+    showToast('Reset error: ' + err.message + ' — try clearing site data manually.', 'err');
   });
 }

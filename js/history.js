@@ -150,6 +150,7 @@ function editSavedDoc(type, id) {
     document.getElementById('invChequeNo').value = doc.payDetails || '';
     document.getElementById('invBankName').value = doc.bankName || '';
     document.getElementById('invNotes').value = doc.notes || '';
+    toggleInvFields();
     calcInv();
   } else {
     var doc = C.receipts.find(function (d) { return d.id === id; });

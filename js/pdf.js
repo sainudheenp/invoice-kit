@@ -2,9 +2,10 @@
   var P = (window.jspdf && (window.jspdf.jsPDF || window.jspdf.default)) || window.jsPDF || null;
 
   function _capturePDF(html, filename) {
-    if (!P) { alert('PDF library not loaded'); return; }
+    if (!P) { showToast('PDF library not loaded', 'err'); return; }
     var c = getCo();
-    if (!c) { alert('No active company'); return; }
+    if (!c) { showToast('No active company', 'err'); return; }
+    showPDFOverlay();
 
     var A4_W = 794;
     var A4_H = 1123;
@@ -69,9 +70,11 @@
 
         pdf.save((filename || 'document') + '.pdf');
         document.body.removeChild(container);
+        hidePDFOverlay();
       }).catch(function (err) {
         document.body.removeChild(container);
-        alert('PDF error: ' + err.message);
+        hidePDFOverlay();
+        showToast('PDF error: ' + err.message, 'err');
       });
     }
   }
@@ -91,7 +94,7 @@
 
   function _invData(saved, id) {
     var c = getCo();
-    if (!c) { alert('No active company'); return null; }
+    if (!c) { showToast('No active company', 'err'); return null; }
     var doc, html, name;
     if (saved) {
       doc = C.invoices.find(function (e) { return e.id === id; });
@@ -108,7 +111,7 @@
 
   function _recData(saved, id) {
     var c = getCo();
-    if (!c) { alert('No active company'); return null; }
+    if (!c) { showToast('No active company', 'err'); return null; }
     var doc, html, name;
     if (saved) {
       doc = C.receipts.find(function (e) { return e.id === id; });
