@@ -126,6 +126,30 @@ document.getElementById('setupName').addEventListener('keydown', function (e) {
 });
 
 /* ============================================================
+   KEYBOARD SHORTCUTS
+   ============================================================ */
+document.addEventListener('keydown', function (e) {
+  var ctrl = e.ctrlKey || e.metaKey;
+  if (!ctrl) return;
+  var activePage = document.querySelector('.page.active');
+  if (!activePage) return;
+  var id = activePage.id;
+  if ((e.key === 'Enter' || e.key === 's') && id === 'invoicePage') {
+    e.preventDefault(); saveInvoice();
+  } else if ((e.key === 'Enter' || e.key === 's') && id === 'receiptPage') {
+    e.preventDefault(); saveReceipt();
+  } else if (e.key === 'n') {
+    e.preventDefault(); switchPage('invoice');
+  } else if (e.key === 'r') {
+    e.preventDefault(); switchPage('receipt');
+  } else if (e.key === 'd') {
+    e.preventDefault(); switchPage('dashboard');
+  } else if (e.key === 'h') {
+    e.preventDefault(); switchPage('history');
+  }
+});
+
+/* ============================================================
    WELCOME IMPORT
    ============================================================ */
 function welcomeImportData() {

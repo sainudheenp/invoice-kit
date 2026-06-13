@@ -146,6 +146,7 @@
 <div class="form-row">
 <div class="fg"><label>Invoice No.</label><input id="invNo"></div>
 <div class="fg"><label>Date</label><input id="invDate" type="date"></div>
+<div class="fg"><label>Due Date</label><input id="invDueDate" type="date"></div>
 </div>
 <h3>Customer</h3>
 <div class="fg"><label>Customer Name</label><input id="custName"></div>
@@ -282,10 +283,11 @@
 <button class="btn btn-sm btn-success" id="backupBtn" onclick="backupData()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Backup</button>
 </div>
 </div>
-<div style="display:flex;gap:8px;margin-bottom:14px">
+<div style="display:flex;gap:8px;margin-bottom:10px">
 <button class="btn btn-sm btn-primary" data-tab="inv" onclick="switchDocTab('inv')">Invoices</button>
 <button class="btn btn-sm btn-outline" data-tab="rec" onclick="switchDocTab('rec')">Receipts</button>
 </div>
+<div class="fg" style="margin-bottom:12px"><input id="historySearch" type="text" placeholder="Search by number or customer name…" oninput="renderHistory()"></div>
 <div id="historyList">
 <p style="color:var(--text2);text-align:center;padding:24px">No documents saved yet.</p>
 </div>

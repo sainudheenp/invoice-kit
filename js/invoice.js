@@ -59,6 +59,12 @@ function refreshInv() {
     var t = new Date();
     d.value = t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
   }
+  var dd = document.getElementById('invDueDate');
+  if (!dd.value) {
+    var t2 = new Date();
+    t2.setDate(t2.getDate() + 30);
+    dd.value = t2.getFullYear() + '-' + String(t2.getMonth()+1).padStart(2,'0') + '-' + String(t2.getDate()).padStart(2,'0');
+  }
   document.getElementById('invNo').value    = c.invPref + c.invNext;
   document.getElementById('invVatPct').value = c.vatPct || 0;
   document.getElementById('invNotes').value  = c.invNotes || '';
@@ -77,9 +83,11 @@ function _buildInvHTML(savedInv, comp) {
   var no, dt, cust, addr, ph, cr_, em, notes, pm, ch, bk, disc, dts;
   var items, sub, vp, va, grand;
 
+  var dueDt;
   if (savedInv) {
     no    = savedInv.invNo;
     dt    = savedInv.date;
+    dueDt = savedInv.dueDate || '';
     cust  = (savedInv.customer && savedInv.customer.name) || '';
     addr  = (savedInv.customer && savedInv.customer.address) || '';
     ph    = (savedInv.customer && savedInv.customer.phone) || '';
@@ -100,6 +108,7 @@ function _buildInvHTML(savedInv, comp) {
     var $ = function (id) { return document.getElementById(id); };
     no    = $('invNo').value;
     dt    = $('invDate').value;
+    dueDt = $('invDueDate').value;
     cust  = $('custName').value;
     addr  = $('custAddr').value;
     ph    = $('custPhone').value;
@@ -181,6 +190,7 @@ function _buildInvHTML(savedInv, comp) {
     '<div style="text-align:right;font-size:13px;color:' + ac + ';line-height:1.9">' +
     '<span style="color:#777">Invoice No.</span> <strong style="color:#222">' + no + '</strong><br>' +
     '<span style="color:#777">Date</span> <strong style="color:#222">' + dts + '</strong>' +
+    (dueDt ? '<br><span style="color:#777">Due Date</span> <strong style="color:#222">' + dueDt + '</strong>' : '') +
     (c.vatReg ? '<br><span style="color:#777">VAT Reg.</span> <strong style="color:#222">' + c.vatReg + '</strong>' : '') +
     '</div></div>' +
 
@@ -258,6 +268,8 @@ function saveInvoice() {
   var inv = {
     id: uid(), companyId: c.id, invNo: no,
     date: document.getElementById('invDate').value,
+    dueDate: document.getElementById('invDueDate').value,
+    paid: false,
     customer: {
       name:    document.getElementById('custName').value,
       address: document.getElementById('custAddr').value,
