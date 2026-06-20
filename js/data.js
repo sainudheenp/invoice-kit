@@ -1,6 +1,8 @@
 /* ==========================================================
    DATA LAYER — in-memory cache + persist helpers
    ========================================================== */
+window._INV_TEMPLATES = {};
+window._REC_TEMPLATES = {};
 var C = {
   companies: [],
   invoices:  [],
@@ -133,6 +135,7 @@ function defCo(name) {
     bankName:'', bankAccName:'', bankAcc:'', bankIban:'', bankSwift:'', bankBranch:'',
     invPref:'INV-', invNext:1, recPref:'RV-', recNext:1,
     invNotes:'', invTerms:'', invFooter:'', recBeing:'',
+    invTemplate:'classic', recTemplate:'classic', watermark:'',
     createdAt: now, updatedAt: now
   };
 }

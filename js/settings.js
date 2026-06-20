@@ -49,6 +49,10 @@ function populateSettings() {
   $('s_invFooter').value = c.invFooter || '';
   $('s_recBeing').value  = c.recBeing  || '';
 
+  $('s_invTemplate').value = c.invTemplate || 'classic';
+  $('s_recTemplate').value = c.recTemplate || 'classic';
+  $('s_watermark').value   = c.watermark   || '';
+
   _previewImg('logoPrev', c.logo, 'No logo');
   _previewImg('sealPrev', c.seal, 'No seal');
   _previewImg('sigPrev',  c.signature, 'No signature');
@@ -101,6 +105,10 @@ function saveCompany() {
   c.invTerms  = $('s_invTerms');
   c.invFooter = $('s_invFooter');
   c.recBeing  = $('s_recBeing');
+
+  c.invTemplate = document.getElementById('s_invTemplate').value || 'classic';
+  c.recTemplate = document.getElementById('s_recTemplate').value || 'classic';
+  c.watermark   = document.getElementById('s_watermark').value   || '';
 
   c.updatedAt = Date.now();
 
