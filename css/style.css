@@ -558,6 +558,32 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .pdf-progress-box p{font-size:15px;font-weight:600;color:var(--text)}
 
 /* ============================================================
+   SETTINGS NAV
+   ============================================================ */
+.settings-nav{
+  position:sticky;top:0;z-index:10;
+  display:flex;gap:4px;flex-wrap:wrap;
+  padding:10px 0 6px;margin-bottom:14px;
+  background:var(--bg,#fff);
+  border-bottom:1px solid var(--border,#e8e8e8);
+}
+.settings-nav a{
+  display:block;
+  padding:5px 13px;font-size:12px;font-weight:600;
+  color:var(--text2,#666);
+  border-radius:20px;
+  text-decoration:none;white-space:nowrap;
+  transition:background .15s,color .15s;
+  cursor:pointer;
+}
+.settings-nav a:hover{background:var(--hover-bg,#f0f0f0);color:var(--text,#111)}
+.settings-nav a.active{background:var(--primary,#D97706);color:#fff}
+@media only screen and (max-width:480px){
+  .settings-nav{position:static;border-bottom:none;padding-bottom:0}
+  .settings-nav a{font-size:11px;padding:4px 10px}
+}
+
+/* ============================================================
    COMPANY BAR (settings)
    ============================================================ */
 .comp-bar{

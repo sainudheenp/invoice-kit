@@ -282,6 +282,35 @@ function setStatus(msg, type) {
 }
 
 /* ===========================================================
+   SETTINGS NAV SCROLL SPY
+   =========================================================== */
+(function(){
+  var nav = document.getElementById('settingsNav');
+  if (!nav) return;
+  var links = nav.querySelectorAll('a');
+  var sections = [];
+  links.forEach(function(a){
+    var id = a.getAttribute('href').slice(1);
+    var el = document.getElementById(id);
+    if (el) sections.push({el:el,link:a,id:id});
+  });
+  if (sections.length === 0) return;
+  function updateActive(){
+    var scrollY = window.scrollY + 90;
+    var activeId = sections[0].id;
+    for (var i = 0; i < sections.length; i++) {
+      var rect = sections[i].el.getBoundingClientRect();
+      if (rect.top <= 90) activeId = sections[i].id;
+    }
+    links.forEach(function(l){
+      l.classList.toggle('active', l.getAttribute('href') === '#' + activeId);
+    });
+  }
+  window.addEventListener('scroll', function(){ requestAnimationFrame(updateActive); }, {passive:true});
+  updateActive();
+})();
+
+/* ===========================================================
    DARK MODE
    =========================================================== */
 function toggleDarkMode() {

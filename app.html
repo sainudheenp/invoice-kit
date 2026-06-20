@@ -307,7 +307,18 @@
 <p>Manage company profiles and preferences</p>
 </div>
 
-<div class="card">
+<nav class="settings-nav" id="settingsNav">
+<a href="#settings-company">Company</a>
+<a href="#settings-contact">Contact</a>
+<a href="#settings-branding">Branding</a>
+<a href="#settings-currency">Currency</a>
+<a href="#settings-tax">Tax &amp; Banking</a>
+<a href="#settings-documents">Documents</a>
+<a href="#settings-backup">Backup</a>
+<a href="#settings-theme">Theme</a>
+</nav>
+
+<div class="card" id="settings-profiles">
 <div class="card-header"><h2>Company Profiles</h2></div>
 <div class="comp-bar">
 <select id="companySelect" onchange="switchCompany(this.value)"></select>
@@ -319,7 +330,7 @@
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="settings-company">
 <div class="card-header"><h2>Company Details</h2></div>
 <div class="set-grid">
 <div class="fg"><label>Company Name (EN)</label><input id="s_name"></div>
@@ -329,7 +340,7 @@
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="settings-contact">
 <div class="card-header"><h2>Contact Information</h2></div>
 <div class="set-grid">
 <div class="fg"><label>Telephone</label><input id="s_tel" type="tel"></div>
@@ -343,7 +354,7 @@
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="settings-branding">
 <div class="card-header"><h2>Branding</h2></div>
 <div class="set-grid">
 <div class="fg">
@@ -382,7 +393,7 @@
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="settings-currency">
 <div class="card-header"><h2>Currency</h2></div>
 <div class="form-row" style="margin-bottom:12px">
 <div class="fg" style="flex:0 0 240px"><label>Preset</label>
@@ -411,7 +422,7 @@
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="settings-tax">
 <div class="card-header"><h2>Tax &amp; Banking</h2></div>
 <h3>VAT</h3>
 <div class="set-grid">
@@ -429,7 +440,7 @@
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="settings-documents">
 <div class="card-header"><h2>Document Settings</h2></div>
 <h3>Numbering</h3>
 <div class="set-grid">
@@ -484,7 +495,7 @@
   <div id="settingsStatus" class="status-bar"></div>
   </div>
 
-<div class="card">
+<div class="card" id="settings-backup">
 <div class="card-header"><h2>Backup &amp; Restore</h2></div>
 <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Download a full backup of all companies, invoices, and receipts, or restore from a previous backup.</p>
 <div class="btn-row">
@@ -494,7 +505,7 @@
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="settings-theme">
 <div class="card-header"><h2>Theme</h2></div>
 <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
 <span style="font-size:14px">Dark Mode</span>
@@ -502,7 +513,7 @@
 </div>
 </div>
 
-<div class="card" style="border-color:var(--red);background:#FEF2F2">
+<div class="card" id="settings-danger" style="border-color:var(--red);background:#FEF2F2">
 <div class="card-header"><h2 style="color:var(--red)">Danger Zone</h2></div>
 <p style="font-size:13px;color:var(--text2);margin-bottom:14px">This will permanently delete all companies, invoices, and receipts. This action cannot be undone.</p>
 <button class="btn btn-danger" onclick="showResetConfirm()">Reset All Data</button>
