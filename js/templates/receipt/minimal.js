@@ -25,9 +25,9 @@ window._REC_TEMPLATES.minimal = function (d) {
     '<div style="font-size:20px;font-weight:700;color:#000;margin-top:2px">' + d.amFmt + ' ' + d.cur.symbol + '</div>' +
     '</div>' +
     '<div style="margin-bottom:2mm">' +
-    '<div style="display:flex;padding:3px 0"><span style="width:90px;font-size:11px;color:#999">Payment:</span><span style="font-size:13px">' + esc(d.pm) + d.chqHtml + '</span></div>' +
-    ((d.bk||d.td) ? '<div style="display:flex;padding:3px 0"><span style="width:90px;font-size:11px;color:#999">Bank:</span><span style="font-size:13px">' + esc(d.bk) + (d.bk&&d.td?' / ':'') + esc(d.td) + '</span></div>' : '') +
-    '<div style="display:flex;padding:3px 0"><span style="width:90px;font-size:11px;color:#999">Purpose:</span><span style="font-size:13px">' + esc(d.bg||'\u2014') + '</span></div>' +
+    '<div style="display:flex;padding:3px 0"><span style="width:90px;font-size:11px;color:#999">Payment:</span><span style="font-size:14px">' + esc(d.pm) + d.chqHtml + '</span></div>' +
+    ((d.bk||d.td) ? '<div style="display:flex;padding:3px 0"><span style="width:90px;font-size:11px;color:#999">Bank:</span><span style="font-size:14px">' + esc(d.bk) + (d.bk&&d.td?' / ':'') + esc(d.td) + '</span></div>' : '') +
+    '<div style="display:flex;padding:3px 0"><span style="width:90px;font-size:11px;color:#999">Purpose:</span><span style="font-size:14px">' + esc(d.bg||'\u2014') + '</span></div>' +
     '</div>' +
     (d.rv ? '<div style="margin-top:5mm;padding-top:3mm;border-top:1px solid #eee;text-align:center">' +
     '<div style="font-size:13px;font-weight:600">' + esc(d.rv) + '</div>' +

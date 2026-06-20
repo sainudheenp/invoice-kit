@@ -31,7 +31,7 @@ window._INV_TEMPLATES.bold = function (d) {
     '<div style="font-size:11px;color:' + pc + ';text-transform:uppercase;letter-spacing:2px;font-weight:700">TAX INVOICE</div>' +
     '<div style="font-size:20px;font-weight:800;color:#fff;margin-top:2px">#' + esc(d.no) + '</div>' +
     '</div></div>' +
-    '<div style="display:flex;gap:20px;margin-top:6mm;font-size:11px;color:#aaa;border-top:1px solid rgba(255,255,255,0.1);padding-top:4mm">' +
+    '<div style="display:flex;gap:20px;margin-top:6mm;font-size:12px;color:#aaa;border-top:1px solid rgba(255,255,255,0.1);padding-top:4mm">' +
     '<div>' + [c.loc, c.cr && 'CR: ' + c.cr].filter(Boolean).join(' | ') + '</div>' +
     '<div>' + [c.tel && 'Tel: ' + c.tel, c.email].filter(Boolean).join(' | ') + '</div>' +
     (c.vatReg ? '<div style="margin-left:auto;color:' + pc + '">VAT: ' + c.vatReg + '</div>' : '') +
@@ -41,27 +41,27 @@ window._INV_TEMPLATES.bold = function (d) {
     '<div style="padding:8mm 16mm 0">' +
 
     /* meta row */
-    '<div style="display:flex;justify-content:space-between;margin-bottom:5mm;font-size:12px;color:#888">' +
+    '<div style="display:flex;justify-content:space-between;margin-bottom:5mm;font-size:13px;color:#888">' +
     '<div><span style="color:#999">Date:</span> <strong style="color:#333">' + d.dt + '</strong></div>' +
     (d.dueDt ? '<div><span style="color:#999">Due:</span> <strong style="color:#333">' + d.dueDt + '</strong></div>' : '') +
     '</div>' +
 
     /* customer */
     '<div style="margin-bottom:5mm">' +
-    '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:3px">Bill To</div>' +
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:3px">Bill To</div>' +
     '<div style="font-weight:700;font-size:16px;color:#1a1a2e">' + esc(d.cust||'---') + '</div>' +
-    '<div style="font-size:12px;color:#666;line-height:1.6">' +
+    '<div style="font-size:13px;color:#666;line-height:1.6">' +
     [d.addr, d.ph && 'Tel: ' + d.ph, d.em].filter(Boolean).join('<br>') +
     '</div></div>' +
 
     /* table */
     '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:5mm">' +
     '<thead><tr style="background:#1a1a2e">' +
-    '<th style="padding:10px 8px;text-align:center;font-weight:700;font-size:11px;color:' + pc + '">#</th>' +
-    '<th style="padding:10px 8px;text-align:left;font-weight:700;font-size:11px;color:#fff">Description</th>' +
-    '<th style="padding:10px 8px;text-align:center;font-weight:700;font-size:11px;color:#fff">Qty</th>' +
-    '<th style="padding:10px 8px;text-align:right;font-weight:700;font-size:11px;color:#fff">Price</th>' +
-    '<th style="padding:10px 8px;text-align:right;font-weight:700;font-size:11px;color:' + pc + '">Amount</th>' +
+    '<th style="padding:10px 8px;text-align:center;font-weight:700;font-size:12px;color:' + pc + '">#</th>' +
+    '<th style="padding:10px 8px;text-align:left;font-weight:700;font-size:12px;color:#fff">Description</th>' +
+    '<th style="padding:10px 8px;text-align:center;font-weight:700;font-size:12px;color:#fff">Qty</th>' +
+    '<th style="padding:10px 8px;text-align:right;font-weight:700;font-size:12px;color:#fff">Price</th>' +
+    '<th style="padding:10px 8px;text-align:right;font-weight:700;font-size:12px;color:' + pc + '">Amount</th>' +
     '</tr></thead><tbody>' + ir +
     '</tbody></table>' +
 
@@ -77,7 +77,7 @@ window._INV_TEMPLATES.bold = function (d) {
     '</div></div>' +
 
     /* notes */
-    (d.notes || c.invTerms ? '<div style="margin-top:5mm;padding:3mm 0;font-size:12px;color:#666;border-top:1px solid #eee">' +
+    (d.notes || c.invTerms ? '<div style="margin-top:5mm;padding:3mm 0;font-size:13px;color:#666;border-top:1px solid #eee">' +
     (d.notes ? '<span style="font-weight:600;color:#333">Notes:</span> ' + esc(d.notes) + '<br>' : '') +
     (c.invTerms ? '<span style="font-weight:600;color:#333">Terms:</span> ' + esc(c.invTerms) : '') +
     '</div>' : '') +
@@ -85,16 +85,16 @@ window._INV_TEMPLATES.bold = function (d) {
     /* seal & signature */
     (c.seal || c.signature ? '<div style="display:flex;justify-content:space-between;align-items:end;margin-top:6mm">' +
     (c.seal ? '<div><img src="' + esc(c.seal) + '" style="max-width:130px;max-height:130px;object-fit:contain"></div>' : '<div></div>') +
-    (c.signature ? '<div style="text-align:center"><img src="' + esc(c.signature) + '" style="max-width:100px;max-height:36px;object-fit:contain"><div style="font-size:10px;color:#999;margin-top:1px">Authorized Signature</div></div>' : '<div></div>') +
+    (c.signature ? '<div style="text-align:center"><img src="' + esc(c.signature) + '" style="max-width:100px;max-height:36px;object-fit:contain"><div style="font-size:11px;color:#999;margin-top:1px">Authorized Signature</div></div>' : '<div></div>') +
     '</div>' : '') +
 
     '</div>' + /* end body padding */
 
     /* footer */
-    '<div style="margin-top:6mm;background:#1a1a2e;padding:3mm 16mm;display:flex;justify-content:space-between;font-size:10px;color:#888">' +
+    '<div style="margin-top:6mm;background:#1a1a2e;padding:3mm 16mm;display:flex;justify-content:space-between;font-size:11px;color:#888">' +
     '<div>' + esc(c.name) + '</div>' +
     '<div>' + [c.tel && 'Tel: ' + c.tel, c.email].filter(Boolean).join(' | ') + '</div>' +
     '</div>' +
-    (c.invFooter ? '<div style="background:#1a1a2e;padding:0 16mm 2mm;text-align:center;font-size:9px;color:#666">' + esc(c.invFooter) + '</div>' : '') +
+    (c.invFooter ? '<div style="background:#1a1a2e;padding:0 16mm 2mm;text-align:center;font-size:10px;color:#666">' + esc(c.invFooter) + '</div>' : '') +
     '</div>';
 };
