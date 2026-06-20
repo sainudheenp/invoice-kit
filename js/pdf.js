@@ -130,28 +130,20 @@
     var area = document.getElementById(type === 'inv' ? 'invoicePrintArea' : 'receiptPrintArea');
     if (!area) return;
     area.innerHTML = html;
-    area.style.display = 'block';
-    document.body.classList.add('print-' + (type === 'inv' ? 'invoice' : 'receipt'));
-
     void area.offsetHeight;
 
     var cleaned = false;
     function clean() {
       if (cleaned) return;
       cleaned = true;
-      window.removeEventListener('afterprint', clean);
-      document.body.classList.remove('print-invoice', 'print-receipt');
-      area.style.display = 'none';
+      area.style.display = '';
       area.innerHTML = '';
+      window.removeEventListener('afterprint', clean);
     }
 
     window.addEventListener('afterprint', clean);
-    var fallbackTimer = setTimeout(clean, 10000);
-
-    setTimeout(function () {
-      window.print();
-      if (!cleaned) setTimeout(clean, 5000);
-    }, 0);
+    setTimeout(clean, 3000);
+    window.print();
   }
 
   window.printInvoiceHTML = function (type) {
