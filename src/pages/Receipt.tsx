@@ -39,7 +39,7 @@ const emptyForm = (): ReceiptFormState => ({
 
 export default function Receipt() {
   const { state, getCo, saveCompany, createReceipt, setEditing } = useApp()
-  const { markDirty, markClean, showToast } = useUI()
+  const { markDirty, markClean, showToast, showPDFOverlay, hidePDFOverlay } = useUI()
   const co = getCo()
   const [form, setForm] = useState<ReceiptFormState>(emptyForm)
   const [isEditing, setIsEditing] = useState(false)
@@ -131,6 +131,49 @@ export default function Receipt() {
 
   useKeyboardShortcuts({ s: handleSave, enter: handleSave })
 
+  const buildTempReceipt = (): Receipt => ({
+    id: '',
+    companyId: co?.id || '',
+    recNo: form.recNo,
+    date: form.date,
+    receivedFrom: form.receivedFrom,
+    amount: form.amount,
+    amountWords: words,
+    payMethod: form.payMethod,
+    chequeNo: form.chequeNo,
+    bankName: form.bankName,
+    transDate: form.transDate,
+    being: form.being,
+    receiver: form.receiver,
+    signatory: form.signatory,
+    createdAt: Date.now(),
+  })
+
+  const handlePrint = async () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = buildReceiptHTML(buildTempReceipt(), co)
+    if (!html) { showToast('Cannot print empty receipt.', 'err'); return }
+    await printHTML(html)
+  }
+
+  const handlePDF = async () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    showPDFOverlay()
+    try {
+      const html = buildReceiptHTML(buildTempReceipt(), co)
+      if (!html) { showToast('Cannot generate PDF.', 'err'); hidePDFOverlay(); return }
+      await capturePDF(html, form.recNo || 'receipt')
+    } catch { showToast('PDF generation failed.', 'err') }
+    hidePDFOverlay()
+  }
+
+  const handleText = () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = buildReceiptHTML(buildTempReceipt(), co)
+    if (!html) { showToast('Cannot export text.', 'err'); return }
+    downloadText(html, form.recNo || 'receipt')
+  }
+
   return (
     <div>
       <div className="mb-5">
@@ -220,6 +263,9 @@ export default function Receipt() {
             <Button onClick={handleSave} className="justify-center w-full">
               {isEditing ? 'Update Receipt' : 'Save Receipt'}
             </Button>
+            <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
+            <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
+            <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
           </div>
         </div>
       </div>
