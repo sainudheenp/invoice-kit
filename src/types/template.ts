@@ -1,0 +1,57 @@
+import type { Company } from './company'
+import type { Currency } from './currency'
+import type { LineItem } from './invoice'
+
+export interface InvTemplateData {
+  comp: Company
+  cur: Currency
+  no: string
+  dt: string
+  dueDt: string
+  cust: string
+  addr: string
+  ph: string
+  cr: string
+  em: string
+  notes: string
+  pm: string
+  ch: string
+  bk: string
+  disc: number
+  sub: number
+  vp: number
+  va: number
+  grand: number
+  items: LineItem[]
+  dp: number
+  sv: string
+  vv: string
+  dv: string
+  gv: string
+  gw: string
+  pd: string
+}
+
+export interface RecTemplateData {
+  comp: Company
+  cur: Currency
+  pc: string
+  ac: string
+  no: string
+  dt: string
+  rf: string
+  am: number
+  ww: string
+  pm: string
+  ch: string
+  bk: string
+  td: string
+  bg: string
+  rv: string
+  sg: string
+  dp: number
+  wi: number
+  fr: number
+  amFmt: string
+  chqHtml: string
+}
