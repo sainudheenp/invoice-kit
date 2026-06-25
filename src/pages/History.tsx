@@ -5,13 +5,15 @@ import { useUI } from '@/store/UIContext'
 import { Card, CardHeader, Button } from '@/components/ui'
 import { Svg } from '@/icons'
 import { invStatus } from '@/utils'
+import { buildInvoiceHTML, buildReceiptHTML } from '@/templates'
+import { capturePDF, printHTML, downloadText } from '@/utils/pdf'
 import type { Invoice } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
 
 export default function History() {
   const navigate = useNavigate()
   const { state, deleteInvoice, deleteReceipt, markInvoicePaid, setEditing } = useApp()
-  const { showToast } = useUI()
+  const { showToast, showPDFOverlay, hidePDFOverlay } = useUI()
   const co = state.companies.find((c) => c.id === state.activeId)
   const [tab, setTab] = useState<'inv' | 'rec'>('inv')
   const [search, setSearch] = useState('')
@@ -41,6 +43,39 @@ export default function History() {
   const handlePaid = async (id: string) => {
     await markInvoicePaid(id)
     showToast('Status updated.')
+  }
+
+  const handlePrint = (type: 'inv' | 'rec', doc: Invoice | Receipt) => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = type === 'inv'
+      ? buildInvoiceHTML(doc as Invoice, co)
+      : buildReceiptHTML(doc as Receipt, co)
+    if (!html) { showToast('Cannot print.', 'err'); return }
+    printHTML(html)
+  }
+
+  const handlePDF = async (type: 'inv' | 'rec', doc: Invoice | Receipt) => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    showPDFOverlay()
+    try {
+      const html = type === 'inv'
+        ? buildInvoiceHTML(doc as Invoice, co)
+        : buildReceiptHTML(doc as Receipt, co)
+      if (!html) { showToast('Cannot generate PDF.', 'err'); hidePDFOverlay(); return }
+      const name = type === 'inv' ? (doc as Invoice).invNo : (doc as Receipt).recNo
+      await capturePDF(html, name || 'document')
+    } catch { showToast('PDF generation failed.', 'err') }
+    hidePDFOverlay()
+  }
+
+  const handleText = (type: 'inv' | 'rec', doc: Invoice | Receipt) => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = type === 'inv'
+      ? buildInvoiceHTML(doc as Invoice, co)
+      : buildReceiptHTML(doc as Receipt, co)
+    if (!html) { showToast('Cannot export text.', 'err'); return }
+    const name = type === 'inv' ? (doc as Invoice).invNo : (doc as Receipt).recNo
+    downloadText(html, name || 'document')
   }
 
   const count = tab === 'inv' ? invoices.length : receipts.length
@@ -112,6 +147,15 @@ export default function History() {
                               <Svg name="check" />
                             </button>
                           )}
+                          <button onClick={() => handlePrint('inv', inv)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Print">
+                            <Svg name="print" />
+                          </button>
+                          <button onClick={() => handlePDF('inv', inv)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Download PDF">
+                            <Svg name="download" />
+                          </button>
+                          <button onClick={() => handleText('inv', inv)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Export Text">
+                            <Svg name="file" />
+                          </button>
                           <button onClick={() => handleEdit('inv', inv.id)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Edit">
                             <Svg name="edit" />
                           </button>
@@ -148,6 +192,15 @@ export default function History() {
                     <td className="py-2.5 px-4 text-right font-medium">{co?.currency.symbol}{rec.amount.toFixed(2)}</td>
                     <td className="py-2.5 px-4">
                       <div className="flex gap-1 justify-end">
+                        <button onClick={() => handlePrint('rec', rec)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Print">
+                          <Svg name="print" />
+                        </button>
+                        <button onClick={() => handlePDF('rec', rec)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Download PDF">
+                          <Svg name="download" />
+                        </button>
+                        <button onClick={() => handleText('rec', rec)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Export Text">
+                          <Svg name="file" />
+                        </button>
                         <button onClick={() => handleEdit('rec', rec.id)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Edit">
                           <Svg name="edit" />
                         </button>

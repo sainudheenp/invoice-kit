@@ -1,46 +1,48 @@
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 
-export async function capturePDF(html: string, filename: string): Promise<void> {
-  const container = document.createElement('div')
-  container.style.cssText = 'position:fixed;top:-9999px;left:0;width:794px;min-height:1123px;background:#fff;overflow:hidden;'
-  container.innerHTML = html
-  document.body.appendChild(container)
+const A4_W = 794
+const A4_H = 1123
 
-  await waitForImages(container)
+export async function capturePDF(html: string, filename: string): Promise<void> {
+  const pageEl = document.createElement('div')
+  pageEl.style.cssText = `position:fixed;top:-9999px;left:0;width:${A4_W}px;height:${A4_H}px;overflow:hidden;background:#fff;`
+
+  const content = document.createElement('div')
+  content.style.cssText = `width:${A4_W}px;background:#fff;min-height:0!important;`
+  content.innerHTML = html
+  pageEl.appendChild(content)
+  document.body.appendChild(pageEl)
+
+  await waitForImages(content)
 
   try {
-    const canvas = await html2canvas(container, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
-    })
-    document.body.removeChild(container)
-
-    const imgData = canvas.toDataURL('image/jpeg', 0.92)
     const pdf = new jsPDF('p', 'mm', 'a4')
     const pdfW = 210
     const pdfH = 297
-    const imgW = pdfW
-    const imgH = (canvas.height / canvas.width) * pdfW
 
-    let heightLeft = imgH
-    let position = 0
-    let page = 0
+    const totalH = content.scrollHeight
+    const pageCount = Math.max(1, Math.ceil(totalH / A4_H))
 
-    while (heightLeft > 0) {
-      page++
-      if (page > 1) pdf.addPage()
-      pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH, undefined, 'FAST')
-      heightLeft -= pdfH
-      position -= pdfH
+    for (let i = 0; i < pageCount; i++) {
+      content.style.marginTop = `${-i * A4_H}px`
+
+      const canvas = await html2canvas(pageEl, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+      })
+
+      if (i > 0) pdf.addPage()
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pdfW, pdfH, undefined, 'FAST')
     }
 
     pdf.save(filename + '.pdf')
   } catch (err) {
-    document.body.removeChild(container)
     throw err
+  } finally {
+    document.body.removeChild(pageEl)
   }
 }
 
