@@ -59,6 +59,12 @@ function genericInvoice(name: string, d: InvTemplateData): string {
       </div>
       ${d.notes ? `<div style="margin-top:4mm;font-size:12px"><strong>Notes:</strong> ${esc(d.notes)}</div>` : ''}
       ${c.invTerms ? `<div style="font-size:12px"><strong>Terms:</strong> ${esc(c.invTerms)}</div>` : ''}
+      ${c.seal || c.signature ? `
+      <div style="display:flex;gap:20px;align-items:flex-end;margin-top:6mm;justify-content:center">
+        ${c.seal ? `<div><img src="${esc(c.seal)}" style="max-width:80px;max-height:80px;object-fit:contain" /></div>` : ''}
+        ${c.signature ? `<div><img src="${esc(c.signature)}" style="max-width:100px;max-height:50px;object-fit:contain" /><div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center">Authorized Signature</div></div>` : ''}
+      </div>
+      ` : ''}
       <div style="border-top:1px solid #ddd;margin-top:6mm;padding-top:3mm;font-size:11px;color:#666;text-align:center">${esc(c.name)}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}</div>
       ${c.invFooter ? `<div style="font-size:11px;color:#666;text-align:center">${esc(c.invFooter)}</div>` : ''}
     </div>

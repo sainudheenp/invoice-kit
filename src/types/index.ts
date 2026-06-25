@@ -16,4 +16,5 @@ export interface Toast {
   id: string
   msg: string
   type: ToastType
+  duration: number
 }

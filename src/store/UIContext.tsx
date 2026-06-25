@@ -68,7 +68,7 @@ interface UIContextValue {
   toggleDark: () => void
   markDirty: () => void
   markClean: () => void
-  showToast: (msg: string, type?: ToastType) => void
+  showToast: (msg: string, type?: ToastType, duration?: number) => void
   showPDFOverlay: () => void
   hidePDFOverlay: () => void
   showResetModal: () => void
@@ -113,10 +113,10 @@ export function UIProvider({ children }: { children: ReactNode }) {
   }
   const markDirty = () => dispatchUI({ type: 'SET_FORM_DIRTY', payload: true })
   const markClean = () => dispatchUI({ type: 'SET_FORM_DIRTY', payload: false })
-  const showToast = (msg: string, type: ToastType = 'ok') => {
+  const showToast = (msg: string, type: ToastType = 'ok', duration = 3000) => {
     const id = uid()
-    dispatchUI({ type: 'ADD_TOAST', payload: { id, msg, type } })
-    setTimeout(() => dispatchUI({ type: 'REMOVE_TOAST', payload: id }), 3000)
+    dispatchUI({ type: 'ADD_TOAST', payload: { id, msg, type, duration } })
+    setTimeout(() => dispatchUI({ type: 'REMOVE_TOAST', payload: id }), duration)
   }
   const showPDFOverlay = () => dispatchUI({ type: 'SET_PDF_OVERLAY', payload: true })
   const hidePDFOverlay = () => dispatchUI({ type: 'SET_PDF_OVERLAY', payload: false })

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { Card, CardHeader, Button, Modal } from '@/components/ui'
@@ -16,7 +16,8 @@ const SECTIONS = [
   { id: 'branding', label: 'Branding' },
   { id: 'currency', label: 'Currency' },
   { id: 'tax', label: 'Tax & Banking' },
-  { id: 'documents', label: 'Documents' },
+  { id: 'documents', label: 'Numbering' },
+  { id: 'templates', label: 'Templates' },
   { id: 'backup', label: 'Backup' },
   { id: 'theme', label: 'Theme' },
   { id: 'danger', label: 'Danger Zone' },
@@ -48,8 +49,6 @@ export default function Settings() {
   const { ui, toggleDark, showToast, showResetModal, hideResetModal, showPreview } = useUI()
   const co = getCo()
   const [activeSection, setActiveSection] = useState('profiles')
-  const [status, setStatus] = useState('')
-  const [statusType, setStatusType] = useState<'ok' | 'err'>('ok')
   const [resetConfirm, setResetConfirm] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -84,38 +83,21 @@ export default function Settings() {
     )
   }
 
-  const set = <K extends keyof typeof form>(field: K, value: (typeof form)[K]) =>
+  const set = <K extends keyof typeof form>(field: K, value: (typeof form)[K]) => {
     setForm((f) => f ? { ...f, [field]: value } : f)
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+    setSaving(true)
+    autoSaveTimer.current = setTimeout(doAutoSave, 500)
+  }
 
   const handleSave = async () => {
-    if (!form) return
-    if (!form.name.trim()) { setStatusType('err'); setStatus('Company name is required.'); setTimeout(() => setStatus(''), 3000); return }
-    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { setStatusType('err'); setStatus('Invalid email format.'); setTimeout(() => setStatus(''), 3000); return }
+    if (!form || !co) return
+    if (!form.name.trim()) { showToast('Company name is required.', 'err'); return }
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { showToast('Invalid email format.', 'err'); return }
     const subPer = parseInt(form.curSubPer) || 0
-    if (subPer < 1) { setStatusType('err'); setStatus('Sub-units per unit must be at least 1.'); setTimeout(() => setStatus(''), 3000); return }
-    const updated: Company = {
-      ...co,
-      name: form.name, nameAr: form.nameAr, sub: form.sub, subAr: form.subAr,
-      tel: form.tel, fax: form.fax, mob: form.mob, email: form.email, cr: form.cr, pobox: form.pobox, loc: form.loc, website: form.website,
-      pcolor: form.pcolor, acolor: form.acolor,
-      currency: {
-        code: form.curCode, symbol: form.curSym, name: form.curName, namePl: form.curNamePl,
-        sub: form.curSub, subPl: form.curSubPl, subPer,
-      },
-      vatReg: form.vatReg, vatPct: parseFloat(form.vatPct) || 0,
-      bankName: form.bankName, bankAccName: form.bankAccName, bankAcc: form.bankAcc, bankIban: form.bankIban, bankSwift: form.bankSwift, bankBranch: form.bankBranch,
-      invPref: form.invPref, invNext: parseInt(form.invNext) || 1, recPref: form.recPref, recNext: parseInt(form.recNext) || 1,
-      quotPref: form.quotPref, quotNext: parseInt(form.quotNext) || 1,
-      invNotes: form.invNotes, invTerms: form.invTerms, invFooter: form.invFooter, recBeing: form.recBeing,
-      invTemplate: form.invTemplate, recTemplate: form.recTemplate, quotTemplate: form.quotTemplate, watermark: form.watermark,
-      showArabic: form.showArabic,
-      logo: form.logo, seal: form.seal, signature: form.signature,
-      updatedAt: Date.now(),
-    }
-    await saveCompany(updated)
-    setStatusType('ok')
-    setStatus('Settings saved.')
-    setTimeout(() => setStatus(''), 3000)
+    if (subPer < 1) { showToast('Sub-units per unit must be at least 1.', 'err'); return }
+    await saveCompany(buildCompany(form, co))
+    showToast('Settings saved.')
   }
 
   const handleCurrencyPreset = (preset: string) => {
@@ -130,6 +112,46 @@ export default function Settings() {
     set('curSubPer', String(cur.subPer))
   }
 
+  const formRef = useRef(form)
+  formRef.current = form
+  const coRef = useRef(co)
+  coRef.current = co
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const [saving, setSaving] = useState(false)
+
+  const buildCompany = (f: typeof form, c: Company): Company => ({
+    ...c,
+    name: f.name, nameAr: f.nameAr, sub: f.sub, subAr: f.subAr,
+    tel: f.tel, fax: f.fax, mob: f.mob, email: f.email, cr: f.cr, pobox: f.pobox, loc: f.loc, website: f.website,
+    pcolor: f.pcolor, acolor: f.acolor,
+    currency: {
+      code: f.curCode, symbol: f.curSym, name: f.curName, namePl: f.curNamePl,
+      sub: f.curSub, subPl: f.curSubPl, subPer: parseInt(f.curSubPer) || 0,
+    },
+    vatReg: f.vatReg, vatPct: parseFloat(f.vatPct) || 0,
+    bankName: f.bankName, bankAccName: f.bankAccName, bankAcc: f.bankAcc, bankIban: f.bankIban, bankSwift: f.bankSwift, bankBranch: f.bankBranch,
+    invPref: f.invPref, invNext: parseInt(f.invNext) || 1, recPref: f.recPref, recNext: parseInt(f.recNext) || 1,
+    quotPref: f.quotPref, quotNext: parseInt(f.quotNext) || 1,
+    invNotes: f.invNotes, invTerms: f.invTerms, invFooter: f.invFooter, recBeing: f.recBeing,
+    invTemplate: f.invTemplate, recTemplate: f.recTemplate, quotTemplate: f.quotTemplate, watermark: f.watermark,
+    showArabic: f.showArabic,
+    logo: f.logo, seal: f.seal, signature: f.signature,
+    updatedAt: Date.now(),
+  })
+
+  const doAutoSave = useCallback(async () => {
+    const f = formRef.current
+    const c = coRef.current
+    if (!f || !c) return
+    const subPer = parseInt(f.curSubPer) || 0
+    if (subPer < 1) return
+    await saveCompany(buildCompany(f, c))
+    setSaving(false)
+    showToast('Saved', 'ok', 1500)
+  }, [saveCompany, showToast])
+
+  const [dragOverField, setDragOverField] = useState<'logo' | 'seal' | 'signature' | null>(null)
+
   const handleUpload = (field: 'logo' | 'seal' | 'signature') => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -139,8 +161,11 @@ export default function Settings() {
       if (!file) return
       if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB.', 'err'); return }
       const reader = new FileReader()
-      reader.onload = () => {
+      reader.onload = async () => {
         set(field, reader.result as string)
+        if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+        setSaving(true)
+        await doAutoSave()
       }
       reader.readAsDataURL(file)
     }
@@ -209,6 +234,7 @@ export default function Settings() {
     if (type === 'inv') sampleCo.invTemplate = tpl
     else if (type === 'rec') sampleCo.recTemplate = tpl
     else sampleCo.quotTemplate = tpl
+    if (form) { sampleCo.showArabic = form.showArabic; sampleCo.watermark = form.watermark }
 
     let html = ''
     if (type === 'inv') {
@@ -233,9 +259,15 @@ export default function Settings() {
 
   return (
     <div>
-      <div className="mb-5">
-        <h1 className="text-xl font-bold">Settings</h1>
-        <p className="text-sm text-[var(--color-text2)]">Manage your company and preferences.</p>
+      <div className="mb-5 flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-bold">Settings</h1>
+          <p className="text-sm text-[var(--color-text2)]">Manage your company and preferences.</p>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-[var(--color-text3)] shrink-0 mt-1">
+          <span className={`w-2 h-2 rounded-full transition-colors ${saving ? 'bg-amber-400' : 'bg-green'}`} />
+          {saving ? 'Saving...' : 'Saved'}
+        </div>
       </div>
 
       <div className="flex gap-5">
@@ -325,19 +357,63 @@ export default function Settings() {
             <CardHeader><h2 className="text-sm font-semibold">Branding</h2></CardHeader>
             <div className="p-5 space-y-4">
               {(['logo', 'seal', 'signature'] as const).map((field) => (
-                <div key={field} className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-xl border-2 border-dashed border-[var(--color-border)] flex items-center justify-center overflow-hidden bg-[var(--color-input-bg)]">
-                    {form[field] ? <img src={form[field]} alt="" className="max-w-full max-h-full object-contain" /> : <span className="text-xs text-[var(--color-text3)] capitalize">{field}</span>}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleUpload(field)}>Upload</Button>
-                    {field === 'logo' && (
-                      <Button size="sm" variant="outline" onClick={() => {
-                        const svg = prompt('Paste SVG code:')
-                        if (svg) set('logo', 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))))
-                      }}>SVG</Button>
+                <div key={field}>
+                  <label className="text-xs font-medium text-[var(--color-text2)] capitalize mb-1.5 block">{field}</label>
+                  <div
+                    onClick={() => handleUpload(field)}
+                    onDragOver={(e) => { e.preventDefault(); setDragOverField(field) }}
+                    onDragLeave={() => setDragOverField(null)}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      setDragOverField(null)
+                      const file = e.dataTransfer.files?.[0]
+                      if (!file) return
+                      if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB.', 'err'); return }
+                      const reader = new FileReader()
+                      reader.onload = async () => {
+                        set(field, reader.result as string)
+                        if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+                        setSaving(true)
+                        await doAutoSave()
+                      }
+                      reader.readAsDataURL(file)
+                    }}
+                    className={`relative w-full h-28 rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden bg-[var(--color-input-bg)] cursor-pointer transition-all duration-200 ${
+                      dragOverField === field
+                        ? 'border-[var(--color-primary)] bg-[var(--color-primary-bg)]'
+                        : form[field]
+                          ? 'border-[var(--color-primary)]/30'
+                          : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/50'
+                    }`}
+                  >
+                    {form[field] ? (
+                      <img src={form[field]} alt="" className="max-w-full max-h-full object-contain p-2" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-1 text-[var(--color-text3)]">
+                        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <span className="text-xs">Click or drop an image</span>
+                        <span className="text-[10px]">PNG, JPG, SVG &middot; Max 2MB</span>
+                      </div>
                     )}
-                    {form[field] && <Button size="sm" variant="danger" onClick={() => set(field, '')}>X</Button>}
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    {field === 'logo' && (
+                      <button
+                        onClick={() => {
+                          const svg = prompt('Paste SVG code:')
+                          if (svg) set('logo', 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))))
+                        }}
+                        className="text-xs text-[var(--color-text3)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
+                      >Paste SVG</button>
+                    )}
+                    {form[field] && (
+                      <>
+                        <span className="text-xs text-[var(--color-text3)]">&middot;</span>
+                        <button onClick={() => set(field, '')} className="text-xs text-red hover:brightness-110 transition-colors cursor-pointer">Remove</button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
@@ -404,9 +480,9 @@ export default function Settings() {
             </div>
           </Card>
 
-          {/* Document Settings */}
+          {/* Numbering & Defaults */}
           <Card id="settings-documents" data-section="documents">
-            <CardHeader><h2 className="text-sm font-semibold">Document Settings</h2></CardHeader>
+            <CardHeader><h2 className="text-sm font-semibold">Numbering &amp; Defaults</h2></CardHeader>
             <div className="p-5 space-y-4">
               <h3 className="text-xs font-semibold text-[var(--color-text2)] uppercase">Numbering</h3>
               <div className="grid grid-cols-2 gap-3">
@@ -422,8 +498,13 @@ export default function Settings() {
               <div><label className="text-xs font-medium text-[var(--color-text2)]">Invoice Terms</label><textarea value={form.invTerms} onChange={(e) => set('invTerms', e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] resize-none" /></div>
               <div><label className="text-xs font-medium text-[var(--color-text2)]">Invoice Footer</label><textarea value={form.invFooter} onChange={(e) => set('invFooter', e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] resize-none" /></div>
               <div><label className="text-xs font-medium text-[var(--color-text2)]">Receipt Purpose</label><input value={form.recBeing} onChange={(e) => set('recBeing', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
-              <h3 className="text-xs font-semibold text-[var(--color-text2)] uppercase">Templates &amp; Watermark</h3>
+            </div>
+          </Card>
 
+          {/* Templates */}
+          <Card id="settings-templates" data-section="templates">
+            <CardHeader><h2 className="text-sm font-semibold">Templates</h2></CardHeader>
+            <div className="p-5 space-y-4">
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Invoice Template</label>
                 <div className="flex flex-wrap gap-1.5 mt-1">
@@ -546,11 +627,6 @@ export default function Settings() {
             </div>
           </Card>
 
-          {/* Save Button */}
-          <div className="flex items-center gap-3 pb-8">
-            <Button onClick={handleSave}>Save Settings</Button>
-            {status && <span className={`text-xs px-3 py-1 rounded-full ${statusType === 'ok' ? 'bg-green-bg text-green-dark' : 'bg-red-bg text-red'}`}>{status}</span>}
-          </div>
         </div>
       </div>
 

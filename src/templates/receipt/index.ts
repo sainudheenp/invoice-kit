@@ -71,7 +71,9 @@ function genericReceipt(name: string, d: RecTemplateData): string {
         ${d.td ? `<div><strong>Date:</strong> ${d.td}</div>` : ''}
         <div style="grid-column:1/-1"><strong>Purpose:</strong> ${esc(d.bg)}</div>
       </div>
-      <div style="border-top:1px solid #ddd;margin-top:6mm;padding-top:3mm;display:flex;gap:20px">
+      <div style="border-top:1px solid #ddd;margin-top:6mm;padding-top:3mm;display:flex;gap:20px;align-items:flex-end">
+        ${c.seal ? `<div><img src="${esc(c.seal)}" style="max-width:70px;max-height:70px" /></div>` : ''}
+        ${c.signature ? `<div><img src="${esc(c.signature)}" style="max-width:90px;max-height:40px" /><div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center">Authorized Signature</div></div>` : ''}
         ${d.rv ? `<div><div style="border-top:1px solid #999;width:100px;padding-top:2px;font-size:12px;text-align:center">${esc(d.rv)}</div><div style="font-size:11px;color:#666;text-align:center">Receiver</div></div>` : ''}
         ${d.sg ? `<div><div style="border-top:1px solid #999;width:100px;padding-top:2px;font-size:12px;text-align:center">${esc(d.sg)}</div><div style="font-size:11px;color:#666;text-align:center">Signatory</div></div>` : ''}
       </div>
