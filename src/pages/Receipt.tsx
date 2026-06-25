@@ -39,7 +39,7 @@ const emptyForm = (): ReceiptFormState => ({
 
 export default function Receipt() {
   const { state, getCo, saveCompany, createReceipt, setEditing } = useApp()
-  const { markDirty, markClean, showToast, showPDFOverlay, hidePDFOverlay } = useUI()
+  const { markDirty, markClean, showToast, showPDFOverlay, hidePDFOverlay, showPreview } = useUI()
   const co = getCo()
   const [form, setForm] = useState<ReceiptFormState>(emptyForm)
   const [isEditing, setIsEditing] = useState(false)
@@ -169,6 +169,13 @@ export default function Receipt() {
     hidePDFOverlay()
   }
 
+  const handlePreview = () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = buildReceiptHTML(buildTempReceipt(), co)
+    if (!html) { showToast('Nothing to preview.', 'err'); return }
+    showPreview(html)
+  }
+
   const handleText = () => {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = buildReceiptHTML(buildTempReceipt(), co)
@@ -265,6 +272,7 @@ export default function Receipt() {
             <Button onClick={handleSave} className="justify-center w-full">
               {isEditing ? 'Update Receipt' : 'Save Receipt'}
             </Button>
+            <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
             <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
             <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
             <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>

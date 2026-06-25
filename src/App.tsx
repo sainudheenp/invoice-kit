@@ -4,6 +4,7 @@ import { UIProvider, useUI } from '@/store/UIContext'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { WelcomeOverlay } from '@/components/layout/WelcomeOverlay'
 import { PDFOverlay } from '@/components/layout/PDFOverlay'
+import { PreviewModal } from '@/components/layout/PreviewModal'
 import { ToastContainer } from '@/components/ui'
 import { Svg } from '@/icons'
 import Dashboard from '@/pages/Dashboard'
@@ -58,6 +59,7 @@ function AppContent() {
       </main>
 
       <PDFOverlay />
+      <PreviewModal />
       <ToastContainer />
     </div>
   )

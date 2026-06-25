@@ -42,7 +42,7 @@ const emptyForm = (): QuotationFormState => ({
 export default function QuotationPage() {
   const navigate = useNavigate()
   const { state, getCo, saveCompany, createQuotation, setEditing } = useApp()
-  const { markDirty, markClean, showToast, showPDFOverlay, hidePDFOverlay } = useUI()
+  const { markDirty, markClean, showToast, showPDFOverlay, hidePDFOverlay, showPreview } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()
   const co = getCo()
   const [form, setForm] = useState<QuotationFormState>(emptyForm)
@@ -174,6 +174,13 @@ export default function QuotationPage() {
       await capturePDF(html, form.quotNo || 'quotation')
     } catch { showToast('PDF generation failed.', 'err') }
     hidePDFOverlay()
+  }
+
+  const handlePreview = () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = buildQuotationHTML(buildTempQuotation(), co)
+    if (!html) { showToast('Nothing to preview.', 'err'); return }
+    showPreview(html)
   }
 
   const handleText = () => {
@@ -320,6 +327,7 @@ export default function QuotationPage() {
             <Button onClick={handleSave} className="justify-center w-full">
               {isEditing ? 'Update Quotation' : 'Save Quotation'}
             </Button>
+            <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
             <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
             <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
             <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>

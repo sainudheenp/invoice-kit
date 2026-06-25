@@ -52,6 +52,7 @@ export async function printHTML(html: string): Promise<void> {
   area.style.display = 'block'
   await waitForImages(area)
   window.print()
+  area.style.display = ''
 }
 
 export function downloadText(html: string, filename: string): void {
