@@ -35,6 +35,7 @@ function parseCo(c: Company) {
     quotPref: c.quotPref, quotNext: String(c.quotNext),
     invNotes: c.invNotes, invTerms: c.invTerms, invFooter: c.invFooter, recBeing: c.recBeing,
     invTemplate: c.invTemplate, recTemplate: c.recTemplate, quotTemplate: c.quotTemplate, watermark: c.watermark,
+    showArabic: c.showArabic,
     logo: c.logo, seal: c.seal, signature: c.signature,
   }
 }
@@ -44,7 +45,7 @@ const WATERMARK_OPTIONS = ['', 'Draft', 'Paid', 'Sample', 'Copy']
 
 export default function Settings() {
   const { state, getCo, saveCompany, deleteCompany, setActive, resetAll, dispatch } = useApp()
-  const { ui, toggleDark, showToast, showResetModal, hideResetModal, showPreview, closePreview } = useUI()
+  const { ui, toggleDark, showToast, showResetModal, hideResetModal, showPreview } = useUI()
   const co = getCo()
   const [activeSection, setActiveSection] = useState('profiles')
   const [status, setStatus] = useState('')
@@ -107,6 +108,7 @@ export default function Settings() {
       quotPref: form.quotPref, quotNext: parseInt(form.quotNext) || 1,
       invNotes: form.invNotes, invTerms: form.invTerms, invFooter: form.invFooter, recBeing: form.recBeing,
       invTemplate: form.invTemplate, recTemplate: form.recTemplate, quotTemplate: form.quotTemplate, watermark: form.watermark,
+      showArabic: form.showArabic,
       logo: form.logo, seal: form.seal, signature: form.signature,
       updatedAt: Date.now(),
     }
@@ -485,6 +487,19 @@ export default function Settings() {
                 </div>
               </div>
 
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <div className="text-sm font-medium">Show Arabic Text</div>
+                  <div className="text-xs text-[var(--color-text3)]">Displays Arabic company name and labels in Classic templates</div>
+                </div>
+                <button
+                  onClick={() => set('showArabic', !form.showArabic)}
+                  className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.showArabic ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
+                >
+                  <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.showArabic ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+                </button>
+              </div>
+
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Watermark</label>
                 <select value={form.watermark} onChange={(e) => set('watermark', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]">
@@ -550,20 +565,6 @@ export default function Settings() {
             <Button variant="outline" onClick={hideResetModal}>Cancel</Button>
             <Button variant="danger" disabled={resetConfirm !== co.name} onClick={handleReset}>Delete Everything</Button>
           </div>
-        </div>
-      </Modal>
-
-      {/* Template Preview Modal */}
-      <Modal open={ui.previewModal} onClose={closePreview} maxW="90%">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-semibold">Template Preview</h3>
-          <button onClick={closePreview} className="p-1 rounded-lg hover:bg-[var(--color-input-bg)] cursor-pointer">
-            <Svg name="close" />
-          </button>
-        </div>
-        <div className="max-h-[70vh] overflow-auto bg-white rounded-lg p-4" dangerouslySetInnerHTML={{ __html: ui.previewContent }} />
-        <div className="flex justify-end mt-3">
-          <Button variant="outline" onClick={closePreview}>Close</Button>
         </div>
       </Modal>
     </div>

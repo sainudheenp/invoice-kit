@@ -22,6 +22,7 @@ export function defCompany(name?: string): Company {
     invPref: 'INV-', invNext: 1, recPref: 'RV-', recNext: 1, quotPref: 'QT-', quotNext: 1,
     invNotes: '', invTerms: '', invFooter: '', recBeing: '',
     invTemplate: 'classic', recTemplate: 'classic', quotTemplate: 'classic', watermark: '',
+    showArabic: false,
     createdAt: now, updatedAt: now,
   }
 }

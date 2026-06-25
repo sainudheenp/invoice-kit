@@ -14,7 +14,8 @@ export function InvoiceClassic(d: InvTemplateData) {
     </tr>`
   )).join('')
 
-  const arabicBlock = c.nameAr
+  const showAr = c.showArabic && c.nameAr
+  const arabicBlock = showAr
     ? `<div style="text-align:right"><div dir="rtl" unicode-bidi="embed" style="font-size:18px;font-weight:700">${esc(c.nameAr)}</div>${c.subAr ? `<div dir="rtl" unicode-bidi="embed" style="font-size:12px;color:#666">${esc(c.subAr)}</div>` : ''}</div>`
     : ''
 
@@ -42,7 +43,7 @@ export function InvoiceClassic(d: InvTemplateData) {
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
             <div style="font-size:16px;font-weight:700;color:${pc}">TAX INVOICE</div>
-            <div dir="rtl" unicode-bidi="embed" style="font-size:12px;color:#999">\u0641\u0627\u062A\u0648\u0631\u0629 \u0636\u0631\u064A\u0628\u064A\u0629</div>
+            ${showAr ? '<div dir="rtl" unicode-bidi="embed" style="font-size:12px;color:#999">\u0641\u0627\u062A\u0648\u0631\u0629 \u0636\u0631\u064A\u0628\u064A\u0629</div>' : ''}
           </div>
           <div style="text-align:right;font-size:12px">
             <div><strong>Invoice No.:</strong> ${esc(d.no)}</div>
@@ -54,7 +55,7 @@ export function InvoiceClassic(d: InvTemplateData) {
       </div>
       <div style="border-bottom:1px solid #eee;margin:0 16mm"></div>
       <div style="padding:6mm 16mm">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:4px">Bill To / \u0625\u0644\u0649 \u0627\u0644\u0633\u064A\u062F</div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:4px">Bill To${showAr ? ' / \u0625\u0644\u0649 \u0627\u0644\u0633\u064A\u062F' : ''}</div>
         <div style="font-weight:600">${esc(d.cust)}</div>
         ${d.addr ? `<div style="font-size:12px;color:#555">${esc(d.addr)}</div>` : ''}
         <div style="font-size:12px;color:#555">${[d.ph, d.cr, d.em].filter(Boolean).join(' | ')}</div>
@@ -64,10 +65,10 @@ export function InvoiceClassic(d: InvTemplateData) {
           <thead>
             <tr style="background:${pc};color:#fff">
               <th style="padding:10px 8px;text-align:center;width:30px">#</th>
-              <th style="padding:10px 8px;text-align:left">Description / <span dir="rtl" unicode-bidi="embed">\u0627\u0644\u0628\u064A\u0627\u0646</span></th>
-              <th style="padding:10px 8px;text-align:center;width:60px">Qty / <span dir="rtl" unicode-bidi="embed">\u0627\u0644\u0643\u0645\u064A\u0629</span></th>
-              <th style="padding:10px 8px;text-align:right;width:100px">Price / <span dir="rtl" unicode-bidi="embed">\u0627\u0644\u0633\u0639\u0631</span></th>
-              <th style="padding:10px 8px;text-align:right;width:100px">Amount / <span dir="rtl" unicode-bidi="embed">\u0627\u0644\u0645\u0628\u0644\u063A</span></th>
+              <th style="padding:10px 8px;text-align:left">Description${showAr ? ' / \u0627\u0644\u0628\u064A\u0627\u0646' : ''}</th>
+              <th style="padding:10px 8px;text-align:center;width:60px">Qty${showAr ? ' / \u0627\u0644\u0643\u0645\u064A\u0629' : ''}</th>
+              <th style="padding:10px 8px;text-align:right;width:100px">Price${showAr ? ' / \u0627\u0644\u0633\u0639\u0631' : ''}</th>
+              <th style="padding:10px 8px;text-align:right;width:100px">Amount${showAr ? ' / \u0627\u0644\u0645\u0628\u0644\u063A' : ''}</th>
             </tr>
           </thead>
           <tbody>
@@ -92,7 +93,7 @@ export function InvoiceClassic(d: InvTemplateData) {
       </div>
       <div style="padding:6mm 16mm;display:flex;gap:20px;align-items:flex-end">
         ${c.seal ? `<div><img src="${esc(c.seal)}" style="max-width:80px;max-height:80px;object-fit:contain" /></div>` : ''}
-        ${c.signature ? `<div><img src="${esc(c.signature)}" style="max-width:100px;max-height:50px;object-fit:contain" /><div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px">Authorized Signature / <span dir="rtl" unicode-bidi="embed">\u0627\u0644\u062A\u0648\u0642\u064A\u0639</span></div></div>` : ''}
+        ${c.signature ? `<div><img src="${esc(c.signature)}" style="max-width:100px;max-height:50px;object-fit:contain" /><div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px">Authorized Signature${showAr ? ' / \u0627\u0644\u062A\u0648\u0642\u064A\u0639' : ''}</div></div>` : ''}
       </div>
       <div style="position:absolute;bottom:0;left:0;right:0;padding:4mm 16mm;border-top:1px solid #ddd;font-size:11px;color:#666;display:flex;justify-content:space-between">
         <span>${esc(c.name)}${c.loc ? ` - ${esc(c.loc)}` : ''}</span>

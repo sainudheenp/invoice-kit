@@ -9,7 +9,8 @@ export function ReceiptClassic(d: RecTemplateData) {
   const pc = d.comp.pcolor || '#D97706'
   const c = d.comp
 
-  const arabicBlock = c.nameAr
+  const showAr = c.showArabic && c.nameAr
+  const arabicBlock = showAr
     ? `<div style="text-align:right"><div dir="rtl" unicode-bidi="embed" style="font-size:18px;font-weight:700">${_esc(c.nameAr)}</div>${c.subAr ? `<div dir="rtl" unicode-bidi="embed" style="font-size:12px;color:#666">${_esc(c.subAr)}</div>` : ''}</div>`
     : ''
 
@@ -25,15 +26,15 @@ export function ReceiptClassic(d: RecTemplateData) {
   `).join('') : ''
 
   const detailRows = [
-    ['Received from', _esc(d.rf), '\u0627\u0633\u062A\u0644\u0645\u062A \u0645\u0646'],
-    ['Amount', _esc(d.ww), '\u0628\u0645\u0628\u0644\u063A \u0642\u062F\u0631\u0647'],
-    ['Payment', d.pm + (d.ch ? ` - ${_esc(d.ch)}` : ''), '\u0646\u0642\u062F / \u0634\u064A\u0643'],
+    ['Received from', _esc(d.rf), showAr ? '\u0627\u0633\u062A\u0644\u0645\u062A \u0645\u0646' : ''],
+    ['Amount', _esc(d.ww), showAr ? '\u0628\u0645\u0628\u0644\u063A \u0642\u062F\u0631\u0647' : ''],
+    ['Payment', d.pm + (d.ch ? ` - ${_esc(d.ch)}` : ''), showAr ? '\u0646\u0642\u062F / \u0634\u064A\u0643' : ''],
   ]
 
   if (d.bk || d.td) {
-    detailRows.push(['Bank / Date', [d.bk, d.td].filter(Boolean).join(' - '), '\u0627\u0644\u0628\u0646\u0643 / \u062A\u0627\u0631\u064A\u062E\u0647'])
+    detailRows.push(['Bank / Date', [d.bk, d.td].filter(Boolean).join(' - '), showAr ? '\u0627\u0644\u0628\u0646\u0643 / \u062A\u0627\u0631\u064A\u062E\u0647' : ''])
   }
-  detailRows.push(['Being / \u0628\u064A\u0627\u0646', _esc(d.bg), '\u0628\u064A\u0627\u0646'])
+  detailRows.push([showAr ? 'Being / \u0628\u064A\u0627\u0646' : 'Being', _esc(d.bg), showAr ? '\u0628\u064A\u0627\u0646' : ''])
 
   return wrap(`
     <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2d2d2d;position:relative;background:#fff;min-height:100vh">
@@ -56,11 +57,11 @@ export function ReceiptClassic(d: RecTemplateData) {
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
             <div style="font-size:15px;font-weight:700;color:${pc}">RECEIPT VOUCHER</div>
-            <div dir="rtl" unicode-bidi="embed" style="font-size:12px;color:#999">\u0633\u0646\u062F \u0642\u0628\u0636</div>
+            ${showAr ? '<div dir="rtl" unicode-bidi="embed" style="font-size:12px;color:#999">\u0633\u0646\u062F \u0642\u0628\u0636</div>' : ''}
           </div>
           <div style="text-align:right;font-size:12px">
             <div><strong>No.:</strong> ${_esc(d.no)}</div>
-            <div><strong>Date / <span dir="rtl" unicode-bidi="embed">\u0627\u0644\u062A\u0627\u0631\u064A\u062E</span>:</strong> ${d.dt}</div>
+            <div><strong>Date${showAr ? ' / \u0627\u0644\u062A\u0627\u0631\u064A\u062E' : ''}:</strong> ${d.dt}</div>
           </div>
         </div>
       </div>
@@ -84,7 +85,7 @@ export function ReceiptClassic(d: RecTemplateData) {
             <tr${altRow(i)}>
               <td style="padding:8px 10px;width:35%;font-weight:600">${row[0]}</td>
               <td style="padding:8px 10px">${row[1]}</td>
-              <td style="padding:8px 10px;width:20%;direction:rtl;unicode-bidi:embed;text-align:right;font-size:12px;color:#888">${row[2]}</td>
+              ${showAr ? `<td style="padding:8px 10px;width:20%;direction:rtl;unicode-bidi:embed;text-align:right;font-size:12px;color:#888">${row[2]}</td>` : ''}
             </tr>
           `).join('')}
         </table>
@@ -103,8 +104,8 @@ export function ReceiptClassic(d: RecTemplateData) {
       </div>
       <div style="padding:4mm 14mm;display:flex;gap:20px;align-items:flex-end">
         ${c.seal ? `<div><img src="${_esc(c.seal)}" style="max-width:70px;max-height:70px" /></div>` : ''}
-        ${d.rv ? `<div><div style="border-top:1px solid #999;width:120px;padding-top:2px;font-size:12px;text-align:center">${_esc(d.rv)}</div><div style="font-size:11px;color:#666;text-align:center">Receiver / <span dir="rtl" unicode-bidi="embed">\u0627\u0644\u0645\u0633\u062A\u0644\u0645</span></div></div>` : ''}
-        ${c.signature ? `<div><img src="${_esc(c.signature)}" style="max-width:90px;max-height:40px" /><div style="font-size:11px;color:#666;text-align:center">Authorized Signature / <span dir="rtl" unicode-bidi="embed">\u0627\u0644\u062A\u0648\u0642\u064A\u0639</span></div></div>` : ''}
+        ${d.rv ? `<div><div style="border-top:1px solid #999;width:120px;padding-top:2px;font-size:12px;text-align:center">${_esc(d.rv)}</div><div style="font-size:11px;color:#666;text-align:center">Receiver${showAr ? ' / \u0627\u0644\u0645\u0633\u062A\u0644\u0645' : ''}</div></div>` : ''}
+        ${c.signature ? `<div><img src="${_esc(c.signature)}" style="max-width:90px;max-height:40px" /><div style="font-size:11px;color:#666;text-align:center">Authorized Signature${showAr ? ' / \u0627\u0644\u062A\u0648\u0642\u064A\u0639' : ''}</div></div>` : ''}
         ${d.sg ? `<div><div style="border-top:1px solid #999;width:120px;padding-top:2px;font-size:12px;text-align:center">${_esc(d.sg)}</div><div style="font-size:11px;color:#666;text-align:center">Signatory</div></div>` : ''}
       </div>
       <div style="position:absolute;bottom:0;left:0;right:0;padding:3mm 14mm;border-top:1px solid #ddd;font-size:11px;color:#666;display:flex;justify-content:space-between">

@@ -73,7 +73,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
           </span>
         </div>
-        <h1 className="text-xl font-bold text-center mb-1">Welcome to invoicekit</h1>
+        <h1 className="text-xl font-bold text-center mb-1">Welcome to invoicekitz</h1>
         <p className="text-sm text-[var(--color-text2)] text-center mb-6">Set up your first company to get started.</p>
 
         <div className="space-y-3">

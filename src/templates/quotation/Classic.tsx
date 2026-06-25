@@ -14,7 +14,8 @@ export function QuotationClassic(d: QuotTemplateData) {
     </tr>`
   )).join('')
 
-  const arabicBlock = c.nameAr
+  const showAr = c.showArabic && c.nameAr
+  const arabicBlock = showAr
     ? `<div style="text-align:right"><div dir="rtl" unicode-bidi="embed" style="font-size:18px;font-weight:700">${esc(c.nameAr)}</div>${c.subAr ? `<div dir="rtl" unicode-bidi="embed" style="font-size:12px;color:#666">${esc(c.subAr)}</div>` : ''}</div>`
     : ''
 

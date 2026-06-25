@@ -42,6 +42,7 @@ export interface Company {
   recTemplate: string
   quotTemplate: string
   watermark: string
+  showArabic: boolean
   createdAt: number
   updatedAt: number
 }
