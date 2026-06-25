@@ -1,9 +1,11 @@
 import { InvoiceClassic, InvoiceModern, InvoiceCompact, InvoiceMinimal, InvoiceElegant, InvoiceBold, InvoiceProfessional } from './invoice'
 import { ReceiptClassic, ReceiptModern, ReceiptCompact, ReceiptMinimal, ReceiptElegant, ReceiptBold, ReceiptProfessional } from './receipt'
-import { getInvDocData, getRecDocData, applyWatermark } from './registry'
+import { QuotationClassic, QuotationModern, QuotationCompact, QuotationMinimal, QuotationElegant, QuotationBold, QuotationProfessional } from './quotation'
+import { getInvDocData, getRecDocData, getQuotDocData, applyWatermark } from './registry'
 import type { Company } from '@/types/company'
 import type { Invoice } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
+import type { Quotation } from '@/types/quotation'
 
 export const INV_TEMPLATES: Record<string, (d: any) => string> = {
   classic: InvoiceClassic,
@@ -25,6 +27,16 @@ export const REC_TEMPLATES: Record<string, (d: any) => string> = {
   professional: ReceiptProfessional,
 }
 
+export const QUOT_TEMPLATES: Record<string, (d: any) => string> = {
+  classic: QuotationClassic,
+  modern: QuotationModern,
+  compact: QuotationCompact,
+  minimal: QuotationMinimal,
+  elegant: QuotationElegant,
+  bold: QuotationBold,
+  professional: QuotationProfessional,
+}
+
 export function buildInvoiceHTML(savedInv: Invoice | null, comp?: Company | null): string {
   const data = getInvDocData(savedInv, comp)
   if (!data) return ''
@@ -39,6 +51,15 @@ export function buildReceiptHTML(savedRec: Receipt | null, comp?: Company | null
   if (!data) return ''
   const tplName = data.comp.recTemplate || 'classic'
   const fn = REC_TEMPLATES[tplName] || REC_TEMPLATES.classic
+  const html = fn(data)
+  return applyWatermark(html, data.comp.watermark)
+}
+
+export function buildQuotationHTML(savedQuot: Quotation | null, comp?: Company | null): string {
+  const data = getQuotDocData(savedQuot, comp)
+  if (!data) return ''
+  const tplName = data.comp.quotTemplate || 'classic'
+  const fn = QUOT_TEMPLATES[tplName] || QUOT_TEMPLATES.classic
   const html = fn(data)
   return applyWatermark(html, data.comp.watermark)
 }
@@ -81,5 +102,29 @@ export function sampleRecData(comp: Company) {
     rv: 'John Doe', sg: 'Jane Smith',
     wi: 5500, fr: 0, amFmt: '5,500.00',
     chqHtml: 'Cheque: CHQ-001',
+  }
+}
+
+export function sampleQuotData(comp: Company) {
+  const data = getQuotDocData(null, comp)
+  if (!data) return null
+  return {
+    ...data,
+    no: 'QT-1',
+    dt: new Date().toISOString().slice(0, 10),
+    validDt: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+    cust: 'ABC Trading LLC',
+    addr: 'Muscat, Sultanate of Oman',
+    ph: '+968 1234 5678',
+    cr: 'CR/123456',
+    em: 'info@abctrading.com',
+    items: [
+      { desc: 'Consulting Services', qty: 40, price: 150, amount: 6000 },
+      { desc: 'Software License', qty: 2, price: 1250, amount: 2500 },
+      { desc: 'Training Session', qty: 1, price: 750, amount: 750 },
+    ],
+    sub: 9250, vp: 10, va: 925, disc: 250, grand: 9900,
+    sv: '9250.00', vv: '925.00', dv: '250.00', gv: '9900.00',
+    gw: 'Nine Thousand Nine Hundred US Dollars only',
   }
 }

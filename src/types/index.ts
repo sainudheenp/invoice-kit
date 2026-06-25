@@ -2,10 +2,11 @@ export type { Currency } from './currency'
 export type { Company } from './company'
 export type { Invoice, LineItem, Customer } from './invoice'
 export type { Receipt } from './receipt'
-export type { InvTemplateData, RecTemplateData } from './template'
+export type { Quotation } from './quotation'
+export type { InvTemplateData, RecTemplateData, QuotTemplateData } from './template'
 
 export interface EditingDoc {
-  type: 'inv' | 'rec'
+  type: 'inv' | 'rec' | 'quot'
   id: string
 }
 

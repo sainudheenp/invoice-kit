@@ -9,6 +9,7 @@ import { Svg } from '@/icons'
 import Dashboard from '@/pages/Dashboard'
 import Invoice from '@/pages/Invoice'
 import Receipt from '@/pages/Receipt'
+import QuotationPage from '@/pages/Quotation'
 import History from '@/pages/History'
 import Settings from '@/pages/Settings'
 
@@ -50,6 +51,7 @@ function AppContent() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/invoice" element={<Invoice />} />
           <Route path="/receipt" element={<Receipt />} />
+          <Route path="/quotation" element={<QuotationPage />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

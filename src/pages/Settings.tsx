@@ -30,8 +30,9 @@ function parseCo(c: Company) {
     vatReg: c.vatReg, vatPct: String(c.vatPct),
     bankName: c.bankName, bankAccName: c.bankAccName, bankAcc: c.bankAcc, bankIban: c.bankIban, bankSwift: c.bankSwift, bankBranch: c.bankBranch,
     invPref: c.invPref, invNext: String(c.invNext), recPref: c.recPref, recNext: String(c.recNext),
+    quotPref: c.quotPref, quotNext: String(c.quotNext),
     invNotes: c.invNotes, invTerms: c.invTerms, invFooter: c.invFooter, recBeing: c.recBeing,
-    invTemplate: c.invTemplate, recTemplate: c.recTemplate, watermark: c.watermark,
+    invTemplate: c.invTemplate, recTemplate: c.recTemplate, quotTemplate: c.quotTemplate, watermark: c.watermark,
     logo: c.logo, seal: c.seal, signature: c.signature,
   }
 }
@@ -97,8 +98,9 @@ export default function Settings() {
       vatReg: form.vatReg, vatPct: parseFloat(form.vatPct) || 0,
       bankName: form.bankName, bankAccName: form.bankAccName, bankAcc: form.bankAcc, bankIban: form.bankIban, bankSwift: form.bankSwift, bankBranch: form.bankBranch,
       invPref: form.invPref, invNext: parseInt(form.invNext) || 1, recPref: form.recPref, recNext: parseInt(form.recNext) || 1,
+      quotPref: form.quotPref, quotNext: parseInt(form.quotNext) || 1,
       invNotes: form.invNotes, invTerms: form.invTerms, invFooter: form.invFooter, recBeing: form.recBeing,
-      invTemplate: form.invTemplate, recTemplate: form.recTemplate, watermark: form.watermark,
+      invTemplate: form.invTemplate, recTemplate: form.recTemplate, quotTemplate: form.quotTemplate, watermark: form.watermark,
       logo: form.logo, seal: form.seal, signature: form.signature,
       updatedAt: Date.now(),
     }
@@ -177,6 +179,7 @@ export default function Settings() {
           for (const c of data.companies) await saveCompany(c)
           if (data.invoices) for (const i of data.invoices) dispatch({ type: 'UPSERT_INVOICE', payload: i })
           if (data.receipts) for (const r of data.receipts) dispatch({ type: 'UPSERT_RECEIPT', payload: r })
+          if (data.quotations) for (const q of data.quotations) dispatch({ type: 'UPSERT_QUOTATION', payload: q })
           showToast('Data imported!')
         }
       } catch { showToast('Invalid file.', 'err') }
@@ -192,12 +195,14 @@ export default function Settings() {
     window.location.reload()
   }
 
-  const handlePreview = (type: 'inv' | 'rec', tpl: string) => {
+  const handlePreview = (type: 'inv' | 'rec' | 'quot', tpl: string) => {
+    const label = type === 'inv' ? 'Invoice' : type === 'rec' ? 'Receipt' : 'Quotation'
     const data = type === 'inv'
       ? { no: 'INV-1', dt: '2025-01-01', dueDt: '2025-01-31', cust: 'ABC Trading', addr: 'Muscat, Oman', ph: '+968 1234 5678', cr: 'CR-12345', em: 'info@abc.com', notes: '', pm: 'Cash', ch: '', bk: '', disc: 250, sub: 9250, vp: 10, va: 925, grand: 9900, items: [{ desc: 'Consulting Services', qty: 40, price: 150, amount: 6000 }, { desc: 'Software License', qty: 2, price: 1250, amount: 2500 }, { desc: 'Training', qty: 1, price: 750, amount: 750 }], dp: 2, sv: '9250', vv: '925', dv: '250', gv: '9900', gw: 'Nine Thousand Nine Hundred US Dollars only', pd: '' }
-      : { no: 'RV-1', dt: '2025-01-01', rf: 'ABC Trading', am: 5500, ww: 'Five Thousand Five Hundred US Dollars only', pm: 'Cheque', ch: 'CHQ-001', bk: 'Bank Muscat', td: '2025-01-01', bg: 'Payment for services', rv: 'John Doe', sg: 'Jane Smith', dp: 2, wi: 5500, fr: 0, amFmt: '5,500.00', chqHtml: 'Cheque: CHQ-001', pc: co.pcolor, ac: co.acolor, cur: co.currency, comp: co }
-    // In a real implementation, we'd render the template component to HTML
-    showPreview(`<div style="padding:20px;font-family:Arial;color:#333"><h2>${tpl} ${type === 'inv' ? 'Invoice' : 'Receipt'} Preview</h2><p>Sample preview content</p></div>`)
+      : type === 'rec'
+      ? { no: 'RV-1', dt: '2025-01-01', rf: 'ABC Trading', am: 5500, ww: 'Five Thousand Five Hundred US Dollars only', pm: 'Cheque', ch: 'CHQ-001', bk: 'Bank Muscat', td: '2025-01-01', bg: 'Payment for services', rv: 'John Doe', sg: 'Jane Smith', dp: 2, wi: 5500, fr: 0, amFmt: '5,500.00', chqHtml: 'Cheque: CHQ-001', pc: co.pcolor, ac: co.acolor, cur: co.currency, comp: co }
+      : { no: 'QT-1', dt: '2025-01-01', validDt: '2025-01-31', cust: 'ABC Trading', addr: 'Muscat, Oman', ph: '+968 1234 5678', cr: 'CR-12345', em: 'info@abc.com', notes: '', terms: '', disc: 250, sub: 9250, vp: 10, va: 925, grand: 9900, items: [{ desc: 'Consulting Services', qty: 40, price: 150, amount: 6000 }, { desc: 'Software License', qty: 2, price: 1250, amount: 2500 }, { desc: 'Training', qty: 1, price: 750, amount: 750 }], dp: 2, sv: '9250', vv: '925', dv: '250', gv: '9900', gw: 'Nine Thousand Nine Hundred US Dollars only' }
+    showPreview(`<div style="padding:20px;font-family:Arial;color:#333"><h2>${tpl} ${label} Preview</h2><p>Sample preview content</p></div>`)
   }
 
   return (
@@ -383,6 +388,8 @@ export default function Settings() {
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Next Invoice #</label><input value={form.invNext} onChange={(e) => set('invNext', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Receipt Prefix</label><input value={form.recPref} onChange={(e) => set('recPref', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Next Receipt #</label><input value={form.recNext} onChange={(e) => set('recNext', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
+                <div><label className="text-xs font-medium text-[var(--color-text2)]">Quotation Prefix</label><input value={form.quotPref} onChange={(e) => set('quotPref', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
+                <div><label className="text-xs font-medium text-[var(--color-text2)]">Next Quotation #</label><input value={form.quotNext} onChange={(e) => set('quotNext', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
               </div>
               <h3 className="text-xs font-semibold text-[var(--color-text2)] uppercase">Defaults</h3>
               <div><label className="text-xs font-medium text-[var(--color-text2)]">Invoice Notes</label><textarea value={form.invNotes} onChange={(e) => set('invNotes', e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] resize-none" /></div>
@@ -404,6 +411,13 @@ export default function Settings() {
                     {TEMPLATE_OPTIONS.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                   </select>
                   <Button size="sm" variant="outline" className="mt-1" onClick={() => handlePreview('rec', form.recTemplate)}>Preview</Button>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-[var(--color-text2)]">Quotation Template</label>
+                  <select value={form.quotTemplate} onChange={(e) => set('quotTemplate', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]">
+                    {TEMPLATE_OPTIONS.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                  </select>
+                  <Button size="sm" variant="outline" className="mt-1" onClick={() => handlePreview('quot', form.quotTemplate)}>Preview</Button>
                 </div>
               </div>
               <div>
@@ -445,7 +459,7 @@ export default function Settings() {
           <Card id="settings-danger" data-section="danger" className="border-red/30 bg-red-bg/30">
             <CardHeader><h2 className="text-sm font-semibold text-red">Danger Zone</h2></CardHeader>
             <div className="p-5">
-              <p className="text-xs text-[var(--color-text2)] mb-4">This will permanently delete all your companies, invoices, and receipts. This action cannot be undone.</p>
+              <p className="text-xs text-[var(--color-text2)] mb-4">This will permanently delete all your companies, invoices, receipts, and quotations. This action cannot be undone.</p>
               <Button variant="danger" onClick={showResetModal}>Reset All Data</Button>
             </div>
           </Card>

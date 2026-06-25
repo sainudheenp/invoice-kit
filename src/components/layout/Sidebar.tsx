@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { page: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
   { page: 'invoice', label: 'Invoice', icon: 'file' },
   { page: 'receipt', label: 'Receipt', icon: 'receipt' },
+  { page: 'quotation', label: 'Quotation', icon: 'file' },
   { page: 'history', label: 'Documents', icon: 'clipboard' },
   { page: 'settings', label: 'Settings', icon: 'settings' },
 ] as const

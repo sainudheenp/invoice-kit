@@ -5,17 +5,20 @@ import { useUI } from '@/store/UIContext'
 import { Card, CardHeader, Button } from '@/components/ui'
 import { Svg } from '@/icons'
 import { invStatus } from '@/utils'
-import { buildInvoiceHTML, buildReceiptHTML } from '@/templates'
+import { buildInvoiceHTML, buildReceiptHTML, buildQuotationHTML } from '@/templates'
 import { capturePDF, printHTML, downloadText } from '@/utils/pdf'
 import type { Invoice } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
+import type { Quotation } from '@/types/quotation'
+
+type Tab = 'inv' | 'rec' | 'quot'
 
 export default function History() {
   const navigate = useNavigate()
-  const { state, deleteInvoice, deleteReceipt, markInvoicePaid, setEditing } = useApp()
+  const { state, deleteInvoice, deleteReceipt, deleteQuotation, markInvoicePaid, setEditing } = useApp()
   const { showToast, showPDFOverlay, hidePDFOverlay } = useUI()
   const co = state.companies.find((c) => c.id === state.activeId)
-  const [tab, setTab] = useState<'inv' | 'rec'>('inv')
+  const [tab, setTab] = useState<Tab>('inv')
   const [search, setSearch] = useState('')
 
   const invoices = state.invoices
@@ -28,15 +31,21 @@ export default function History() {
     .filter((r) => !search || r.recNo.toLowerCase().includes(search.toLowerCase()) || r.receivedFrom.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => b.createdAt - a.createdAt)
 
-  const handleEdit = (type: 'inv' | 'rec', id: string) => {
+  const quotations = state.quotations
+    .filter((q) => q.companyId === co?.id)
+    .filter((q) => !search || q.quotNo.toLowerCase().includes(search.toLowerCase()) || q.customer.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => b.createdAt - a.createdAt)
+
+  const handleEdit = (type: Tab, id: string) => {
     setEditing({ type, id })
-    navigate('/' + type)
+    navigate('/' + (type === 'quot' ? 'quotation' : type))
   }
 
-  const handleDelete = async (type: 'inv' | 'rec', id: string) => {
+  const handleDelete = async (type: Tab, id: string) => {
     if (!confirm('Delete this document?')) return
     if (type === 'inv') await deleteInvoice(id)
-    else await deleteReceipt(id)
+    else if (type === 'rec') await deleteReceipt(id)
+    else await deleteQuotation(id)
     showToast('Deleted.')
   }
 
@@ -45,40 +54,50 @@ export default function History() {
     showToast('Status updated.')
   }
 
-  const handlePrint = (type: 'inv' | 'rec', doc: Invoice | Receipt) => {
+  const handlePrint = (type: Tab, doc: Invoice | Receipt | Quotation) => {
     if (!co) { showToast('No active company.', 'err'); return }
-    const html = type === 'inv'
-      ? buildInvoiceHTML(doc as Invoice, co)
-      : buildReceiptHTML(doc as Receipt, co)
+    const html = type === 'inv' ? buildInvoiceHTML(doc as Invoice, co)
+      : type === 'rec' ? buildReceiptHTML(doc as Receipt, co)
+      : buildQuotationHTML(doc as Quotation, co)
     if (!html) { showToast('Cannot print.', 'err'); return }
     printHTML(html)
   }
 
-  const handlePDF = async (type: 'inv' | 'rec', doc: Invoice | Receipt) => {
+  const handlePDF = async (type: Tab, doc: Invoice | Receipt | Quotation) => {
     if (!co) { showToast('No active company.', 'err'); return }
     showPDFOverlay()
     try {
-      const html = type === 'inv'
-        ? buildInvoiceHTML(doc as Invoice, co)
-        : buildReceiptHTML(doc as Receipt, co)
+      const html = type === 'inv' ? buildInvoiceHTML(doc as Invoice, co)
+        : type === 'rec' ? buildReceiptHTML(doc as Receipt, co)
+        : buildQuotationHTML(doc as Quotation, co)
       if (!html) { showToast('Cannot generate PDF.', 'err'); hidePDFOverlay(); return }
-      const name = type === 'inv' ? (doc as Invoice).invNo : (doc as Receipt).recNo
+      const name = type === 'inv' ? (doc as Invoice).invNo
+        : type === 'rec' ? (doc as Receipt).recNo
+        : (doc as Quotation).quotNo
       await capturePDF(html, name || 'document')
     } catch { showToast('PDF generation failed.', 'err') }
     hidePDFOverlay()
   }
 
-  const handleText = (type: 'inv' | 'rec', doc: Invoice | Receipt) => {
+  const handleText = (type: Tab, doc: Invoice | Receipt | Quotation) => {
     if (!co) { showToast('No active company.', 'err'); return }
-    const html = type === 'inv'
-      ? buildInvoiceHTML(doc as Invoice, co)
-      : buildReceiptHTML(doc as Receipt, co)
+    const html = type === 'inv' ? buildInvoiceHTML(doc as Invoice, co)
+      : type === 'rec' ? buildReceiptHTML(doc as Receipt, co)
+      : buildQuotationHTML(doc as Quotation, co)
     if (!html) { showToast('Cannot export text.', 'err'); return }
-    const name = type === 'inv' ? (doc as Invoice).invNo : (doc as Receipt).recNo
+    const name = type === 'inv' ? (doc as Invoice).invNo
+      : type === 'rec' ? (doc as Receipt).recNo
+      : (doc as Quotation).quotNo
     downloadText(html, name || 'document')
   }
 
-  const count = tab === 'inv' ? invoices.length : receipts.length
+  const count = tab === 'inv' ? invoices.length : tab === 'rec' ? receipts.length : quotations.length
+
+  const tabBtn = (t: Tab, label: string) => (
+    <button onClick={() => setTab(t)} className={`px-3 py-1.5 text-xs rounded-full font-medium cursor-pointer transition-colors ${tab === t ? 'bg-[var(--color-primary)] text-white' : 'border border-[var(--color-border)] hover:bg-[var(--color-input-bg)]'}`}>
+      {label}
+    </button>
+  )
 
   return (
     <div>
@@ -95,12 +114,9 @@ export default function History() {
 
         <div className="px-5 py-3 border-b border-[var(--color-border)] flex items-center gap-3 flex-wrap">
           <div className="flex gap-2">
-            <button onClick={() => setTab('inv')} className={`px-3 py-1.5 text-xs rounded-full font-medium cursor-pointer transition-colors ${tab === 'inv' ? 'bg-[var(--color-primary)] text-white' : 'border border-[var(--color-border)] hover:bg-[var(--color-input-bg)]'}`}>
-              Invoices
-            </button>
-            <button onClick={() => setTab('rec')} className={`px-3 py-1.5 text-xs rounded-full font-medium cursor-pointer transition-colors ${tab === 'rec' ? 'bg-[var(--color-primary)] text-white' : 'border border-[var(--color-border)] hover:bg-[var(--color-input-bg)]'}`}>
-              Receipts
-            </button>
+            {tabBtn('inv', 'Invoices')}
+            {tabBtn('rec', 'Receipts')}
+            {tabBtn('quot', 'Quotations')}
           </div>
           <div className="relative flex-1 max-w-xs ml-auto">
             <Svg name="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text3)]" />
@@ -169,7 +185,7 @@ export default function History() {
                 })}
               </tbody>
             </table>
-          ) : (
+          ) : tab === 'rec' ? (
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--color-border)] text-[var(--color-text2)] text-xs">
@@ -205,6 +221,50 @@ export default function History() {
                           <Svg name="edit" />
                         </button>
                         <button onClick={() => handleDelete('rec', rec.id)} className="p-1.5 rounded-lg hover:bg-red-bg text-red cursor-pointer" title="Delete">
+                          <Svg name="trash" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--color-border)] text-[var(--color-text2)] text-xs">
+                  <th className="py-3 px-4 text-left">#</th>
+                  <th className="py-3 px-4 text-left">Date</th>
+                  <th className="py-3 px-4 text-left">Customer</th>
+                  <th className="py-3 px-4 text-right">Amount</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quotations.length === 0 && (
+                  <tr><td colSpan={5} className="py-8 text-center text-[var(--color-text3)] text-sm">No quotations yet.</td></tr>
+                )}
+                {quotations.map((q) => (
+                  <tr key={q.id} className="border-b border-[var(--color-border)]/50 hover:bg-[var(--color-input-bg)]/50">
+                    <td className="py-2.5 px-4 font-medium">{q.quotNo}</td>
+                    <td className="py-2.5 px-4 text-[var(--color-text2)]">{q.date}</td>
+                    <td className="py-2.5 px-4">{q.customer.name}</td>
+                    <td className="py-2.5 px-4 text-right font-medium">{co?.currency.symbol}{q.grand.toFixed(2)}</td>
+                    <td className="py-2.5 px-4">
+                      <div className="flex gap-1 justify-end">
+                        <button onClick={() => handlePrint('quot', q)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Print">
+                          <Svg name="print" />
+                        </button>
+                        <button onClick={() => handlePDF('quot', q)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Download PDF">
+                          <Svg name="download" />
+                        </button>
+                        <button onClick={() => handleText('quot', q)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Export Text">
+                          <Svg name="file" />
+                        </button>
+                        <button onClick={() => handleEdit('quot', q.id)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Edit">
+                          <Svg name="edit" />
+                        </button>
+                        <button onClick={() => handleDelete('quot', q.id)} className="p-1.5 rounded-lg hover:bg-red-bg text-red cursor-pointer" title="Delete">
                           <Svg name="trash" />
                         </button>
                       </div>

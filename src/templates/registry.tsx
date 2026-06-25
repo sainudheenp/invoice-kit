@@ -1,7 +1,8 @@
 import type { Company } from '@/types/company'
 import type { Invoice, LineItem } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
-import type { InvTemplateData, RecTemplateData } from '@/types/template'
+import type { Quotation } from '@/types/quotation'
+import type { InvTemplateData, RecTemplateData, QuotTemplateData } from '@/types/template'
 import { num2words, dp, fmtAmount, esc } from '@/utils'
 
 export function getInvDocData(savedInv: Invoice | null, comp?: Company | null): InvTemplateData | null {
@@ -85,6 +86,51 @@ export function getRecDocData(savedRec: Receipt | null, comp?: Company | null): 
     fr: frac,
     amFmt: fmtAmount(amount, d),
     chqHtml: saved?.payMethod === 'Cheque' && saved?.chequeNo ? `Cheque: ${esc(saved.chequeNo)}` : '',
+  }
+}
+
+export function getQuotDocData(savedQuot: Quotation | null, comp?: Company | null): QuotTemplateData | null {
+  const c = comp || null
+  if (!c) return null
+  const cur = c.currency
+  const d = dp(cur.subPer)
+  const saved = savedQuot
+
+  const items: LineItem[] = saved
+    ? saved.items
+    : []
+
+  const subtotal = saved ? saved.subtotal : items.reduce((s, i) => s + i.amount, 0)
+  const vatPct = saved ? saved.vatPct : 0
+  const vatAmt = saved ? saved.vatAmt : (vatPct > 0 ? subtotal * vatPct / 100 : 0)
+  const discount = saved ? saved.discount : 0
+  const grand = saved ? saved.grand : (subtotal - discount + vatAmt)
+
+  return {
+    comp: c,
+    cur,
+    no: saved?.quotNo || '',
+    dt: saved?.date || '',
+    validDt: saved?.validUntil || '',
+    cust: saved?.customer?.name || '',
+    addr: saved?.customer?.address || '',
+    ph: saved?.customer?.phone || '',
+    cr: saved?.customer?.cr || '',
+    em: saved?.customer?.email || '',
+    notes: saved?.notes || '',
+    terms: saved?.terms || '',
+    disc: discount,
+    sub: subtotal,
+    vp: vatPct,
+    va: vatAmt,
+    grand,
+    items,
+    dp: d,
+    sv: fmtAmount(subtotal, d),
+    vv: fmtAmount(vatAmt, d),
+    dv: fmtAmount(discount, d),
+    gv: fmtAmount(grand, d),
+    gw: grand > 0 ? num2words(grand, cur) + ' only' : '',
   }
 }
 

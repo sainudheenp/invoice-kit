@@ -19,9 +19,9 @@ export function defCompany(name?: string): Company {
     currency: { ...CUR_PRESETS.OMR },
     vatReg: '', vatPct: 0,
     bankName: '', bankAccName: '', bankAcc: '', bankIban: '', bankSwift: '', bankBranch: '',
-    invPref: 'INV-', invNext: 1, recPref: 'RV-', recNext: 1,
+    invPref: 'INV-', invNext: 1, recPref: 'RV-', recNext: 1, quotPref: 'QT-', quotNext: 1,
     invNotes: '', invTerms: '', invFooter: '', recBeing: '',
-    invTemplate: 'classic', recTemplate: 'classic', watermark: '',
+    invTemplate: 'classic', recTemplate: 'classic', quotTemplate: 'classic', watermark: '',
     createdAt: now, updatedAt: now,
   }
 }

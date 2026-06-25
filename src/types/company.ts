@@ -32,12 +32,15 @@ export interface Company {
   invNext: number
   recPref: string
   recNext: number
+  quotPref: string
+  quotNext: number
   invNotes: string
   invTerms: string
   invFooter: string
   recBeing: string
   invTemplate: string
   recTemplate: string
+  quotTemplate: string
   watermark: string
   createdAt: number
   updatedAt: number

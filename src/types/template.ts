@@ -55,3 +55,30 @@ export interface RecTemplateData {
   amFmt: string
   chqHtml: string
 }
+
+export interface QuotTemplateData {
+  comp: Company
+  cur: Currency
+  no: string
+  dt: string
+  validDt: string
+  cust: string
+  addr: string
+  ph: string
+  cr: string
+  em: string
+  notes: string
+  terms: string
+  disc: number
+  sub: number
+  vp: number
+  va: number
+  grand: number
+  items: LineItem[]
+  dp: number
+  sv: string
+  vv: string
+  dv: string
+  gv: string
+  gw: string
+}

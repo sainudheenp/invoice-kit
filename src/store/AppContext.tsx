@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useEffect, useState, type ReactN
 import type { Company } from '@/types/company'
 import type { Invoice, LineItem, Customer } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
+import type { Quotation } from '@/types/quotation'
 import type { EditingDoc } from '@/types'
 import { db } from '@/db'
 import { uid } from '@/utils/uid'
@@ -10,6 +11,7 @@ interface AppState {
   companies: Company[]
   invoices: Invoice[]
   receipts: Receipt[]
+  quotations: Quotation[]
   activeId: string | null
   editingDoc: EditingDoc | null
 }
@@ -23,6 +25,8 @@ type AppAction =
   | { type: 'REMOVE_INVOICE'; payload: string }
   | { type: 'UPSERT_RECEIPT'; payload: Receipt }
   | { type: 'REMOVE_RECEIPT'; payload: string }
+  | { type: 'UPSERT_QUOTATION'; payload: Quotation }
+  | { type: 'REMOVE_QUOTATION'; payload: string }
   | { type: 'SET_EDITING'; payload: EditingDoc | null }
   | { type: 'RESET' }
 
@@ -59,10 +63,19 @@ function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'REMOVE_RECEIPT':
       return { ...state, receipts: state.receipts.filter((r) => r.id !== action.payload) }
+    case 'UPSERT_QUOTATION': {
+      const idx = state.quotations.findIndex((q) => q.id === action.payload.id)
+      const quotations = idx >= 0
+        ? state.quotations.map((q, n) => (n === idx ? action.payload : q))
+        : [...state.quotations, action.payload]
+      return { ...state, quotations }
+    }
+    case 'REMOVE_QUOTATION':
+      return { ...state, quotations: state.quotations.filter((q) => q.id !== action.payload) }
     case 'SET_EDITING':
       return { ...state, editingDoc: action.payload }
     case 'RESET':
-      return { companies: [], invoices: [], receipts: [], activeId: null, editingDoc: null }
+      return { companies: [], invoices: [], receipts: [], quotations: [], activeId: null, editingDoc: null }
     default:
       return state
   }
@@ -72,6 +85,7 @@ const initialState: AppState = {
   companies: [],
   invoices: [],
   receipts: [],
+  quotations: [],
   activeId: null,
   editingDoc: null,
 }
@@ -89,6 +103,8 @@ interface AppContextValue {
   markInvoicePaid: (id: string) => Promise<void>
   saveReceipt: (rec: Receipt) => Promise<void>
   deleteReceipt: (id: string) => Promise<void>
+  saveQuotation: (quot: Quotation) => Promise<void>
+  deleteQuotation: (id: string) => Promise<void>
   setEditing: (doc: EditingDoc | null) => void
   resetAll: () => Promise<void>
   createInvoice: (company: Company, form: {
@@ -103,6 +119,12 @@ interface AppContextValue {
     payMethod: string; chequeNo: string; bankName: string; transDate: string
     being: string; receiver: string; signatory: string
   }) => Promise<Receipt>
+  createQuotation: (company: Company, form: {
+    quotNo: string; date: string; validUntil: string
+    customer: Customer; items: LineItem[]
+    subtotal: number; vatPct: number; vatAmt: number; discount: number; grand: number
+    notes: string; terms: string
+  }) => Promise<Quotation>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -114,10 +136,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function init() {
       try {
-        const [companies, invoices, receipts] = await Promise.all([
+        const [companies, invoices, receipts, quotations] = await Promise.all([
           db.companies.toArray(),
           db.invoices.toArray(),
           db.receipts.toArray(),
+          db.quotations.toArray(),
         ])
         let activeId: string | null = null
         const stored = sessionStorage.getItem('dg_activeId')
@@ -126,7 +149,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         } else if (companies.length > 0) {
           activeId = companies[0].id
         }
-        dispatch({ type: 'SET_ALL', payload: { companies, invoices, receipts, activeId, editingDoc: null } })
+        dispatch({ type: 'SET_ALL', payload: { companies, invoices, receipts, quotations, activeId, editingDoc: null } })
       } catch (err) {
         console.error('Failed to load DB:', err)
       } finally {
@@ -149,14 +172,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteCompany = async (id: string) => {
     const invs = state.invoices.filter((i) => i.companyId === id)
     const recs = state.receipts.filter((r) => r.companyId === id)
+    const quots = state.quotations.filter((q) => q.companyId === id)
     await Promise.all([
       db.companies.delete(id),
       ...invs.map((i) => db.invoices.delete(i.id)),
       ...recs.map((r) => db.receipts.delete(r.id)),
+      ...quots.map((q) => db.quotations.delete(q.id)),
     ])
     dispatch({ type: 'REMOVE_COMPANY', payload: id })
     invs.forEach((i) => dispatch({ type: 'REMOVE_INVOICE', payload: i.id }))
     recs.forEach((r) => dispatch({ type: 'REMOVE_RECEIPT', payload: r.id }))
+    quots.forEach((q) => dispatch({ type: 'REMOVE_QUOTATION', payload: q.id }))
   }
 
   const setActive = (id: string) => {
@@ -190,6 +216,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteReceipt = async (id: string) => {
     await db.receipts.delete(id)
     dispatch({ type: 'REMOVE_RECEIPT', payload: id })
+  }
+
+  const saveQuotation = async (quot: Quotation) => {
+    await db.quotations.put(quot)
+    dispatch({ type: 'UPSERT_QUOTATION', payload: quot })
+  }
+
+  const deleteQuotation = async (id: string) => {
+    await db.quotations.delete(id)
+    dispatch({ type: 'REMOVE_QUOTATION', payload: id })
   }
 
   const setEditing = (doc: EditingDoc | null) => {
@@ -265,14 +301,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return rec
   }
 
+  const createQuotation = async (company: Company, form: {
+    quotNo: string; date: string; validUntil: string
+    customer: Customer; items: LineItem[]
+    subtotal: number; vatPct: number; vatAmt: number; discount: number; grand: number
+    notes: string; terms: string
+  }): Promise<Quotation> => {
+    const now = Date.now()
+    const editing = state.editingDoc?.type === 'quot' ? state.editingDoc.id : null
+    const quot: Quotation = {
+      id: editing || uid(),
+      companyId: company.id,
+      quotNo: form.quotNo,
+      date: form.date,
+      validUntil: form.validUntil,
+      customer: form.customer,
+      items: form.items,
+      subtotal: form.subtotal,
+      vatPct: form.vatPct,
+      vatAmt: form.vatAmt,
+      discount: form.discount,
+      grand: form.grand,
+      notes: form.notes,
+      terms: form.terms,
+      createdAt: now,
+    }
+    await db.quotations.put(quot)
+    dispatch({ type: 'UPSERT_QUOTATION', payload: quot })
+    return quot
+  }
+
   return (
     <AppContext.Provider value={{
       state, dispatch, loading,
       getCo, saveCompany, deleteCompany, setActive,
       saveInvoice, deleteInvoice, markInvoicePaid,
       saveReceipt, deleteReceipt,
+      saveQuotation, deleteQuotation,
       setEditing, resetAll,
-      createInvoice, createReceipt,
+      createInvoice, createReceipt, createQuotation,
     }}>
       {children}
     </AppContext.Provider>
