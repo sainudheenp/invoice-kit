@@ -9,7 +9,7 @@ import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { QuotationSummary } from '@/components/quotation/QuotationSummary'
 import { num2words, dp as getDp } from '@/utils'
 import { buildQuotationHTML } from '@/templates'
-import { capturePDF, printHTML, downloadText } from '@/utils/pdf'
+import { createQuotationPDF, printHTML, downloadText } from '@/utils/pdf'
 import type { LineItem, Customer } from '@/types/invoice'
 import type { Quotation } from '@/types/quotation'
 
@@ -169,9 +169,7 @@ export default function QuotationPage() {
     if (!co) { showToast('No active company.', 'err'); return }
     showPDFOverlay()
     try {
-      const html = buildQuotationHTML(buildTempQuotation(), co)
-      if (!html) { showToast('Cannot generate PDF.', 'err'); hidePDFOverlay(); return }
-      await capturePDF(html, form.quotNo || 'quotation')
+      await createQuotationPDF(buildTempQuotation(), co)
     } catch { showToast('PDF generation failed.', 'err') }
     hidePDFOverlay()
   }

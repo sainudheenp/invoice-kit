@@ -96,6 +96,11 @@ export function sampleRecData(comp: Company) {
     no: 'RV-1',
     dt: new Date().toISOString().slice(0, 10),
     rf: 'ABC Trading LLC',
+    items: [
+      { desc: 'Consulting Services', qty: 40, price: 150, amount: 6000 },
+      { desc: 'Software License', qty: 2, price: 1250, amount: 2500 },
+      { desc: 'Training Session', qty: 1, price: 750, amount: 750 },
+    ],
     am: 5500, ww: 'Five Thousand Five Hundred US Dollars only',
     pm: 'Cheque', ch: 'CHQ-001', bk: 'Bank Muscat', td: new Date().toISOString().slice(0, 10),
     bg: 'Payment for consulting services',

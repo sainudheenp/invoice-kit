@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Svg } from '@/icons'
+import { Card, CardHeader } from '@/components/ui/Card'
 
 const ACTIONS = [
   { page: 'invoice', label: 'New Invoice', sub: 'Create a tax invoice', icon: 'file' },
@@ -11,9 +12,11 @@ const ACTIONS = [
 export function QuickActions() {
   const navigate = useNavigate()
   return (
-    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm p-5 mb-6">
-      <h2 className="text-sm font-semibold mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <Card className="mb-6">
+      <CardHeader>
+        <h2 className="text-sm font-semibold">Quick Actions</h2>
+      </CardHeader>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-5">
         {ACTIONS.map((a) => (
           <button
             key={a.page}
@@ -30,6 +33,6 @@ export function QuickActions() {
           </button>
         ))}
       </div>
-    </div>
+    </Card>
   )
 }

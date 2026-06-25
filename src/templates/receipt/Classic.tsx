@@ -15,6 +15,15 @@ export function ReceiptClassic(d: RecTemplateData) {
 
   const altRow = (idx: number) => idx % 2 === 1 ? ' style="background:#fafafa"' : ''
 
+  const itemsRows = d.items.length > 0 ? d.items.map((item, i) => `
+    <tr${altRow(i)}>
+      <td style="padding:6px 10px;color:#888">${i + 1}</td>
+      <td style="padding:6px 10px" colspan="2">${_esc(item.desc)}</td>
+      <td style="padding:6px 10px;text-align:right;direction:ltr">${item.qty} x ${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:6px 10px;text-align:right;font-weight:600">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
+    </tr>
+  `).join('') : ''
+
   const detailRows = [
     ['Received from', _esc(d.rf), '\u0627\u0633\u062A\u0644\u0645\u062A \u0645\u0646'],
     ['Amount', _esc(d.ww), '\u0628\u0645\u0628\u0644\u063A \u0642\u062F\u0631\u0647'],
@@ -56,6 +65,19 @@ export function ReceiptClassic(d: RecTemplateData) {
         </div>
       </div>
       <div style="border-bottom:1px solid #eee;margin:0 14mm"></div>
+      ${itemsRows ? `
+      <div style="padding:2mm 14mm">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:2px solid #ddd;font-size:11px;color:#999">
+              <th style="padding:6px 10px;text-align:left">#</th><th style="padding:6px 10px;text-align:left" colspan="2">Description</th><th style="padding:6px 10px;text-align:right">Rate</th><th style="padding:6px 10px;text-align:right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>${itemsRows}</tbody>
+        </table>
+      </div>
+      <div style="border-bottom:1px solid #eee;margin:0 14mm"></div>
+      ` : ''}
       <div style="padding:4mm 14mm">
         <table style="width:100%;border-collapse:collapse;font-size:13px">
           ${detailRows.map((row, i) => `

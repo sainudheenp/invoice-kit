@@ -1,5 +1,6 @@
 import { useApp } from '@/store/AppContext'
 import { Svg } from '@/icons'
+import { Card } from '@/components/ui/Card'
 
 export function StatsGrid() {
   const { state } = useApp()
@@ -18,7 +19,7 @@ export function StatsGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       {stats.map((s) => (
-        <div key={s.label} className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm overflow-hidden">
+        <Card key={s.label} className="overflow-hidden">
           <div className="p-5 flex items-center gap-4">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.bar} text-white`}>
               <Svg name={s.icon} />
@@ -29,7 +30,7 @@ export function StatsGrid() {
             </div>
           </div>
           <div className={`h-1 ${s.bar}`} />
-        </div>
+        </Card>
       ))}
     </div>
   )

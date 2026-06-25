@@ -1,9 +1,12 @@
+import type { LineItem } from './invoice'
+
 export interface Receipt {
   id: string
   companyId: string
   recNo: string
   date: string
   receivedFrom: string
+  items: LineItem[]
   amount: number
   amountWords: string
   payMethod: string

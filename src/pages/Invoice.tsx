@@ -9,7 +9,7 @@ import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { InvoiceSummary } from '@/components/invoice/InvoiceSummary'
 import { num2words, dp as getDp } from '@/utils'
 import { buildInvoiceHTML } from '@/templates'
-import { capturePDF, printHTML, downloadText } from '@/utils/pdf'
+import { createInvoicePDF, printHTML, downloadText } from '@/utils/pdf'
 import type { LineItem, Customer, Invoice } from '@/types/invoice'
 
 interface InvoiceFormState {
@@ -181,9 +181,7 @@ export default function Invoice() {
     if (!co) { showToast('No active company.', 'err'); return }
     showPDFOverlay()
     try {
-      const html = buildInvoiceHTML(buildTempInvoice(), co)
-      if (!html) { showToast('Cannot generate PDF.', 'err'); hidePDFOverlay(); return }
-      await capturePDF(html, form.invNo || 'invoice')
+      await createInvoicePDF(buildTempInvoice(), co)
     } catch { showToast('PDF generation failed.', 'err') }
     hidePDFOverlay()
   }

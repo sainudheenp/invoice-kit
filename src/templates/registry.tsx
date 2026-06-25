@@ -60,7 +60,11 @@ export function getRecDocData(savedRec: Receipt | null, comp?: Company | null): 
   const d = dp(cur.subPer)
   const saved = savedRec
 
-  const amount = saved?.amount || 0
+  const items: LineItem[] = saved
+    ? saved.items
+    : []
+
+  const amount = saved?.amount || items.reduce((s, i) => s + i.amount, 0)
   const whole = Math.floor(amount)
   const frac = Math.round((amount - whole) * cur.subPer)
 
@@ -72,6 +76,7 @@ export function getRecDocData(savedRec: Receipt | null, comp?: Company | null): 
     no: saved?.recNo || '',
     dt: saved?.date || '',
     rf: saved?.receivedFrom || '',
+    items,
     am: amount,
     ww: saved?.amountWords || (amount > 0 ? num2words(amount, cur) + ' only' : ''),
     pm: saved?.payMethod || '',

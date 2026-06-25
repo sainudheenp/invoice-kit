@@ -1,4 +1,5 @@
 import { useApp } from '@/store/AppContext'
+import { Card, CardHeader } from '@/components/ui/Card'
 
 export function ActiveCompany() {
   const { state } = useApp()
@@ -6,13 +7,13 @@ export function ActiveCompany() {
   if (!co) return null
 
   return (
-    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm overflow-hidden">
-      <div className="px-5 py-3 border-b border-[var(--color-border)] flex items-center justify-between">
+    <Card className="overflow-hidden">
+      <CardHeader className="px-5 py-3">
         <h2 className="text-sm font-semibold">Active Company</h2>
         <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] font-medium">
           {co.currency.code} {co.currency.symbol}
         </span>
-      </div>
+      </CardHeader>
       <div className="p-5 flex items-start gap-4">
         {co.logo ? (
           <img src={co.logo} alt="" className="w-14 h-14 rounded-xl object-contain border border-[var(--color-border)]" />
@@ -33,6 +34,6 @@ export function ActiveCompany() {
           )}
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

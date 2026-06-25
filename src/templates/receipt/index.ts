@@ -17,6 +17,31 @@ function genericReceipt(name: string, d: RecTemplateData): string {
     ? html.replace('</div>', `<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none;z-index:999;font-size:80px;font-weight:900;color:rgba(128,128,128,0.15);transform:rotate(-30deg);text-transform:uppercase">${esc(d.comp.watermark)}</div></div>`)
     : html
 
+  const itemsHtml = d.items.length > 0 ? `
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:4mm">
+      <thead>
+        <tr style="border-bottom:2px solid #ddd;font-size:11px;color:#999;text-transform:uppercase">
+          <th style="padding:6px 8px;text-align:left">#</th>
+          <th style="padding:6px 8px;text-align:left">Description</th>
+          <th style="padding:6px 8px;text-align:right">Qty</th>
+          <th style="padding:6px 8px;text-align:right">Price</th>
+          <th style="padding:6px 8px;text-align:right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${d.items.map((item, i) => `
+          <tr style="border-bottom:1px solid #eee">
+            <td style="padding:6px 8px;color:#999">${i + 1}</td>
+            <td style="padding:6px 8px">${esc(item.desc)}</td>
+            <td style="padding:6px 8px;text-align:right">${item.qty}</td>
+            <td style="padding:6px 8px;text-align:right">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+            <td style="padding:6px 8px;text-align:right;font-weight:600">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  ` : ''
+
   return wrap(`
     <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;position:relative;background:#fff;min-height:100vh;padding:12mm 14mm">
       <div style="text-align:center;margin-bottom:6mm">
@@ -33,6 +58,7 @@ function genericReceipt(name: string, d: RecTemplateData): string {
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999">Received From</div>
         <div style="font-weight:600">${esc(d.rf)}</div>
       </div>
+      ${itemsHtml}
       <div style="background:#f9fafb;border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:4mm">
         <div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px">Amount</div>
         <div style="font-size:12px;color:#666;font-style:italic">${esc(d.ww)}</div>

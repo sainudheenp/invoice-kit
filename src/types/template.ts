@@ -40,6 +40,7 @@ export interface RecTemplateData {
   no: string
   dt: string
   rf: string
+  items: LineItem[]
   am: number
   ww: string
   pm: string
