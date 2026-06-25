@@ -5,6 +5,9 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Card, CardHeader, Button } from '@/components/ui'
 import { ReceiptSummary } from '@/components/receipt/ReceiptSummary'
 import { num2words, dp as getDp } from '@/utils'
+import { buildReceiptHTML } from '@/templates'
+import { capturePDF, printHTML, downloadText } from '@/utils/pdf'
+import type { Receipt } from '@/types/receipt'
 
 interface ReceiptFormState {
   recNo: string

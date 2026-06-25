@@ -66,8 +66,8 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-[var(--color-page-bg)] p-4">
-      <div className="w-full max-w-md bg-[var(--color-card)] rounded-2xl shadow-lg p-8">
+    <div className="fixed inset-0 z-[99999] flex items-start sm:items-center justify-center bg-[var(--color-page-bg)] p-3 sm:p-4 overflow-y-auto">
+      <div className="w-full max-w-xl bg-[var(--color-card)] rounded-2xl shadow-lg p-5 sm:p-8 my-4">
         <div className="flex justify-center mb-4">
           <span className="text-4xl text-[var(--color-primary)]">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
@@ -77,7 +77,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
         <p className="text-sm text-[var(--color-text2)] text-center mb-6">Set up your first company to get started.</p>
 
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-[var(--color-text2)]">Company Name *</label>
               <input value={form.name} onChange={(e) => set('name', e.target.value)} autoFocus className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
@@ -88,7 +88,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-[var(--color-text2)]">Subtitle</label>
               <input value={form.sub} onChange={(e) => set('sub', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
@@ -99,7 +99,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-[var(--color-text2)]">Telephone</label>
               <input value={form.tel} onChange={(e) => set('tel', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
@@ -110,7 +110,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-[var(--color-text2)]">Email</label>
               <input value={form.email} onChange={(e) => set('email', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />

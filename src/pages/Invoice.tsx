@@ -8,7 +8,9 @@ import { Card, CardHeader, Button } from '@/components/ui'
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { InvoiceSummary } from '@/components/invoice/InvoiceSummary'
 import { num2words, dp as getDp } from '@/utils'
-import type { LineItem, Customer } from '@/types/invoice'
+import { buildInvoiceHTML } from '@/templates'
+import { capturePDF, printHTML, downloadText } from '@/utils/pdf'
+import type { LineItem, Customer, Invoice } from '@/types/invoice'
 
 interface InvoiceFormState {
   invNo: string
@@ -41,7 +43,7 @@ const emptyForm = (): InvoiceFormState => ({
 export default function Invoice() {
   const navigate = useNavigate()
   const { state, getCo, saveCompany, createInvoice, setEditing, deleteInvoice } = useApp()
-  const { markDirty, markClean, showToast, closeSidebar } = useUI()
+  const { markDirty, markClean, showToast, closeSidebar, showPDFOverlay, hidePDFOverlay } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()
   const co = getCo()
   const [form, setForm] = useState<InvoiceFormState>(emptyForm)
@@ -146,6 +148,48 @@ export default function Invoice() {
   }
 
   useKeyboardShortcuts({ s: handleSave, enter: handleSave })
+
+  const buildTempInvoice = (): Invoice => ({
+    id: '',
+    companyId: co?.id || '',
+    invNo: form.invNo,
+    date: form.date,
+    dueDate: form.dueDate,
+    paid: false,
+    customer,
+    items: form.items,
+    subtotal, vatPct: form.vatPct, vatAmt, discount: form.discount, grand,
+    notes: form.notes,
+    payMethod: form.payMethod,
+    payDetails: form.chequeNo,
+    bankName: form.bankName,
+    createdAt: Date.now(),
+  })
+
+  const handlePrint = async () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = buildInvoiceHTML(buildTempInvoice(), co)
+    if (!html) { showToast('Cannot print empty invoice.', 'err'); return }
+    await printHTML(html)
+  }
+
+  const handlePDF = async () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    showPDFOverlay()
+    try {
+      const html = buildInvoiceHTML(buildTempInvoice(), co)
+      if (!html) { showToast('Cannot generate PDF.', 'err'); hidePDFOverlay(); return }
+      await capturePDF(html, form.invNo || 'invoice')
+    } catch { showToast('PDF generation failed.', 'err') }
+    hidePDFOverlay()
+  }
+
+  const handleText = () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = buildInvoiceHTML(buildTempInvoice(), co)
+    if (!html) { showToast('Cannot export text.', 'err'); return }
+    downloadText(html, form.invNo || 'invoice')
+  }
 
   const showCheque = form.payMethod === 'Cheque'
   const showBank = form.payMethod === 'Cheque' || form.payMethod === 'Bank Transfer'
@@ -303,6 +347,9 @@ export default function Invoice() {
             <Button onClick={handleSave} className="justify-center w-full">
               {isEditing ? 'Update Invoice' : 'Save Invoice'}
             </Button>
+            <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
+            <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
+            <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
           </div>
         </div>
       </div>
