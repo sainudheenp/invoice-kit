@@ -327,10 +327,12 @@ export default function QuotationPage() {
             <Button onClick={handleSave} className="justify-center w-full">
               {isEditing ? 'Update Quotation' : 'Save Quotation'}
             </Button>
-            <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
-            <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
-            <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
-            <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center">Preview</Button>
+              <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center">Print</Button>
+              <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center">PDF</Button>
+              <Button variant="outline" size="sm" onClick={handleText} className="justify-center">Text</Button>
+            </div>
           </div>
         </div>
       </div>

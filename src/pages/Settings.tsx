@@ -5,6 +5,8 @@ import { Card, CardHeader, Button, Modal } from '@/components/ui'
 import { Svg } from '@/icons'
 import { CUR_PRESETS } from '@/utils/currencyPresets'
 import { defCompany } from '@/utils/defCompany'
+import { sampleInvData, sampleRecData, sampleQuotData, INV_TEMPLATES, REC_TEMPLATES, QUOT_TEMPLATES } from '@/templates'
+import { applyWatermark } from '@/templates/registry'
 import type { Company } from '@/types/company'
 
 const SECTIONS = [
@@ -48,6 +50,7 @@ export default function Settings() {
   const [status, setStatus] = useState('')
   const [statusType, setStatusType] = useState<'ok' | 'err'>('ok')
   const [resetConfirm, setResetConfirm] = useState('')
+  const [templatePreviewMeta, setTemplatePreviewMeta] = useState<{ type: 'inv' | 'rec' | 'quot'; tpl: string } | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const [form, setForm] = useState(co ? parseCo(co) : null)
@@ -201,13 +204,31 @@ export default function Settings() {
   }
 
   const handlePreview = (type: 'inv' | 'rec' | 'quot', tpl: string) => {
-    const label = type === 'inv' ? 'Invoice' : type === 'rec' ? 'Receipt' : 'Quotation'
-    const data = type === 'inv'
-      ? { no: 'INV-1', dt: '2025-01-01', dueDt: '2025-01-31', cust: 'ABC Trading', addr: 'Muscat, Oman', ph: '+968 1234 5678', cr: 'CR-12345', em: 'info@abc.com', notes: '', pm: 'Cash', ch: '', bk: '', disc: 250, sub: 9250, vp: 10, va: 925, grand: 9900, items: [{ desc: 'Consulting Services', qty: 40, price: 150, amount: 6000 }, { desc: 'Software License', qty: 2, price: 1250, amount: 2500 }, { desc: 'Training', qty: 1, price: 750, amount: 750 }], dp: 2, sv: '9250', vv: '925', dv: '250', gv: '9900', gw: 'Nine Thousand Nine Hundred US Dollars only', pd: '' }
-      : type === 'rec'
-      ? { no: 'RV-1', dt: '2025-01-01', rf: 'ABC Trading', am: 5500, ww: 'Five Thousand Five Hundred US Dollars only', pm: 'Cheque', ch: 'CHQ-001', bk: 'Bank Muscat', td: '2025-01-01', bg: 'Payment for services', rv: 'John Doe', sg: 'Jane Smith', dp: 2, wi: 5500, fr: 0, amFmt: '5,500.00', chqHtml: 'Cheque: CHQ-001', pc: co.pcolor, ac: co.acolor, cur: co.currency, comp: co }
-      : { no: 'QT-1', dt: '2025-01-01', validDt: '2025-01-31', cust: 'ABC Trading', addr: 'Muscat, Oman', ph: '+968 1234 5678', cr: 'CR-12345', em: 'info@abc.com', notes: '', terms: '', disc: 250, sub: 9250, vp: 10, va: 925, grand: 9900, items: [{ desc: 'Consulting Services', qty: 40, price: 150, amount: 6000 }, { desc: 'Software License', qty: 2, price: 1250, amount: 2500 }, { desc: 'Training', qty: 1, price: 750, amount: 750 }], dp: 2, sv: '9250', vv: '925', dv: '250', gv: '9900', gw: 'Nine Thousand Nine Hundred US Dollars only' }
-    showPreview(`<div style="padding:20px;font-family:Arial;color:#333"><h2>${tpl} ${label} Preview</h2><p>Sample preview content</p></div>`)
+    const sampleCo = { ...co }
+    if (type === 'inv') sampleCo.invTemplate = tpl
+    else if (type === 'rec') sampleCo.recTemplate = tpl
+    else sampleCo.quotTemplate = tpl
+
+    let html = ''
+    if (type === 'inv') {
+      const data = sampleInvData(sampleCo)
+      if (!data) { showToast('Cannot generate preview.', 'err'); return }
+      const fn = INV_TEMPLATES[tpl] || INV_TEMPLATES.classic
+      html = applyWatermark(fn(data), sampleCo.watermark)
+    } else if (type === 'rec') {
+      const data = sampleRecData(sampleCo)
+      if (!data) { showToast('Cannot generate preview.', 'err'); return }
+      const fn = REC_TEMPLATES[tpl] || REC_TEMPLATES.classic
+      html = applyWatermark(fn(data), sampleCo.watermark)
+    } else {
+      const data = sampleQuotData(sampleCo)
+      if (!data) { showToast('Cannot generate preview.', 'err'); return }
+      const fn = QUOT_TEMPLATES[tpl] || QUOT_TEMPLATES.classic
+      html = applyWatermark(fn(data), sampleCo.watermark)
+    }
+
+    setTemplatePreviewMeta({ type, tpl })
+    showPreview(html)
   }
 
   return (
@@ -402,29 +423,58 @@ export default function Settings() {
               <div><label className="text-xs font-medium text-[var(--color-text2)]">Invoice Footer</label><textarea value={form.invFooter} onChange={(e) => set('invFooter', e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] resize-none" /></div>
               <div><label className="text-xs font-medium text-[var(--color-text2)]">Receipt Purpose</label><input value={form.recBeing} onChange={(e) => set('recBeing', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
               <h3 className="text-xs font-semibold text-[var(--color-text2)] uppercase">Templates &amp; Watermark</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Invoice Template</label>
-                  <select value={form.invTemplate} onChange={(e) => set('invTemplate', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]">
-                    {TEMPLATE_OPTIONS.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-                  </select>
-                  <Button size="sm" variant="outline" className="mt-1" onClick={() => handlePreview('inv', form.invTemplate)}>Preview</Button>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Receipt Template</label>
-                  <select value={form.recTemplate} onChange={(e) => set('recTemplate', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]">
-                    {TEMPLATE_OPTIONS.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-                  </select>
-                  <Button size="sm" variant="outline" className="mt-1" onClick={() => handlePreview('rec', form.recTemplate)}>Preview</Button>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Quotation Template</label>
-                  <select value={form.quotTemplate} onChange={(e) => set('quotTemplate', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]">
-                    {TEMPLATE_OPTIONS.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-                  </select>
-                  <Button size="sm" variant="outline" className="mt-1" onClick={() => handlePreview('quot', form.quotTemplate)}>Preview</Button>
+
+              <div>
+                <label className="text-xs font-medium text-[var(--color-text2)]">Invoice Template</label>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {TEMPLATE_OPTIONS.map((t) => (
+                    <button key={t} onClick={() => handlePreview('inv', t)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                        form.invTemplate === t
+                          ? 'bg-[var(--color-primary-bg)] text-[var(--color-primary)] border-[var(--color-primary)]'
+                          : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] border-[var(--color-input-border)] hover:border-[var(--color-primary)]'
+                      }`}
+                    >
+                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                    </button>
+                  ))}
                 </div>
               </div>
+
+              <div>
+                <label className="text-xs font-medium text-[var(--color-text2)]">Receipt Template</label>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {TEMPLATE_OPTIONS.map((t) => (
+                    <button key={t} onClick={() => handlePreview('rec', t)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                        form.recTemplate === t
+                          ? 'bg-[var(--color-primary-bg)] text-[var(--color-primary)] border-[var(--color-primary)]'
+                          : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] border-[var(--color-input-border)] hover:border-[var(--color-primary)]'
+                      }`}
+                    >
+                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-[var(--color-text2)]">Quotation Template</label>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {TEMPLATE_OPTIONS.map((t) => (
+                    <button key={t} onClick={() => handlePreview('quot', t)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                        form.quotTemplate === t
+                          ? 'bg-[var(--color-primary-bg)] text-[var(--color-primary)] border-[var(--color-primary)]'
+                          : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] border-[var(--color-input-border)] hover:border-[var(--color-primary)]'
+                      }`}
+                    >
+                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Watermark</label>
                 <select value={form.watermark} onChange={(e) => set('watermark', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]">
@@ -491,15 +541,28 @@ export default function Settings() {
         </div>
       </Modal>
 
-      {/* Preview Modal */}
-      <Modal open={ui.previewModal} onClose={closePreview} maxW="90%">
+      {/* Template Preview Modal */}
+      <Modal open={ui.previewModal} onClose={() => { setTemplatePreviewMeta(null); closePreview() }} maxW="90%">
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-semibold">Template Preview</h3>
-          <button onClick={closePreview} className="p-1 rounded-lg hover:bg-[var(--color-input-bg)] cursor-pointer">
+          <button onClick={() => { setTemplatePreviewMeta(null); closePreview() }} className="p-1 rounded-lg hover:bg-[var(--color-input-bg)] cursor-pointer">
             <Svg name="close" />
           </button>
         </div>
-        <div className="max-h-[80vh] overflow-auto bg-white rounded-lg p-4" dangerouslySetInnerHTML={{ __html: ui.previewContent }} />
+        <div className="max-h-[70vh] overflow-auto bg-white rounded-lg p-4" dangerouslySetInnerHTML={{ __html: ui.previewContent }} />
+        {templatePreviewMeta && (
+          <div className="flex gap-2 justify-end mt-3">
+            <Button variant="outline" onClick={() => { setTemplatePreviewMeta(null); closePreview() }}>Cancel</Button>
+            <Button onClick={() => {
+              const { type, tpl } = templatePreviewMeta
+              if (type === 'inv') set('invTemplate', tpl)
+              else if (type === 'rec') set('recTemplate', tpl)
+              else set('quotTemplate', tpl)
+              setTemplatePreviewMeta(null)
+              closePreview()
+            }}>Apply Template</Button>
+          </div>
+        )}
       </Modal>
     </div>
   )
