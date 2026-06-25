@@ -50,7 +50,6 @@ export default function Settings() {
   const [status, setStatus] = useState('')
   const [statusType, setStatusType] = useState<'ok' | 'err'>('ok')
   const [resetConfirm, setResetConfirm] = useState('')
-  const [templatePreviewMeta, setTemplatePreviewMeta] = useState<{ type: 'inv' | 'rec' | 'quot'; tpl: string } | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const [form, setForm] = useState(co ? parseCo(co) : null)
@@ -227,7 +226,6 @@ export default function Settings() {
       html = applyWatermark(fn(data), sampleCo.watermark)
     }
 
-    setTemplatePreviewMeta({ type, tpl })
     showPreview(html)
   }
 
@@ -427,51 +425,63 @@ export default function Settings() {
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Invoice Template</label>
                 <div className="flex flex-wrap gap-1.5 mt-1">
-                  {TEMPLATE_OPTIONS.map((t) => (
-                    <button key={t} onClick={() => handlePreview('inv', t)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                        form.invTemplate === t
-                          ? 'bg-[var(--color-primary-bg)] text-[var(--color-primary)] border-[var(--color-primary)]'
-                          : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] border-[var(--color-input-border)] hover:border-[var(--color-primary)]'
-                      }`}
-                    >
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </button>
-                  ))}
+                  {TEMPLATE_OPTIONS.map((t) => {
+                    const sel = form.invTemplate === t
+                    return (
+                      <button key={t} onClick={() => sel ? handlePreview('inv', t) : set('invTemplate', t)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                          sel
+                            ? 'bg-[var(--color-primary-bg)] text-[var(--color-primary)] border-[var(--color-primary)]'
+                            : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] border-[var(--color-input-border)] hover:border-[var(--color-primary)]'
+                        }`}
+                      >
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                        {sel && <span className="ml-1.5 text-[10px] opacity-70">Preview</span>}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Receipt Template</label>
                 <div className="flex flex-wrap gap-1.5 mt-1">
-                  {TEMPLATE_OPTIONS.map((t) => (
-                    <button key={t} onClick={() => handlePreview('rec', t)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                        form.recTemplate === t
-                          ? 'bg-[var(--color-primary-bg)] text-[var(--color-primary)] border-[var(--color-primary)]'
-                          : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] border-[var(--color-input-border)] hover:border-[var(--color-primary)]'
-                      }`}
-                    >
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </button>
-                  ))}
+                  {TEMPLATE_OPTIONS.map((t) => {
+                    const sel = form.recTemplate === t
+                    return (
+                      <button key={t} onClick={() => sel ? handlePreview('rec', t) : set('recTemplate', t)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                          sel
+                            ? 'bg-[var(--color-primary-bg)] text-[var(--color-primary)] border-[var(--color-primary)]'
+                            : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] border-[var(--color-input-border)] hover:border-[var(--color-primary)]'
+                        }`}
+                      >
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                        {sel && <span className="ml-1.5 text-[10px] opacity-70">Preview</span>}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Quotation Template</label>
                 <div className="flex flex-wrap gap-1.5 mt-1">
-                  {TEMPLATE_OPTIONS.map((t) => (
-                    <button key={t} onClick={() => handlePreview('quot', t)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                        form.quotTemplate === t
-                          ? 'bg-[var(--color-primary-bg)] text-[var(--color-primary)] border-[var(--color-primary)]'
-                          : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] border-[var(--color-input-border)] hover:border-[var(--color-primary)]'
-                      }`}
-                    >
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </button>
-                  ))}
+                  {TEMPLATE_OPTIONS.map((t) => {
+                    const sel = form.quotTemplate === t
+                    return (
+                      <button key={t} onClick={() => sel ? handlePreview('quot', t) : set('quotTemplate', t)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                          sel
+                            ? 'bg-[var(--color-primary-bg)] text-[var(--color-primary)] border-[var(--color-primary)]'
+                            : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] border-[var(--color-input-border)] hover:border-[var(--color-primary)]'
+                        }`}
+                      >
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                        {sel && <span className="ml-1.5 text-[10px] opacity-70">Preview</span>}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
@@ -481,6 +491,8 @@ export default function Settings() {
                   {WATERMARK_OPTIONS.map((w) => <option key={w} value={w}>{w || '(none)'}</option>)}
                 </select>
               </div>
+
+              <Button size="sm" onClick={handleSave} className="self-start">Save</Button>
             </div>
           </Card>
 
@@ -542,27 +554,17 @@ export default function Settings() {
       </Modal>
 
       {/* Template Preview Modal */}
-      <Modal open={ui.previewModal} onClose={() => { setTemplatePreviewMeta(null); closePreview() }} maxW="90%">
+      <Modal open={ui.previewModal} onClose={closePreview} maxW="90%">
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-semibold">Template Preview</h3>
-          <button onClick={() => { setTemplatePreviewMeta(null); closePreview() }} className="p-1 rounded-lg hover:bg-[var(--color-input-bg)] cursor-pointer">
+          <button onClick={closePreview} className="p-1 rounded-lg hover:bg-[var(--color-input-bg)] cursor-pointer">
             <Svg name="close" />
           </button>
         </div>
         <div className="max-h-[70vh] overflow-auto bg-white rounded-lg p-4" dangerouslySetInnerHTML={{ __html: ui.previewContent }} />
-        {templatePreviewMeta && (
-          <div className="flex gap-2 justify-end mt-3">
-            <Button variant="outline" onClick={() => { setTemplatePreviewMeta(null); closePreview() }}>Cancel</Button>
-            <Button onClick={() => {
-              const { type, tpl } = templatePreviewMeta
-              if (type === 'inv') set('invTemplate', tpl)
-              else if (type === 'rec') set('recTemplate', tpl)
-              else set('quotTemplate', tpl)
-              setTemplatePreviewMeta(null)
-              closePreview()
-            }}>Apply Template</Button>
-          </div>
-        )}
+        <div className="flex justify-end mt-3">
+          <Button variant="outline" onClick={closePreview}>Close</Button>
+        </div>
       </Modal>
     </div>
   )

@@ -38,7 +38,7 @@ export default function History() {
 
   const handleEdit = (type: Tab, id: string) => {
     setEditing({ type, id })
-    navigate('/' + (type === 'quot' ? 'quotation' : type))
+    navigate('/' + (type === 'inv' ? 'invoice' : type === 'rec' ? 'receipt' : 'quotation'))
   }
 
   const handleDelete = async (type: Tab, id: string) => {
