@@ -86,6 +86,10 @@ export default function Settings() {
 
   const handleSave = async () => {
     if (!form) return
+    if (!form.name.trim()) { setStatusType('err'); setStatus('Company name is required.'); setTimeout(() => setStatus(''), 3000); return }
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { setStatusType('err'); setStatus('Invalid email format.'); setTimeout(() => setStatus(''), 3000); return }
+    const subPer = parseInt(form.curSubPer) || 0
+    if (subPer < 1) { setStatusType('err'); setStatus('Sub-units per unit must be at least 1.'); setTimeout(() => setStatus(''), 3000); return }
     const updated: Company = {
       ...co,
       name: form.name, nameAr: form.nameAr, sub: form.sub, subAr: form.subAr,
@@ -93,7 +97,7 @@ export default function Settings() {
       pcolor: form.pcolor, acolor: form.acolor,
       currency: {
         code: form.curCode, symbol: form.curSym, name: form.curName, namePl: form.curNamePl,
-        sub: form.curSub, subPl: form.curSubPl, subPer: parseInt(form.curSubPer) || 100,
+        sub: form.curSub, subPl: form.curSubPl, subPer,
       },
       vatReg: form.vatReg, vatPct: parseFloat(form.vatPct) || 0,
       bankName: form.bankName, bankAccName: form.bankAccName, bankAcc: form.bankAcc, bankIban: form.bankIban, bankSwift: form.bankSwift, bankBranch: form.bankBranch,
@@ -129,6 +133,7 @@ export default function Settings() {
     input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
+      if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB.', 'err'); return }
       const reader = new FileReader()
       reader.onload = () => {
         set(field, reader.result as string)
@@ -308,7 +313,7 @@ export default function Settings() {
                     {field === 'logo' && (
                       <Button size="sm" variant="outline" onClick={() => {
                         const svg = prompt('Paste SVG code:')
-                        if (svg) set('logo', 'data:image/svg+xml;base64,' + btoa(svg))
+                        if (svg) set('logo', 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))))
                       }}>SVG</Button>
                     )}
                     {form[field] && <Button size="sm" variant="danger" onClick={() => set(field, '')}>X</Button>}

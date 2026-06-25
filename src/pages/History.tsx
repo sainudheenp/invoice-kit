@@ -43,15 +43,20 @@ export default function History() {
 
   const handleDelete = async (type: Tab, id: string) => {
     if (!confirm('Delete this document?')) return
-    if (type === 'inv') await deleteInvoice(id)
-    else if (type === 'rec') await deleteReceipt(id)
-    else await deleteQuotation(id)
-    showToast('Deleted.')
+    try {
+      if (type === 'inv') await deleteInvoice(id)
+      else if (type === 'rec') await deleteReceipt(id)
+      else await deleteQuotation(id)
+      showToast('Deleted.')
+    } catch { showToast('Failed to delete.', 'err') }
   }
 
   const handlePaid = async (id: string) => {
-    await markInvoicePaid(id)
-    showToast('Status updated.')
+    if (!confirm('Toggle paid status?')) return
+    try {
+      await markInvoicePaid(id)
+      showToast('Status updated.')
+    } catch { showToast('Failed to update.', 'err') }
   }
 
   const handlePrint = (type: Tab, doc: Invoice | Receipt | Quotation) => {

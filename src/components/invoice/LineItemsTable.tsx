@@ -10,10 +10,11 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
   const updateItem = (idx: number, field: keyof LineItem, value: string) => {
     const next = items.map((item, i) => {
       if (i !== idx) return item
-      const updated = { ...item, [field]: field === 'desc' ? value : parseFloat(value) || 0 }
+      const num = field === 'desc' ? 0 : Math.max(0, parseFloat(value) || 0)
+      const updated = { ...item, [field]: field === 'desc' ? value : num }
       if (field !== 'desc') {
-        const q = field === 'qty' ? parseFloat(value) || 0 : item.qty
-        const p = field === 'price' ? parseFloat(value) || 0 : item.price
+        const q = field === 'qty' ? num : item.qty
+        const p = field === 'price' ? num : item.price
         updated.amount = parseFloat((q * p).toFixed(dp))
       }
       return updated

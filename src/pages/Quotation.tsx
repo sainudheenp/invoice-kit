@@ -103,6 +103,10 @@ export default function QuotationPage() {
   const handleSave = async () => {
     if (!co) { showToast('No active company.', 'err'); return }
     if (!form.quotNo.trim()) { showToast('Quotation number is required.', 'err'); return }
+    if (!form.custName.trim()) { showToast('Customer name is required.', 'err'); return }
+    if (form.validUntil && form.date && form.validUntil < form.date) { showToast('Valid until date must be on or after the quotation date.', 'err'); return }
+    const validItems = form.items.filter((i) => i.desc.trim() && i.qty > 0 && i.price > 0)
+    if (validItems.length === 0) { showToast('At least one line item with description, quantity, and price is required.', 'err'); return }
 
     const editingId = state.editingDoc?.type === 'quot' ? state.editingDoc.id : null
     const dupe = state.quotations.find(
@@ -196,7 +200,7 @@ export default function QuotationPage() {
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Quotation No.</label>
+                  <label className="text-xs font-medium text-[var(--color-text2)]">Quotation No. <span className="text-red">*</span></label>
                   <input value={form.quotNo} onChange={(e) => set('quotNo', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
                 </div>
                 <div>
@@ -215,7 +219,7 @@ export default function QuotationPage() {
             <CardHeader><h2 className="text-sm font-semibold">Customer</h2></CardHeader>
             <div className="p-5 space-y-3">
               <div>
-                <label className="text-xs font-medium text-[var(--color-text2)]">Customer Name</label>
+                  <label className="text-xs font-medium text-[var(--color-text2)]">Customer Name <span className="text-red">*</span></label>
                 <input value={form.custName} onChange={(e) => set('custName', e.target.value)} list="quotCustNameList" className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
                 <datalist id="quotCustNameList">
                   {customers.map((c) => <option key={c} value={c} />)}
@@ -261,7 +265,7 @@ export default function QuotationPage() {
                 </div>
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">VAT %</label>
-                  <input type="number" min="0" max="100" step="0.01" value={form.vatPct} onChange={(e) => set('vatPct', parseFloat(e.target.value) || 0)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+                  <input type="number" min="0" max="100" step="0.01" value={form.vatPct} onChange={(e) => set('vatPct', Math.max(0, parseFloat(e.target.value) || 0))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">VAT Amount</label>
@@ -271,7 +275,7 @@ export default function QuotationPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Discount</label>
-                  <input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => set('discount', parseFloat(e.target.value) || 0)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+                  <input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => set('discount', Math.max(0, parseFloat(e.target.value) || 0))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Grand Total</label>

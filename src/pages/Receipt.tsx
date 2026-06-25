@@ -91,6 +91,8 @@ export default function Receipt() {
   const handleSave = async () => {
     if (!co) { showToast('No active company.', 'err'); return }
     if (!form.recNo.trim()) { showToast('Receipt number is required.', 'err'); return }
+    if (!form.receivedFrom.trim()) { showToast('Received from is required.', 'err'); return }
+    if (form.amount <= 0) { showToast('Amount must be greater than zero.', 'err'); return }
 
     const editingId = state.editingDoc?.type === 'rec' ? state.editingDoc.id : null
     const dupe = state.receipts.find(
@@ -191,7 +193,7 @@ export default function Receipt() {
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Receipt No.</label>
+                  <label className="text-xs font-medium text-[var(--color-text2)]">Receipt No. <span className="text-red">*</span></label>
                   <input value={form.recNo} onChange={(e) => set('recNo', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
                 </div>
                 <div>
@@ -200,13 +202,13 @@ export default function Receipt() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-[var(--color-text2)]">Received From</label>
+                  <label className="text-xs font-medium text-[var(--color-text2)]">Received From <span className="text-red">*</span></label>
                 <input value={form.receivedFrom} onChange={(e) => set('receivedFrom', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Amount</label>
-                  <input type="number" min="0" step="0.001" value={form.amount} onChange={(e) => set('amount', parseFloat(e.target.value) || 0)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+                  <label className="text-xs font-medium text-[var(--color-text2)]">Amount <span className="text-red">*</span></label>
+                  <input type="number" min="0" step="0.001" value={form.amount} onChange={(e) => set('amount', Math.max(0, parseFloat(e.target.value) || 0))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Words</label>
