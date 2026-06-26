@@ -578,10 +578,20 @@ export default function Settings() {
                   <div className="text-xs text-[var(--color-text3)]">Displays Arabic company name and labels in Classic templates</div>
                 </div>
                 <button
-                  onClick={() => set('showArabic', !form.showArabic)}
+                  onClick={() => {
+                    const next = !form.showArabic
+                    setForm((f) => f ? { ...f, showArabic: next } : f)
+                    formRef.current = { ...formRef.current, showArabic: next }
+                    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+                    setSaving(true)
+                    doAutoSave()
+                  }}
+                  type="button"
+                  role="switch"
+                  aria-checked={form.showArabic}
                   className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.showArabic ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
                 >
-                  <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.showArabic ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.showArabic ? 'translate-x-[18px]' : 'translate-x-0'}`} />
                 </button>
               </div>
 
