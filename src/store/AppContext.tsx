@@ -141,6 +141,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function init() {
       try {
+        await db.open()
         const [companies, invoices, receipts, quotations] = await Promise.all([
           db.companies.toArray(),
           db.invoices.toArray(),
@@ -155,8 +156,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
           activeId = companies[0].id
         }
         dispatch({ type: 'SET_ALL', payload: { companies, invoices, receipts, quotations, activeId, editingDoc: null } })
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to load DB:', err)
+        if (err?.name === 'VersionError') {
+          try {
+            await db.delete()
+            await db.open()
+            dispatch({ type: 'RESET' })
+          } catch {
+            dispatch({ type: 'DB_ERROR', payload: 'Failed to create database. Please clear browser storage for this site.' })
+          }
+        } else {
+          dispatch({ type: 'DB_ERROR', payload: 'Failed to load data from IndexedDB. See console for details.' })
+        }
       } finally {
         setLoading(false)
       }

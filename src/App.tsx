@@ -29,6 +29,19 @@ function AppContent() {
     )
   }
 
+  if (state.dbError) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-[var(--color-page-bg)] p-4">
+        <div className="text-center max-w-md">
+          <div className="text-3xl mb-3">⚠️</div>
+          <h2 className="text-lg font-bold mb-2">Database Error</h2>
+          <p className="text-sm text-[var(--color-text2)] mb-4">{state.dbError}</p>
+          <button onClick={() => window.location.reload()} className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm cursor-pointer">Retry</button>
+        </div>
+      </div>
+    )
+  }
+
   if (state.companies.length === 0 || !state.activeId) {
     return (
       <WelcomeOverlay onDone={() => window.location.reload()} />
