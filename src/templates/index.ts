@@ -71,7 +71,6 @@ export function sampleInvData(comp: Company) {
     ...data,
     no: 'INV-1',
     dt: new Date().toISOString().slice(0, 10),
-    dueDt: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
     cust: 'ABC Trading LLC',
     addr: 'Muscat, Sultanate of Oman',
     ph: '+968 1234 5678',

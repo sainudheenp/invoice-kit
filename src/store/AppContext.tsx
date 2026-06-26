@@ -113,7 +113,7 @@ interface AppContextValue {
   setEditing: (doc: EditingDoc | null) => void
   resetAll: () => Promise<void>
   createInvoice: (company: Company, form: {
-    invNo: string; date: string; dueDate: string; paid: boolean
+    invNo: string; date: string; paid: boolean
     customer: Customer; items: LineItem[]
     subtotal: number; vatPct: number; vatAmt: number; discount: number; grand: number
     notes: string; payMethod: string; payDetails: string; bankName: string
@@ -256,7 +256,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   const createInvoice = async (company: Company, form: {
-    invNo: string; date: string; dueDate: string; paid: boolean
+    invNo: string; date: string; paid: boolean
     customer: Customer; items: LineItem[]
     subtotal: number; vatPct: number; vatAmt: number; discount: number; grand: number
     notes: string; payMethod: string; payDetails: string; bankName: string
@@ -268,7 +268,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       companyId: company.id,
       invNo: form.invNo,
       date: form.date,
-      dueDate: form.dueDate,
       paid: form.paid,
       customer: form.customer,
       items: form.items,

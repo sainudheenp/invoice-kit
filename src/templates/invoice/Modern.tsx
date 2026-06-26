@@ -34,7 +34,6 @@ export function InvoiceModern(d: InvTemplateData) {
           </div>
           <div style="width:200px;text-align:right;font-size:12px">
             <div><strong>Date:</strong> ${d.dt}</div>
-            ${d.dueDt ? `<div><strong>Due:</strong> ${d.dueDt}</div>` : ''}
             ${c.vatReg ? `<div><strong>VAT:</strong> ${esc(c.vatReg)}</div>` : ''}
           </div>
         </div>

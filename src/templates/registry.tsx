@@ -27,7 +27,6 @@ export function getInvDocData(savedInv: Invoice | null, comp?: Company | null): 
     cur,
     no: saved?.invNo || '',
     dt: saved?.date || '',
-    dueDt: saved?.dueDate || '',
     cust: saved?.customer?.name || '',
     addr: saved?.customer?.address || '',
     ph: saved?.customer?.phone || '',
@@ -139,8 +138,8 @@ export function getQuotDocData(savedQuot: Quotation | null, comp?: Company | nul
   }
 }
 
+import { watermarkWrap } from './shared'
+
 export function applyWatermark(html: string, text: string): string {
-  if (!text) return html
-  const wm = `<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none;z-index:999;font-size:80px;font-weight:900;color:rgba(128,128,128,0.15);transform:rotate(-30deg);text-transform:uppercase">${esc(text)}</div>`
-  return html.replace('</div>', wm + '</div>')
+  return watermarkWrap(html, text)
 }

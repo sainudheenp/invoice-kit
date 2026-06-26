@@ -331,7 +331,7 @@ async function renderInvoiceGeneric(pdf: jsPDF, inv: Invoice, co: Company, imgs:
   pdf.text(`${cap(tplName)} Invoice`, MARGIN, y)
   pdf.setFont('helvetica', 'normal')
   pdf.setFontSize(8); pdf.setTextColor('#999')
-  pdf.text(`${inv.invNo} | ${inv.date}${inv.dueDate ? ` | Due: ${inv.dueDate}` : ''}`, MARGIN, y + 4)
+  pdf.text(`${inv.invNo} | ${inv.date}`, MARGIN, y + 4)
   y += 10
 
   pdf.setFontSize(7.5); pdf.setTextColor('#999'); pdf.text('BILL TO', MARGIN, y)
@@ -409,7 +409,7 @@ async function renderInvoiceClassic(pdf: jsPDF, inv: Invoice, co: Company, imgs:
   pdf.setFontSize(13); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text('TAX INVOICE', MARGIN, y)
   pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8); pdf.setTextColor('#999')
-  pdf.text(`Invoice No.: ${inv.invNo} | Date: ${inv.date} | Due: ${inv.dueDate}${co.vatReg ? ` | VAT: ${co.vatReg}` : ''}`, MARGIN, y + 4)
+  pdf.text(`Invoice No.: ${inv.invNo} | Date: ${inv.date}${co.vatReg ? ` | VAT: ${co.vatReg}` : ''}`, MARGIN, y + 4)
   y += 10
 
   pdf.setDrawColor('#eee'); pdf.setLineWidth(0.2); pdf.line(MARGIN, y, MARGIN + W, y)
@@ -503,8 +503,7 @@ async function renderInvoiceModern(pdf: jsPDF, inv: Invoice, co: Company, imgs: 
   if (cust) { pdf.setFontSize(7.5); pdf.setTextColor('#555'); pdf.text(cust, MARGIN + 8, y + 12, { maxWidth: (W - 3) * 0.6 - 10 }) }
 
   pdf.setFontSize(7.5); pdf.setTextColor('#666'); pdf.text(`Date: ${inv.date}`, MARGIN + W - 45, y + 2.5, { align: 'right' })
-  if (inv.dueDate) pdf.text(`Due: ${inv.dueDate}`, MARGIN + W - 45, y + 6.5, { align: 'right' })
-  if (co.vatReg) pdf.text(`VAT: ${co.vatReg}`, MARGIN + W - 45, y + 10.5, { align: 'right' })
+  if (co.vatReg) pdf.text(`VAT: ${co.vatReg}`, MARGIN + W - 45, y + 6.5, { align: 'right' })
 
   y += 18
 

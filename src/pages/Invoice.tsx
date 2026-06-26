@@ -15,7 +15,6 @@ import type { LineItem, Customer, Invoice } from '@/types/invoice'
 interface InvoiceFormState {
   invNo: string
   date: string
-  dueDate: string
   custName: string
   custAddr: string
   custPhone: string
@@ -33,7 +32,6 @@ interface InvoiceFormState {
 const emptyForm = (): InvoiceFormState => ({
   invNo: '',
   date: new Date().toISOString().slice(0, 10),
-  dueDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
   custName: '', custAddr: '', custPhone: '', custCr: '', custEmail: '',
   items: [{ desc: '', qty: 1, price: 0, amount: 0 }, { desc: '', qty: 1, price: 0, amount: 0 }],
   vatPct: 0, discount: 0,
@@ -61,7 +59,6 @@ export default function Invoice() {
     setForm({
       invNo: inv.invNo,
       date: inv.date,
-      dueDate: inv.dueDate,
       custName: inv.customer.name,
       custAddr: inv.customer.address,
       custPhone: inv.customer.phone,
@@ -108,7 +105,6 @@ export default function Invoice() {
     if (!co) { showToast('No active company.', 'err'); return }
     if (!form.invNo.trim()) { showToast('Invoice number is required.', 'err'); return }
     if (!form.custName.trim()) { showToast('Customer name is required.', 'err'); return }
-    if (form.dueDate && form.date && form.dueDate < form.date) { showToast('Due date must be on or after the invoice date.', 'err'); return }
     const validItems = form.items.filter((i) => i.desc.trim() && i.qty > 0 && i.price > 0)
     if (validItems.length === 0) { showToast('At least one line item with description, quantity, and price is required.', 'err'); return }
 
@@ -123,7 +119,6 @@ export default function Invoice() {
       const saved = await createInvoice(co, {
         invNo: form.invNo,
         date: form.date,
-        dueDate: form.dueDate,
         paid: false,
         customer,
         items: form.items,
@@ -164,7 +159,6 @@ export default function Invoice() {
     companyId: co?.id || '',
     invNo: form.invNo,
     date: form.date,
-    dueDate: form.dueDate,
     paid: false,
     customer,
     items: form.items,
@@ -237,7 +231,7 @@ export default function Invoice() {
               {cur && <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] font-medium">{cur.code} {cur.symbol}</span>}
             </CardHeader>
             <div className="p-5 space-y-4">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Invoice No. <span className="text-red">*</span></label>
                   <input value={form.invNo} onChange={(e) => set('invNo', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
@@ -245,10 +239,6 @@ export default function Invoice() {
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Date</label>
                   <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Due Date</label>
-                  <input type="date" value={form.dueDate} onChange={(e) => set('dueDate', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
                 </div>
               </div>
             </div>

@@ -2,6 +2,7 @@ export { ReceiptClassic } from './Classic'
 
 import type { RecTemplateData } from '@/types/template'
 import { esc } from '@/utils/esc'
+import { watermarkWrap } from '../shared'
 
 export function ReceiptModern(d: RecTemplateData) { return genericReceipt('Modern', d) }
 export function ReceiptCompact(d: RecTemplateData) { return genericReceipt('Compact', d) }
@@ -13,40 +14,37 @@ export function ReceiptProfessional(d: RecTemplateData) { return genericReceipt(
 function genericReceipt(name: string, d: RecTemplateData): string {
   const pc = d.comp.pcolor || '#D97706'
   const c = d.comp
-  const wrap = (html: string) => d.comp.watermark
-    ? html.replace('</div>', `<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none;z-index:999;font-size:80px;font-weight:900;color:rgba(128,128,128,0.15);transform:rotate(-30deg);text-transform:uppercase">${esc(d.comp.watermark)}</div></div>`)
-    : html
 
   const itemsHtml = d.items.length > 0 ? `
     <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:4mm">
       <thead>
         <tr style="border-bottom:2px solid #ddd;font-size:11px;color:#999;text-transform:uppercase">
-          <th style="padding:6px 8px;text-align:left">#</th>
-          <th style="padding:6px 8px;text-align:left">Description</th>
-          <th style="padding:6px 8px;text-align:right">Qty</th>
-          <th style="padding:6px 8px;text-align:right">Price</th>
-          <th style="padding:6px 8px;text-align:right">Amount</th>
+          <th style="padding:10px 8px;text-align:left">#</th>
+          <th style="padding:10px 8px;text-align:left">Description</th>
+          <th style="padding:10px 8px;text-align:right">Qty</th>
+          <th style="padding:10px 8px;text-align:right">Price</th>
+          <th style="padding:10px 8px;text-align:right">Amount</th>
         </tr>
       </thead>
       <tbody>
         ${d.items.map((item, i) => `
           <tr style="border-bottom:1px solid #eee">
-            <td style="padding:6px 8px;color:#999">${i + 1}</td>
-            <td style="padding:6px 8px">${esc(item.desc)}</td>
-            <td style="padding:6px 8px;text-align:right">${item.qty}</td>
-            <td style="padding:6px 8px;text-align:right">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-            <td style="padding:6px 8px;text-align:right;font-weight:600">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
+            <td style="padding:10px 8px;color:#999">${i + 1}</td>
+            <td style="padding:10px 8px">${esc(item.desc)}</td>
+            <td style="padding:10px 8px;text-align:right">${item.qty}</td>
+            <td style="padding:10px 8px;text-align:right">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+            <td style="padding:10px 8px;text-align:right;font-weight:600">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
           </tr>
         `).join('')}
       </tbody>
     </table>
   ` : ''
 
-  return wrap(`
-    <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;position:relative;background:#fff;min-height:100vh;padding:12mm 14mm">
+  return watermarkWrap(`
+    <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;position:relative;background:#fff;min-height:100vh;padding:14mm 16mm">
       <div style="text-align:center;margin-bottom:6mm">
         ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:80px;max-height:80px;margin-bottom:4px;display:block;margin-left:auto;margin-right:auto" /><br/>` : ''}
-        <div style="font-size:17px;font-weight:700">${esc(c.name)}</div>
+        <div style="font-size:18px;font-weight:700">${esc(c.name)}</div>
         ${c.sub ? `<div style="font-size:12px;color:#666">${esc(c.sub)}</div>` : ''}
         <div style="font-size:11px;color:#999;margin-top:2px">${[c.loc, c.tel, c.email].filter(Boolean).join(' \u00B7 ')}</div>
       </div>
@@ -72,13 +70,13 @@ function genericReceipt(name: string, d: RecTemplateData): string {
         <div style="grid-column:1/-1"><strong>Purpose:</strong> ${esc(d.bg)}</div>
       </div>
       <div style="border-top:1px solid #ddd;margin-top:6mm;padding-top:3mm;display:flex;gap:20px;align-items:flex-end">
-        ${c.seal ? `<div><img src="${esc(c.seal)}" style="max-width:100px;max-height:100px" /></div>` : ''}
-        ${c.signature ? `<div><img src="${esc(c.signature)}" style="max-width:130px;max-height:55px" /><div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center">Authorized Signature</div></div>` : ''}
+        ${c.seal ? `<div><img src="${esc(c.seal)}" style="max-width:120px;max-height:120px" /></div>` : ''}
+        ${c.signature ? `<div><img src="${esc(c.signature)}" style="max-width:140px;max-height:70px" /><div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center">Authorized Signature</div></div>` : ''}
         ${d.rv ? `<div><div style="border-top:1px solid #999;width:100px;padding-top:2px;font-size:12px;text-align:center">${esc(d.rv)}</div><div style="font-size:11px;color:#666;text-align:center">Receiver</div></div>` : ''}
         ${d.sg ? `<div><div style="border-top:1px solid #999;width:100px;padding-top:2px;font-size:12px;text-align:center">${esc(d.sg)}</div><div style="font-size:11px;color:#666;text-align:center">Signatory</div></div>` : ''}
       </div>
       <div style="border-top:1px solid #ddd;margin-top:6mm;padding-top:3mm;font-size:11px;color:#666;text-align:center">${esc(c.name)}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}</div>
       ${c.bankName ? `<div style="font-size:11px;color:#666;text-align:center">${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).join(' | ')}</div>` : ''}
     </div>
-  `)
+  `, d.comp.watermark)
 }

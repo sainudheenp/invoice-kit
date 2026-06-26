@@ -18,7 +18,6 @@ export interface Invoice {
   companyId: string
   invNo: string
   date: string
-  dueDate: string
   paid: boolean
   customer: Customer
   items: LineItem[]

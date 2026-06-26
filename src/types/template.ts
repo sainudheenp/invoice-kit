@@ -7,7 +7,6 @@ export interface InvTemplateData {
   cur: Currency
   no: string
   dt: string
-  dueDt: string
   cust: string
   addr: string
   ph: string

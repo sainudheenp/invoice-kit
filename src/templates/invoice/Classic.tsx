@@ -1,5 +1,6 @@
 import type { InvTemplateData } from '@/types/template'
 import { esc } from '@/utils/esc'
+import { watermarkWrap } from '../shared'
 
 export function InvoiceClassic(d: InvTemplateData) {
   const pc = d.comp.pcolor || '#D97706'
@@ -22,7 +23,7 @@ export function InvoiceClassic(d: InvTemplateData) {
   const contactParts = [c.loc, c.tel, c.mob, c.email].filter(Boolean)
   const contactStr = contactParts.length > 0 ? `<div style="font-size:11px;color:#666">${contactParts.join(' | ')}</div>` : ''
 
-  return applyWrap(`
+  return watermarkWrap(`
     <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2d2d2d;position:relative;background:#fff;min-height:100vh;padding:0">
       <div style="height:4px;background:${pc};width:100%"></div>
       <div style="padding:14mm 16mm 10mm">
@@ -48,7 +49,6 @@ export function InvoiceClassic(d: InvTemplateData) {
           <div style="text-align:right;font-size:12px">
             <div><strong>Invoice No.:</strong> ${esc(d.no)}</div>
             <div><strong>Date:</strong> ${d.dt}</div>
-            <div><strong>Due Date:</strong> ${d.dueDt}</div>
             ${c.vatReg ? `<div><strong>VAT Reg.:</strong> ${esc(c.vatReg)}</div>` : ''}
           </div>
         </div>
@@ -102,9 +102,4 @@ export function InvoiceClassic(d: InvTemplateData) {
       ${c.invFooter ? `<div style="position:absolute;bottom:10mm;left:16mm;right:16mm;font-size:11px;color:#666;text-align:center">${esc(c.invFooter)}</div>` : ''}
     </div>
   `, d.comp.watermark)
-}
-
-function applyWrap(html: string, watermark: string): string {
-  if (!watermark) return html
-  return html.replace('</div>', `<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none;z-index:999;font-size:80px;font-weight:900;color:rgba(128,128,128,0.15);transform:rotate(-30deg);text-transform:uppercase">${esc(watermark)}</div></div>`)
 }
