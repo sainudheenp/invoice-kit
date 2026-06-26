@@ -23,7 +23,7 @@ function genericInvoice(name: string, d: InvTemplateData): string {
   return wrapHtml(`
     <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;position:relative;background:#fff;min-height:100vh;padding:14mm 16mm">
       <div style="text-align:center;margin-bottom:6mm">
-        ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:50px;max-height:50px;margin-bottom:4px" /><br/>` : ''}
+        ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:50px;max-height:50px;margin-bottom:4px;display:block;margin-left:auto;margin-right:auto" /><br/>` : ''}
         <div style="font-size:18px;font-weight:700">${esc(c.name)}</div>
         ${c.sub ? `<div style="font-size:12px;color:#666">${esc(c.sub)}</div>` : ''}
         <div style="font-size:11px;color:#999;margin-top:2px">${[c.loc, c.tel, c.email].filter(Boolean).join(' \u00B7 ')}</div>
@@ -47,24 +47,29 @@ function genericInvoice(name: string, d: InvTemplateData): string {
         </tr></thead>
         <tbody>${itemsRows || '<tr><td colspan="5" style="padding:20px;text-align:center;color:#999">No items</td></tr>'}</tbody>
       </table>
-      <div style="margin-top:4mm;text-align:right">
-        <div style="display:inline-block;min-width:200px;text-align:right">
-          <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-          ${d.disc > 0 ? `<div style="display:flex;justify-content:space-between;padding:3px 0;color:red"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
-          ${d.vp > 0 ? `<div style="display:flex;justify-content:space-between;padding:3px 0"><span>VAT ${d.vp}%</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
-          <div style="border-top:2px solid #333;margin:3px 0"></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:16px;font-weight:700"><span>Total</span><span>${d.cur.symbol}${d.gv}</span></div>
-          <div style="font-size:11px;color:#666;font-style:italic;padding-top:4px">${esc(d.gw)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:6mm">
+        <div>
+          ${c.seal ? `<img src="${esc(c.seal)}" style="max-width:80px;max-height:80px;object-fit:contain" />` : ''}
+        </div>
+        <div style="text-align:right">
+          <div style="display:inline-block;min-width:200px;text-align:right">
+            <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
+            ${d.disc > 0 ? `<div style="display:flex;justify-content:space-between;padding:3px 0;color:red"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
+            ${d.vp > 0 ? `<div style="display:flex;justify-content:space-between;padding:3px 0"><span>VAT ${d.vp}%</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
+            <div style="border-top:2px solid #333;margin:3px 0"></div>
+            <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:16px;font-weight:700"><span>Total</span><span>${d.cur.symbol}${d.gv}</span></div>
+            <div style="font-size:11px;color:#666;font-style:italic;padding-top:4px">${esc(d.gw)}</div>
+          </div>
         </div>
       </div>
-      ${d.notes ? `<div style="margin-top:4mm;font-size:12px"><strong>Notes:</strong> ${esc(d.notes)}</div>` : ''}
-      ${c.invTerms ? `<div style="font-size:12px"><strong>Terms:</strong> ${esc(c.invTerms)}</div>` : ''}
-      ${c.seal || c.signature ? `
-      <div style="display:flex;gap:20px;align-items:flex-end;margin-top:6mm;justify-content:center">
-        ${c.seal ? `<div><img src="${esc(c.seal)}" style="max-width:80px;max-height:80px;object-fit:contain" /></div>` : ''}
-        ${c.signature ? `<div><img src="${esc(c.signature)}" style="max-width:100px;max-height:50px;object-fit:contain" /><div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center">Authorized Signature</div></div>` : ''}
+      ${c.signature ? `
+      <div style="margin-top:6mm;text-align:left">
+        <img src="${esc(c.signature)}" style="max-width:100px;max-height:50px;object-fit:contain" />
+        <div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center;width:100px">Authorized Signature</div>
       </div>
       ` : ''}
+      ${d.notes ? `<div style="margin-top:4mm;font-size:12px"><strong>Notes:</strong> ${esc(d.notes)}</div>` : ''}
+      ${c.invTerms ? `<div style="font-size:12px"><strong>Terms:</strong> ${esc(c.invTerms)}</div>` : ''}
       <div style="border-top:1px solid #ddd;margin-top:6mm;padding-top:3mm;font-size:11px;color:#666;text-align:center">${esc(c.name)}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}</div>
       ${c.invFooter ? `<div style="font-size:11px;color:#666;text-align:center">${esc(c.invFooter)}</div>` : ''}
     </div>

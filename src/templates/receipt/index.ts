@@ -45,7 +45,7 @@ function genericReceipt(name: string, d: RecTemplateData): string {
   return wrap(`
     <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;position:relative;background:#fff;min-height:100vh;padding:12mm 14mm">
       <div style="text-align:center;margin-bottom:6mm">
-        ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:50px;max-height:50px;margin-bottom:4px" /><br/>` : ''}
+        ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:50px;max-height:50px;margin-bottom:4px;display:block;margin-left:auto;margin-right:auto" /><br/>` : ''}
         <div style="font-size:17px;font-weight:700">${esc(c.name)}</div>
         ${c.sub ? `<div style="font-size:12px;color:#666">${esc(c.sub)}</div>` : ''}
         <div style="font-size:11px;color:#999;margin-top:2px">${[c.loc, c.tel, c.email].filter(Boolean).join(' \u00B7 ')}</div>
