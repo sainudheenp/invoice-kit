@@ -1,6 +1,6 @@
-import { InvoiceClassic, InvoiceModern, InvoiceCompact, InvoiceMinimal, InvoiceElegant, InvoiceBold, InvoiceProfessional } from './invoice'
-import { ReceiptClassic, ReceiptModern, ReceiptCompact, ReceiptMinimal, ReceiptElegant, ReceiptBold, ReceiptProfessional } from './receipt'
-import { QuotationClassic, QuotationModern, QuotationCompact, QuotationMinimal, QuotationElegant, QuotationBold, QuotationProfessional } from './quotation'
+import { InvoiceClassic, InvoiceModern, InvoiceBeirak, InvoiceCompact, InvoiceMinimal, InvoiceElegant, InvoiceBold, InvoiceProfessional } from './invoice'
+import { ReceiptClassic, ReceiptBeirak, ReceiptModern, ReceiptCompact, ReceiptMinimal, ReceiptElegant, ReceiptBold, ReceiptProfessional } from './receipt'
+import { QuotationClassic, QuotationBeirak, QuotationModern, QuotationCompact, QuotationMinimal, QuotationElegant, QuotationBold, QuotationProfessional } from './quotation'
 import { getInvDocData, getRecDocData, getQuotDocData, applyWatermark } from './registry'
 import type { Company } from '@/types/company'
 import type { Invoice } from '@/types/invoice'
@@ -10,6 +10,7 @@ import type { Quotation } from '@/types/quotation'
 export const INV_TEMPLATES: Record<string, (d: any) => string> = {
   classic: InvoiceClassic,
   modern: InvoiceModern,
+  beirak: InvoiceBeirak,
   compact: InvoiceCompact,
   minimal: InvoiceMinimal,
   elegant: InvoiceElegant,
@@ -20,6 +21,7 @@ export const INV_TEMPLATES: Record<string, (d: any) => string> = {
 export const REC_TEMPLATES: Record<string, (d: any) => string> = {
   classic: ReceiptClassic,
   modern: ReceiptModern,
+  beirak: ReceiptBeirak,
   compact: ReceiptCompact,
   minimal: ReceiptMinimal,
   elegant: ReceiptElegant,
@@ -30,6 +32,7 @@ export const REC_TEMPLATES: Record<string, (d: any) => string> = {
 export const QUOT_TEMPLATES: Record<string, (d: any) => string> = {
   classic: QuotationClassic,
   modern: QuotationModern,
+  beirak: QuotationBeirak,
   compact: QuotationCompact,
   minimal: QuotationMinimal,
   elegant: QuotationElegant,

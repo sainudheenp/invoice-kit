@@ -1,4 +1,5 @@
 export { ReceiptClassic } from './Classic'
+export { ReceiptBeirak } from './Beirak'
 
 import type { RecTemplateData } from '@/types/template'
 import { esc } from '@/utils/esc'

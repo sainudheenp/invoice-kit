@@ -1,4 +1,5 @@
 export { QuotationClassic } from './Classic'
+export { QuotationBeirak } from './Beirak'
 
 import type { QuotTemplateData } from '@/types/template'
 import { esc } from '@/utils/esc'

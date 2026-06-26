@@ -94,6 +94,126 @@ function renderTableRow(pdf: jsPDF, y: number, cols: { text: string; x: number; 
   return ly + 3
 }
 
+// ─── BEIRAK TEMPLATE COLORS ──────────────────────────────────────────────────
+
+const BK_DB: [number, number, number] = [71, 102, 148]
+const BK_LB: [number, number, number] = [214, 228, 240]
+const BK_RD: [number, number, number] = [232, 24, 24]
+const BK_GR: [number, number, number] = [204, 204, 204]
+
+function beirakHeader(pdf: jsPDF, co: Company, imgs: LoadedImages, title: string, y: number): number {
+  if (imgs.logo) {
+    try { pdf.addImage(imgs.logo, 'PNG', 210 / 2 - 13, y, 26, 22) } catch {}
+  }
+  y += 26
+  pdf.setFont('helvetica', 'bold')
+  pdf.setTextColor(BK_DB[0], BK_DB[1], BK_DB[2])
+  pdf.setFontSize(18)
+  pdf.text(co.name, 210 / 2, y, { align: 'center' })
+  y += 5.5
+  if (co.sub) {
+    pdf.setTextColor(0, 0, 0)
+    pdf.setFontSize(13)
+    pdf.text(co.sub, 210 / 2, y, { align: 'center' })
+    y += 5
+  }
+  pdf.setFont('helvetica', 'normal')
+  const bw = 44
+  const bx = 210 / 2 - bw / 2
+  pdf.setDrawColor(BK_DB[0], BK_DB[1], BK_DB[2])
+  pdf.setFillColor(BK_LB[0], BK_LB[1], BK_LB[2])
+  pdf.setLineWidth(0.25)
+  pdf.roundedRect(bx, y, bw, 8.2, 1.6, 1.6, 'FD')
+  pdf.setFont('helvetica', 'bold')
+  pdf.setTextColor(BK_RD[0], BK_RD[1], BK_RD[2])
+  pdf.setFontSize(11)
+  pdf.text(title, 210 / 2, y + 5.8, { align: 'center' })
+  pdf.setFont('helvetica', 'normal')
+  pdf.setDrawColor(BK_DB[0], BK_DB[1], BK_DB[2])
+  pdf.setLineWidth(0.4)
+  pdf.line(12, y + 11, 210 - 12, y + 11)
+  return y + 16
+}
+
+function beirakInfoTable(pdf: jsPDF, rows: { label: string; value: string }[][], startY: number): number {
+  const colW = 89
+  const margin = 12
+  const gap = 210 - margin * 2 - colW * 2
+  let maxY = startY
+  const drawTbl = (data: { label: string; value: string }[], left: number) => {
+    data.forEach((r, i) => {
+      const ry = startY + i * 6.5
+      pdf.setDrawColor(BK_GR[0], BK_GR[1], BK_GR[2])
+      pdf.setLineWidth(0.2)
+      pdf.rect(left, ry, colW, 6.5, 'S')
+      pdf.setFillColor(BK_LB[0], BK_LB[1], BK_LB[2])
+      pdf.rect(left, ry, 30, 6.5, 'F')
+      pdf.setFontSize(9)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setTextColor(0, 0, 0)
+      pdf.text(r.label, left + 1.5, ry + 4.5)
+      pdf.setFont('helvetica', 'normal')
+      pdf.setTextColor(0, 0, 0)
+      pdf.text(r.value, left + 32, ry + 4.5)
+      maxY = Math.max(maxY, ry + 6.5)
+    })
+  }
+  drawTbl(rows[0], margin)
+  drawTbl(rows[1], margin + colW + gap)
+  return maxY + 3
+}
+
+function beirakTableHeader(pdf: jsPDF, y: number, cols: string[], widths: number[]): number {
+  let x = 12
+  pdf.setFillColor(BK_DB[0], BK_DB[1], BK_DB[2])
+  pdf.rect(12, y - 4, 210 - 24, 7, 'F')
+  pdf.setTextColor(255, 255, 255)
+  pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9)
+  cols.forEach((c, i) => {
+    const align: 'center' | 'left' | 'right' = i === 0 ? 'center' : i === 1 ? 'left' : 'right'
+    const px = align === 'center' ? x + widths[i] / 2 : align === 'right' ? x + widths[i] - 1 : x + 1
+    pdf.text(c, px, y + 0.5, { align })
+    x += widths[i]
+  })
+  pdf.setFont('helvetica', 'normal')
+  return y + 5
+}
+
+function beirakTableRow(pdf: jsPDF, y: number, cells: string[], widths: number[], alt?: boolean): number {
+  let x = 12
+  if (alt) {
+    pdf.setFillColor(248, 248, 248)
+    pdf.rect(12, y - 4, 210 - 24, 7, 'F')
+  }
+  pdf.setFontSize(9)
+  pdf.setTextColor(0, 0, 0)
+  cells.forEach((c, i) => {
+    const align: 'center' | 'left' | 'right' = i === 0 ? 'center' : i === 1 ? 'left' : 'right'
+    const px = align === 'center' ? x + widths[i] / 2 : align === 'right' ? x + widths[i] - 1 : x + 1
+    pdf.text(c, px, y + 0.5, { align })
+    x += widths[i]
+  })
+  pdf.setDrawColor(BK_GR[0], BK_GR[1], BK_GR[2])
+  pdf.setLineWidth(0.2)
+  const ly = y + 3
+  pdf.line(12, ly, 210 - 12, ly)
+  return y + 7
+}
+
+function beirakFooter(pdf: jsPDF, co: Company, y: number, prefix: string): void {
+  pdf.setDrawColor(BK_DB[0], BK_DB[1], BK_DB[2])
+  pdf.setLineWidth(0.5)
+  pdf.line(12, y, 210 - 12, y)
+  pdf.setFontSize(9)
+  pdf.setTextColor(102, 102, 102)
+  const contact = `${prefix} | ${co.name}${co.tel ? ` | ${co.tel}` : ''}${co.email ? ` | ${co.email}` : ''}`
+  pdf.text(contact, 210 / 2, y + 4, { align: 'center' })
+  if (co.loc) {
+    pdf.text(co.loc, 210 / 2, y + 8, { align: 'center' })
+  }
+}
+
 // ─── RECEIPT PDF ─────────────────────────────────────────────────────────────
 
 async function renderReceiptGeneric(pdf: jsPDF, rec: Receipt, co: Company, imgs: LoadedImages, tplName: string) {
@@ -295,6 +415,8 @@ export async function createReceiptPDF(rec: Receipt, co: Company): Promise<void>
 
   if (tpl === 'classic') {
     await renderReceiptClassic(pdf, rec, co, imgs)
+  } else if (tpl === 'beirak') {
+    await renderReceiptBeirak(pdf, rec, co, imgs)
   } else {
     await renderReceiptGeneric(pdf, rec, co, imgs, tpl)
   }
@@ -559,6 +681,230 @@ async function renderInvoiceModern(pdf: jsPDF, inv: Invoice, co: Company, imgs: 
   pdf.text(`Tel: ${co.tel}${co.email ? ` | ${co.email}` : ''}`, MARGIN + W - 2, 284, { align: 'right' })
 }
 
+// ─── BEIRAK RENDER FUNCTIONS ─────────────────────────────────────────────────
+
+async function renderInvoiceBeirak(pdf: jsPDF, inv: Invoice, co: Company, imgs: LoadedImages) {
+  const cur = co.currency
+  const dp = getDp(cur.subPer)
+  const words = inv.grand > 0 ? num2words(inv.grand, cur) + ' only' : ''
+  let y = beirakHeader(pdf, co, imgs, 'TAX INVOICE', 6)
+
+  const leftRows = [
+    { label: 'Invoice No.', value: inv.invNo },
+    { label: 'Date', value: inv.date },
+    { label: 'Prepared By', value: co.name },
+  ]
+  const rightRows = [
+    { label: 'Party', value: inv.customer.name },
+    { label: 'Address', value: inv.customer.address || '' },
+    ...(inv.customer.cr ? [{ label: 'CR', value: inv.customer.cr }] : []),
+  ]
+  y = beirakInfoTable(pdf, [leftRows, rightRows], y)
+
+  const colWidths = [12, 210 - 24 - 12 - 65 - 35, 23, 23, 25]
+  const colLabels = ['#', 'Description', 'Qty', 'Price', 'Amount']
+
+  y = addPageIfNeeded(pdf, y + 18)
+  y = beirakTableHeader(pdf, y, colLabels, colWidths)
+
+  inv.items.forEach((item, i) => {
+    y = addPageIfNeeded(pdf, y + 7)
+    y = beirakTableRow(pdf, y, [
+      String(i + 1), item.desc, String(item.qty),
+      fmt(item.price, dp), fmt(item.amount, dp),
+    ], colWidths, i % 2 === 1)
+  })
+
+  y += 3; y = addPageIfNeeded(pdf, y + 30)
+  const sumW = 210 - 24
+  const sumX = 12
+
+  const drawSumRow = (label: string, value: string, bg?: typeof BK_LB, bold?: boolean) => {
+    if (bg) { pdf.setFillColor(bg[0], bg[1], bg[2]); pdf.rect(sumX, y, sumW, 7, 'F') }
+    pdf.setDrawColor(BK_GR[0], BK_GR[1], BK_GR[2]); pdf.setLineWidth(0.2); pdf.rect(sumX, y, sumW, 7, 'S')
+    pdf.setFontSize(bold ? 14 : 12)
+    pdf.setFont('helvetica', bold ? 'bold' : 'normal')
+    pdf.setTextColor(bold ? 255 : 0, bold ? 255 : 0, bold ? 255 : 0)
+    pdf.text(label, sumX + 4, y + 5)
+    pdf.text(value, sumX + sumW - 4, y + 5, { align: 'right' })
+    y += 7
+  }
+
+  drawSumRow('Subtotal', `${cur.symbol}${fmt(inv.subtotal, dp)}`, BK_LB)
+  if (inv.vatPct > 0) drawSumRow(`VAT (${inv.vatPct}%)`, `${cur.symbol}${fmt(inv.vatAmt, dp)}`)
+  if (inv.discount > 0) drawSumRow('Discount', `-${cur.symbol}${fmt(inv.discount, dp)}`)
+  pdf.setFillColor(BK_DB[0], BK_DB[1], BK_DB[2])
+  pdf.rect(sumX, y, sumW, 8, 'F')
+  pdf.setDrawColor(BK_GR[0], BK_GR[1], BK_GR[2]); pdf.setLineWidth(0.2); pdf.rect(sumX, y, sumW, 8, 'S')
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16); pdf.setTextColor(255, 255, 255)
+  pdf.text('Grand Total', sumX + 4, y + 5.5)
+  pdf.text(`${cur.symbol}${fmt(inv.grand, dp)}`, sumX + sumW - 4, y + 5.5, { align: 'right' })
+  y += 10
+
+  if (words) { pdf.setFontSize(12); pdf.setTextColor('#666'); pdf.setFont('helvetica', 'italic'); pdf.text(words, sumX + sumW - 4, y, { align: 'right' }); y += 5; pdf.setFont('helvetica', 'normal') }
+
+  y = addPageIfNeeded(pdf, y + 30)
+  const sigY = y
+  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Prepared By', 12, sigY)
+  pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
+  pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text('Accounts Department', 12, sigY + 6)
+  if (imgs.signature) {
+    try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch {}
+  }
+  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
+  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Authorized By', 210 - 12, sigY, { align: 'right' })
+  pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(210 - 100, sigY + 2, 210 - 12, sigY + 2)
+  pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(co.name, 210 - 12, sigY + 6, { align: 'right' })
+
+  beirakFooter(pdf, co, 280, 'TAX INVOICE')
+}
+
+async function renderReceiptBeirak(pdf: jsPDF, rec: Receipt, co: Company, imgs: LoadedImages) {
+  const cur = co.currency
+  const dp = getDp(cur.subPer)
+  const amount = rec.amount || rec.items.reduce((s, i) => s + i.amount, 0)
+  const words = rec.amountWords || (amount > 0 ? num2words(amount, cur) + ' only' : '')
+  let y = beirakHeader(pdf, co, imgs, 'RECEIPT VOUCHER', 6)
+
+  const leftRows = [
+    { label: 'Receipt No.', value: rec.recNo },
+    { label: 'Date', value: rec.date },
+  ]
+  const rightRows = [
+    { label: 'Received From', value: rec.receivedFrom },
+    ...(rec.bankName ? [{ label: 'Bank', value: rec.bankName }] : []),
+    { label: 'Payment', value: rec.payMethod + (rec.chequeNo ? ` - ${rec.chequeNo}` : '') },
+  ]
+  y = beirakInfoTable(pdf, [leftRows, rightRows], y)
+
+  if (rec.items.length > 0) {
+    const colWidths = [12, 210 - 24 - 12 - 65 - 35, 23, 23, 25]
+    const colLabels = ['#', 'Description', 'Qty', 'Price', 'Amount']
+    y = addPageIfNeeded(pdf, y + 18)
+    y = beirakTableHeader(pdf, y, colLabels, colWidths)
+    rec.items.forEach((item, i) => {
+      y = addPageIfNeeded(pdf, y + 7)
+      y = beirakTableRow(pdf, y, [
+        String(i + 1), item.desc, String(item.qty),
+        fmt(item.price, dp), fmt(item.amount, dp),
+      ], colWidths, i % 2 === 1)
+    })
+    y += 3
+  }
+
+  y = addPageIfNeeded(pdf, y + 16)
+  const sumW = 210 - 24
+  const sumX = 12
+  pdf.setFillColor(BK_LB[0], BK_LB[1], BK_LB[2])
+  pdf.rect(sumX, y, sumW, 7, 'F')
+  pdf.setDrawColor(BK_GR[0], BK_GR[1], BK_GR[2]); pdf.setLineWidth(0.2); pdf.rect(sumX, y, sumW, 7, 'S')
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(12); pdf.setTextColor(0, 0, 0)
+  pdf.text('Amount', sumX + 4, y + 5)
+  pdf.text(`${cur.symbol}${fmt(amount, dp)}`, sumX + sumW - 4, y + 5, { align: 'right' })
+  y += 9
+  if (words) { pdf.setFontSize(12); pdf.setTextColor('#666'); pdf.setFont('helvetica', 'italic'); pdf.text(words, sumX + sumW - 4, y, { align: 'right' }); y += 5; pdf.setFont('helvetica', 'normal') }
+  if (rec.being) { pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(`Purpose: ${rec.being}`, sumX, y); y += 5 }
+
+  y = addPageIfNeeded(pdf, y + 24)
+  const sigY = y
+  if (rec.receiver) {
+    pdf.setFontSize(12); pdf.setTextColor('#333')
+    pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
+    pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Receiver', 12, sigY + 6)
+    pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(rec.receiver, 12, sigY)
+  }
+  if (imgs.signature) {
+    try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch {}
+  }
+  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
+  if (rec.signatory) {
+    pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Signatory', 210 - 12, sigY + 6, { align: 'right' })
+    pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(210 - 100, sigY + 2, 210 - 12, sigY + 2)
+    pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(rec.signatory, 210 - 12, sigY, { align: 'right' })
+  }
+
+  beirakFooter(pdf, co, 280, 'RECEIPT VOUCHER')
+}
+
+async function renderQuotationBeirak(pdf: jsPDF, quot: Quotation, co: Company, imgs: LoadedImages) {
+  const cur = co.currency
+  const dp = getDp(cur.subPer)
+  const words = quot.grand > 0 ? num2words(quot.grand, cur) + ' only' : ''
+  let y = beirakHeader(pdf, co, imgs, 'QUOTATION', 6)
+
+  const leftRows = [
+    { label: 'Quotation No.', value: quot.quotNo },
+    { label: 'Date', value: quot.date },
+    { label: 'Valid Until', value: quot.validUntil },
+  ]
+  const rightRows = [
+    { label: 'Party', value: quot.customer.name },
+    { label: 'Address', value: quot.customer.address || '' },
+    ...(quot.customer.cr ? [{ label: 'CR', value: quot.customer.cr }] : []),
+  ]
+  y = beirakInfoTable(pdf, [leftRows, rightRows], y)
+
+  const colWidths = [12, 210 - 24 - 12 - 65 - 35, 23, 23, 25]
+  const colLabels = ['#', 'Description', 'Qty', 'Price', 'Amount']
+
+  y = addPageIfNeeded(pdf, y + 18)
+  y = beirakTableHeader(pdf, y, colLabels, colWidths)
+
+  quot.items.forEach((item, i) => {
+    y = addPageIfNeeded(pdf, y + 7)
+    y = beirakTableRow(pdf, y, [
+      String(i + 1), item.desc, String(item.qty),
+      fmt(item.price, dp), fmt(item.amount, dp),
+    ], colWidths, i % 2 === 1)
+  })
+
+  y += 3; y = addPageIfNeeded(pdf, y + 30)
+  const sumW = 210 - 24
+  const sumX = 12
+
+  const drawSumRow = (label: string, value: string, bg?: typeof BK_LB, bold?: boolean) => {
+    if (bg) { pdf.setFillColor(bg[0], bg[1], bg[2]); pdf.rect(sumX, y, sumW, 7, 'F') }
+    pdf.setDrawColor(BK_GR[0], BK_GR[1], BK_GR[2]); pdf.setLineWidth(0.2); pdf.rect(sumX, y, sumW, 7, 'S')
+    pdf.setFontSize(bold ? 14 : 12)
+    pdf.setFont('helvetica', bold ? 'bold' : 'normal')
+    pdf.setTextColor(bold ? 255 : 0, bold ? 255 : 0, bold ? 255 : 0)
+    pdf.text(label, sumX + 4, y + 5)
+    pdf.text(value, sumX + sumW - 4, y + 5, { align: 'right' })
+    y += 7
+  }
+
+  drawSumRow('Subtotal', `${cur.symbol}${fmt(quot.subtotal, dp)}`, BK_LB)
+  if (quot.vatPct > 0) drawSumRow(`VAT (${quot.vatPct}%)`, `${cur.symbol}${fmt(quot.vatAmt, dp)}`)
+  if (quot.discount > 0) drawSumRow('Discount', `-${cur.symbol}${fmt(quot.discount, dp)}`)
+  pdf.setFillColor(BK_DB[0], BK_DB[1], BK_DB[2])
+  pdf.rect(sumX, y, sumW, 8, 'F')
+  pdf.setDrawColor(BK_GR[0], BK_GR[1], BK_GR[2]); pdf.setLineWidth(0.2); pdf.rect(sumX, y, sumW, 8, 'S')
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16); pdf.setTextColor(255, 255, 255)
+  pdf.text('Grand Total', sumX + 4, y + 5.5)
+  pdf.text(`${cur.symbol}${fmt(quot.grand, dp)}`, sumX + sumW - 4, y + 5.5, { align: 'right' })
+  y += 10
+
+  if (words) { pdf.setFontSize(12); pdf.setTextColor('#666'); pdf.setFont('helvetica', 'italic'); pdf.text(words, sumX + sumW - 4, y, { align: 'right' }); y += 5; pdf.setFont('helvetica', 'normal') }
+
+  if (quot.notes) { pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(`Notes: ${quot.notes}`, sumX, y); y += 5 }
+  if (quot.terms) { pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(`Terms: ${quot.terms}`, sumX, y); y += 5 }
+
+  y = addPageIfNeeded(pdf, y + 30)
+  const sigY = y
+  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Prepared By', 12, sigY)
+  pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
+  pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text('Accounts Department', 12, sigY + 6)
+  if (imgs.signature) {
+    try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch {}
+  }
+  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
+  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Authorized By', 210 - 12, sigY, { align: 'right' })
+  pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(210 - 100, sigY + 2, 210 - 12, sigY + 2)
+  pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(co.name, 210 - 12, sigY + 6, { align: 'right' })
+
+  beirakFooter(pdf, co, 280, 'QUOTATION')
+}
+
 async function buildInvoicePDF(inv: Invoice, co: Company): Promise<jsPDF> {
   const pdf = new jsPDF('p', 'mm', 'a4')
   const imgs = await loadImages(co)
@@ -568,6 +914,8 @@ async function buildInvoicePDF(inv: Invoice, co: Company): Promise<jsPDF> {
     await renderInvoiceClassic(pdf, inv, co, imgs)
   } else if (tpl === 'modern') {
     await renderInvoiceModern(pdf, inv, co, imgs)
+  } else if (tpl === 'beirak') {
+    await renderInvoiceBeirak(pdf, inv, co, imgs)
   } else {
     await renderInvoiceGeneric(pdf, inv, co, imgs, tpl)
   }
@@ -755,6 +1103,8 @@ export async function createQuotationPDF(quot: Quotation, co: Company): Promise<
 
   if (tpl === 'classic') {
     await renderQuotationClassic(pdf, quot, co, imgs)
+  } else if (tpl === 'beirak') {
+    await renderQuotationBeirak(pdf, quot, co, imgs)
   } else {
     await renderQuotationGeneric(pdf, quot, co, imgs, tpl)
   }

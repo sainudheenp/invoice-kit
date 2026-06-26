@@ -1,5 +1,6 @@
 export { InvoiceClassic } from './Classic'
 export { InvoiceModern } from './Modern'
+export { InvoiceBeirak } from './Beirak'
 
 import type { InvTemplateData } from '@/types/template'
 import { esc } from '@/utils/esc'
