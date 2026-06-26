@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useApp } from '@/store/AppContext'
+import { db } from '@/db'
 import { useUI } from '@/store/UIContext'
 import { defCompany } from '@/utils/defCompany'
 import { CUR_PRESETS } from '@/utils/currencyPresets'
@@ -55,7 +56,9 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
       const data = JSON.parse(text)
       if (Array.isArray(data.companies)) {
         for (const c of data.companies) await saveCompany(c)
-        if (data.invoices) for (const i of data.invoices) await saveCompany(i) // defer to context
+        if (data.invoices) for (const i of data.invoices) await db.invoices.put(i)
+        if (data.receipts) for (const r of data.receipts) await db.receipts.put(r)
+        if (data.quotations) for (const q of data.quotations) await db.quotations.put(q)
         showToast('Data imported!')
         onDone()
       }
