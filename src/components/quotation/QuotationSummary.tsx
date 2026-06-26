@@ -14,7 +14,7 @@ interface Props {
 
 export function QuotationSummary({ subtotal, vatPct, vatAmt, discount, grand, words, dp, curSymbol, children }: Props) {
   return (
-    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm p-5 sticky top-4 space-y-4">
+    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm p-5 lg:sticky lg:top-4 space-y-4">
       <h3 className="text-sm font-semibold">Total Summary</h3>
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">

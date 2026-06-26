@@ -218,7 +218,7 @@ export default function Receipt() {
               {cur && <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] font-medium">{cur.code} {cur.symbol}</span>}
             </CardHeader>
             <div className="p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Receipt No. <span className="text-red">*</span></label>
                   <input value={form.recNo} onChange={(e) => set('recNo', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
@@ -262,7 +262,7 @@ export default function Receipt() {
                 <label className="text-xs font-medium text-[var(--color-text2)]">Being (Purpose)</label>
                 <input value={form.being} onChange={(e) => set('being', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Receiver Name</label>
                   <input value={form.receiver} onChange={(e) => set('receiver', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
@@ -295,7 +295,7 @@ export default function Receipt() {
             </CardHeader>
             <div className="p-5">
               {form.mode === 'simple' ? (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-medium text-[var(--color-text2)]">Amount <span className="text-red">*</span></label>
                     <input type="number" min="0" step="0.001" value={form.simpleAmount} onChange={(e) => set('simpleAmount', Math.max(0, parseFloat(e.target.value) || 0))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
