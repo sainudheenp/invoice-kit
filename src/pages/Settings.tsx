@@ -45,7 +45,7 @@ const TEMPLATE_OPTIONS = ['classic', 'modern', 'compact', 'minimal', 'elegant', 
 const WATERMARK_OPTIONS = ['', 'Draft', 'Paid', 'Sample', 'Copy']
 
 export default function Settings() {
-  const { state, getCo, saveCompany, deleteCompany, setActive, resetAll, dispatch } = useApp()
+  const { state, getCo, saveCompany, deleteCompany, setActive, resetAll, dispatch, saveInvoice, saveReceipt, saveQuotation } = useApp()
   const { ui, toggleDark, showToast, showResetModal, hideResetModal, showPreview } = useUI()
   const co = getCo()
   const [activeSection, setActiveSection] = useState('profiles')
@@ -162,8 +162,10 @@ export default function Settings() {
       if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB.', 'err'); return }
       const reader = new FileReader()
       reader.onload = async () => {
-        set(field, reader.result as string)
+        const dataUrl = reader.result as string
+        set(field, dataUrl)
         if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+        formRef.current = { ...formRef.current, [field]: dataUrl }
         setSaving(true)
         await doAutoSave()
       }
@@ -211,9 +213,9 @@ export default function Settings() {
         const data = JSON.parse(reader.result as string)
         if (Array.isArray(data.companies)) {
           for (const c of data.companies) await saveCompany(c)
-          if (data.invoices) for (const i of data.invoices) dispatch({ type: 'UPSERT_INVOICE', payload: i })
-          if (data.receipts) for (const r of data.receipts) dispatch({ type: 'UPSERT_RECEIPT', payload: r })
-          if (data.quotations) for (const q of data.quotations) dispatch({ type: 'UPSERT_QUOTATION', payload: q })
+          if (data.invoices) for (const i of data.invoices) await saveInvoice(i)
+          if (data.receipts) for (const r of data.receipts) await saveReceipt(r)
+          if (data.quotations) for (const q of data.quotations) await saveQuotation(q)
           showToast('Data imported!')
         }
       } catch { showToast('Invalid file.', 'err') }
@@ -371,8 +373,10 @@ export default function Settings() {
                       if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB.', 'err'); return }
                       const reader = new FileReader()
                       reader.onload = async () => {
-                        set(field, reader.result as string)
+                        const dataUrl = reader.result as string
+                        set(field, dataUrl)
                         if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+                        formRef.current = { ...formRef.current, [field]: dataUrl }
                         setSaving(true)
                         await doAutoSave()
                       }
