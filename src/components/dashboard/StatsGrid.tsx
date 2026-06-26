@@ -1,36 +1,48 @@
 import { useApp } from '@/store/AppContext'
 import { Svg } from '@/icons'
-import { Card } from '@/components/ui/Card'
+
+const STATS = [
+  {
+    icon: 'building', label: 'Companies',
+    color: '#6366f1', bg: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-600 dark:text-indigo-400',
+    get: (state: ReturnType<typeof useApp>['state'], coId: string | null) => state.companies.length,
+  },
+  {
+    icon: 'file', label: 'Invoices',
+    color: '#f59e0b', bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-600 dark:text-amber-400',
+    get: (state: any, coId: string | null) => state.invoices.filter((i: any) => i.companyId === coId).length,
+  },
+  {
+    icon: 'receipt', label: 'Receipts',
+    color: '#10b981', bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-600 dark:text-emerald-400',
+    get: (state: any, coId: string | null) => state.receipts.filter((r: any) => r.companyId === coId).length,
+  },
+  {
+    icon: 'clipboard', label: 'Quotations',
+    color: '#3b82f6', bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400',
+    get: (state: any, coId: string | null) => state.quotations.filter((q: any) => q.companyId === coId).length,
+  },
+]
 
 export function StatsGrid() {
   const { state } = useApp()
-  const co = state.companies.find((c) => c.id === state.activeId)
-  const invCount = state.invoices.filter((i) => i.companyId === co?.id).length
-  const recCount = state.receipts.filter((r) => r.companyId === co?.id).length
-  const quotCount = state.quotations.filter((q) => q.companyId === co?.id).length
-
-  const stats = [
-    { icon: 'building', label: 'Companies', value: state.companies.length, bar: 'bg-indigo-500' },
-    { icon: 'file', label: 'Invoices', value: invCount, bar: 'bg-[var(--color-primary)]' },
-    { icon: 'receipt', label: 'Receipts', value: recCount, bar: 'bg-green' },
-    { icon: 'file', label: 'Quotations', value: quotCount, bar: 'bg-blue' },
-  ]
+  const coId = state.activeId
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      {stats.map((s) => (
-        <Card key={s.label} className="overflow-hidden">
-          <div className="p-5 flex items-center gap-4">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.bar} text-white`}>
+      {STATS.map((s) => (
+        <div
+          key={s.label}
+          className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 hover:shadow-md transition-shadow"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className={`w-11 h-11 rounded-xl ${s.bg} ${s.text} flex items-center justify-center`}>
               <Svg name={s.icon} />
             </div>
-            <div>
-              <div className="text-2xl font-bold">{s.value}</div>
-              <div className="text-xs text-[var(--color-text2)]">{s.label}</div>
-            </div>
+            <span className="text-3xl font-bold tracking-tight">{s.get(state, coId)}</span>
           </div>
-          <div className={`h-1 ${s.bar}`} />
-        </Card>
+          <div className="text-sm font-medium text-[var(--color-text2)]">{s.label}</div>
+        </div>
       ))}
     </div>
   )

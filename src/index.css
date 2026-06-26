@@ -20,9 +20,9 @@
   --color-text2: #78716C;
   --color-text3: #A8A29E;
   --color-side-bg: #1C1917;
-  --color-side-text: #A8A29E;
-  --color-side-hover: rgba(255, 255, 255, 0.05);
-  --color-side-active: #FFFBEB;
+  --color-side-text: #D6D3D1;
+  --color-side-hover: rgba(255, 255, 255, 0.08);
+  --color-side-active: rgba(255, 255, 255, 0.1);
   --color-input-bg: #FAFAF9;
   --color-input-border: #D6D3D1;
 }
@@ -37,8 +37,8 @@ html.dark {
   --color-input-bg: #333;
   --color-input-border: #444;
   --color-side-bg: #111;
-  --color-side-active: #2A2A2A;
-  --color-side-text: #888;
+  --color-side-active: rgba(255, 255, 255, 0.08);
+  --color-side-text: #A0A0A0;
   --color-primary-ring: rgba(217, 119, 6, 0.25);
 }
 

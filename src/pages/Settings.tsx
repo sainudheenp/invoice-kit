@@ -625,8 +625,8 @@ export default function Settings() {
             <div className="p-5">
               <div className="flex items-center gap-3">
                 <span className="text-sm">Dark Mode</span>
-                <button onClick={toggleDark} className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${ui.dark ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}>
-                  <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${ui.dark ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+                <button onClick={toggleDark} type="button" role="switch" aria-checked={ui.dark} className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${ui.dark ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}>
+                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${ui.dark ? 'translate-x-[18px]' : 'translate-x-0'}`} />
                 </button>
               </div>
             </div>

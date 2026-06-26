@@ -39,11 +39,11 @@ export function Sidebar() {
             <button
               key={page}
               onClick={() => goTo(page)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 cursor-pointer ${
-                current === page
-                  ? 'bg-[var(--color-side-active)] text-[var(--color-side-active)] font-medium'
-                  : 'text-[var(--color-side-text)] hover:bg-[var(--color-side-hover)] hover:text-white'
-              }`}
+               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 cursor-pointer ${
+                 current === page
+                   ? 'bg-[var(--color-side-active)] text-white font-medium'
+                   : 'text-[var(--color-side-text)] hover:bg-[var(--color-side-hover)] hover:text-white'
+               }`}
             >
               <Svg name={icon} className="shrink-0" />
               <span>{label}</span>
