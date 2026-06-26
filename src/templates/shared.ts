@@ -22,23 +22,23 @@ export function genericDoc(
   </tr>`).join('')
 
   return watermarkWrap(`
-    <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;position:relative;background:#fff;min-height:100vh;padding:14mm 16mm">
+    <div style="font-family:Arial,Helvetica,sans-serif;font-size:20px;color:#333;position:relative;background:#fff;min-height:100vh;padding:14mm 16mm">
       <div style="text-align:center;margin-bottom:6mm">
         ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:80px;max-height:80px;margin-bottom:4px;display:block;margin-left:auto;margin-right:auto" /><br/>` : ''}
-        <div style="font-size:18px;font-weight:700">${esc(c.name)}</div>
-        ${c.sub ? `<div style="font-size:12px;color:#666">${esc(c.sub)}</div>` : ''}
-        <div style="font-size:11px;color:#999;margin-top:2px">${[c.loc, c.tel, c.email].filter(Boolean).join(' \u00B7 ')}</div>
+        <div style="font-size:20px;font-weight:700">${esc(c.name)}</div>
+        ${c.sub ? `<div style="font-size:20px;color:#666">${esc(c.sub)}</div>` : ''}
+        <div style="font-size:15px;color:#999;margin-top:2px">${[c.loc, c.tel, c.email].filter(Boolean).join(' \u00B7 ')}</div>
       </div>
       <div style="text-align:center;margin-bottom:4mm">
-        <div style="font-size:13px;text-transform:uppercase;letter-spacing:2px;color:${pc}">${title}</div>
-        <div style="font-size:12px;color:#666">${dateHtml}</div>
+        <div style="font-size:15px;text-transform:uppercase;letter-spacing:2px;color:${pc}">${title}</div>
+        <div style="font-size:20px;color:#666">${dateHtml}</div>
       </div>
       <div style="margin-bottom:4mm">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999">Bill To</div>
+        <div style="font-size:15px;text-transform:uppercase;letter-spacing:1px;color:#999">Bill To</div>
         <div style="font-weight:600">${esc(d.cust)}</div>
-        <div style="font-size:12px;color:#555">${[d.addr, d.ph, d.em].filter(Boolean).join(' | ')}</div>
+        <div style="font-size:20px;color:#555">${[d.addr, d.ph, d.em].filter(Boolean).join(' | ')}</div>
       </div>
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <table style="width:100%;border-collapse:collapse;font-size:15px">
         <thead><tr style="background:${pc};color:#fff">
           <th style="padding:8px;text-align:center;width:30px">#</th>
           <th style="padding:8px;text-align:left">Description</th>
@@ -58,21 +58,21 @@ export function genericDoc(
             ${d.disc > 0 ? `<div style="display:flex;justify-content:space-between;padding:3px 0;color:red"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
             ${d.vp > 0 ? `<div style="display:flex;justify-content:space-between;padding:3px 0"><span>VAT ${d.vp}%</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
             <div style="border-top:2px solid #333;margin:3px 0"></div>
-            <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:16px;font-weight:700"><span>Total</span><span>${d.cur.symbol}${d.gv}</span></div>
-            <div style="font-size:11px;color:#666;font-style:italic;padding-top:4px">${esc(d.gw)}</div>
+            <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:20px;font-weight:700"><span>Total</span><span>${d.cur.symbol}${d.gv}</span></div>
+            <div style="font-size:15px;color:#666;font-style:italic;padding-top:4px">${esc(d.gw)}</div>
           </div>
         </div>
       </div>
       ${c.signature ? `
       <div style="margin-top:6mm;text-align:left">
         <img src="${esc(c.signature)}" style="max-width:140px;max-height:70px;object-fit:contain" />
-        <div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center;width:140px">Authorized Signature</div>
+        <div style="font-size:15px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center;width:140px">Authorized Signature</div>
       </div>
       ` : ''}
-      ${d.notes ? `<div style="margin-top:4mm;font-size:12px"><strong>Notes:</strong> ${esc(d.notes)}</div>` : ''}
+      ${d.notes ? `<div style="margin-top:4mm;font-size:20px"><strong>Notes:</strong> ${esc(d.notes)}</div>` : ''}
       ${extraBeforeFooter}
-      <div style="border-top:1px solid #ddd;margin-top:6mm;padding-top:3mm;font-size:11px;color:#666;text-align:center">${esc(c.name)}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}</div>
-      ${c.invFooter ? `<div style="font-size:11px;color:#666;text-align:center">${esc(c.invFooter)}</div>` : ''}
+      <div style="border-top:1px solid #ddd;margin-top:6mm;padding-top:3mm;font-size:15px;color:#666;text-align:center">${esc(c.name)}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}</div>
+      ${c.invFooter ? `<div style="font-size:15px;color:#666;text-align:center">${esc(c.invFooter)}</div>` : ''}
     </div>
   `, d.comp.watermark)
 }
