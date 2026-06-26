@@ -14,6 +14,7 @@ interface AppState {
   quotations: Quotation[]
   activeId: string | null
   editingDoc: EditingDoc | null
+  dbError: string | null
 }
 
 type AppAction =
@@ -28,6 +29,7 @@ type AppAction =
   | { type: 'UPSERT_QUOTATION'; payload: Quotation }
   | { type: 'REMOVE_QUOTATION'; payload: string }
   | { type: 'SET_EDITING'; payload: EditingDoc | null }
+  | { type: 'DB_ERROR'; payload: string }
   | { type: 'RESET' }
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -74,8 +76,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, quotations: state.quotations.filter((q) => q.id !== action.payload) }
     case 'SET_EDITING':
       return { ...state, editingDoc: action.payload }
+    case 'DB_ERROR':
+      return { ...state, dbError: action.payload }
     case 'RESET':
-      return { companies: [], invoices: [], receipts: [], quotations: [], activeId: null, editingDoc: null }
+      return { companies: [], invoices: [], receipts: [], quotations: [], activeId: null, editingDoc: null, dbError: null }
     default:
       return state
   }
@@ -88,6 +92,7 @@ const initialState: AppState = {
   quotations: [],
   activeId: null,
   editingDoc: null,
+  dbError: null,
 }
 
 interface AppContextValue {
