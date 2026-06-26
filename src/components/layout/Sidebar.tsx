@@ -56,6 +56,9 @@ export function Sidebar() {
             <span className="w-2 h-2 rounded-full bg-green shrink-0" />
             <span className="truncate">{co?.name || 'No company'}</span>
           </div>
+          <div className="px-3 pt-0.5 text-[10px] text-[var(--color-side-text)]/50">
+            v{import.meta.env.VITE_APP_VERSION || '1.00'}
+          </div>
         </div>
       </aside>
 

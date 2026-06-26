@@ -30,7 +30,7 @@ function genericQuotation(name: string, d: QuotTemplateData): string {
         <div style="font-size:11px;color:#999;margin-top:2px">${[c.loc, c.tel, c.email].filter(Boolean).join(' \u00B7 ')}</div>
       </div>
       <div style="text-align:center;margin-bottom:4mm">
-        <div style="font-size:13px;text-transform:uppercase;letter-spacing:2px;color:${pc}">${name} Quotation</div>
+        <div style="font-size:13px;text-transform:uppercase;letter-spacing:2px;color:${pc}">Quotation</div>
         <div style="font-size:12px;color:#666">${esc(d.no)} | ${d.dt}${d.validDt ? ' | Valid: ' + d.validDt : ''}</div>
       </div>
       <div style="margin-bottom:4mm">

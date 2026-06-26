@@ -120,7 +120,7 @@ export default function Invoice() {
     if (dupe) { showToast('Invoice number already exists.', 'err'); return }
 
     try {
-      await createInvoice(co, {
+      const saved = await createInvoice(co, {
         invNo: form.invNo,
         date: form.date,
         dueDate: form.dueDate,
@@ -141,14 +141,20 @@ export default function Invoice() {
       }
 
       saveCustomer(form.custName)
-      setEditing(null)
-      setIsEditing(false)
-      setForm(emptyForm())
+      setEditing({ type: 'inv', id: saved.id })
+      setIsEditing(true)
       markClean()
       showToast(editingId ? 'Invoice updated!' : 'Invoice saved!')
     } catch {
       showToast('Failed to save invoice.', 'err')
     }
+  }
+
+  const handleNew = () => {
+    setForm(emptyForm())
+    setIsEditing(false)
+    setEditing(null)
+    markClean()
   }
 
   useKeyboardShortcuts({ s: handleSave, enter: handleSave })
@@ -356,12 +362,13 @@ export default function Invoice() {
             <Button onClick={handleSave} className="justify-center w-full">
               {isEditing ? 'Update Invoice' : 'Save Invoice'}
             </Button>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center">Preview</Button>
-              <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center">Print</Button>
-              <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center">PDF</Button>
-              <Button variant="outline" size="sm" onClick={handleText} className="justify-center">Text</Button>
+            <div className="flex flex-col gap-2">
+              <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
+              <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
+              <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
+              <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
             </div>
+            <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Invoice</Button>
           </div>
         </div>
       </div>

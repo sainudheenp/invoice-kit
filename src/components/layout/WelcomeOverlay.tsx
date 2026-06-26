@@ -354,6 +354,6 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
           )
         })()}
       </Modal>
-    </div>
+        </div>
   )
 }

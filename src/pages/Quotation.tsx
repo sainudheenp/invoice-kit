@@ -115,7 +115,7 @@ export default function QuotationPage() {
     if (dupe) { showToast('Quotation number already exists.', 'err'); return }
 
     try {
-      await createQuotation(co, {
+      const saved = await createQuotation(co, {
         quotNo: form.quotNo,
         date: form.date,
         validUntil: form.validUntil,
@@ -132,14 +132,20 @@ export default function QuotationPage() {
       }
 
       saveCustomer(form.custName)
-      setEditing(null)
-      setIsEditing(false)
-      setForm(emptyForm())
+      setEditing({ type: 'quot', id: saved.id })
+      setIsEditing(true)
       markClean()
       showToast(editingId ? 'Quotation updated!' : 'Quotation saved!')
     } catch {
       showToast('Failed to save quotation.', 'err')
     }
+  }
+
+  const handleNew = () => {
+    setForm(emptyForm())
+    setIsEditing(false)
+    setEditing(null)
+    markClean()
   }
 
   useKeyboardShortcuts({ s: handleSave, enter: handleSave })
@@ -325,12 +331,13 @@ export default function QuotationPage() {
             <Button onClick={handleSave} className="justify-center w-full">
               {isEditing ? 'Update Quotation' : 'Save Quotation'}
             </Button>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center">Preview</Button>
-              <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center">Print</Button>
-              <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center">PDF</Button>
-              <Button variant="outline" size="sm" onClick={handleText} className="justify-center">Text</Button>
+            <div className="flex flex-col gap-2">
+              <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
+              <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
+              <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
+              <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
             </div>
+            <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Quotation</Button>
           </div>
         </div>
       </div>
