@@ -45,9 +45,9 @@ const TEMPLATE_OPTIONS = ['classic', 'modern', 'compact', 'minimal', 'elegant', 
 const WATERMARK_OPTIONS = ['', 'Draft', 'Paid', 'Sample', 'Copy']
 
 const IMAGE_INFO = {
-  logo: { dim: '200\u00D7200px', desc: 'Square, transparent background', note: 'Displays at 50\u00D750px on documents' },
-  seal: { dim: '300\u00D7300px', desc: 'Square, transparent background', note: 'Displays at 80\u00D780px on documents' },
-  signature: { dim: '400\u00D7150px', desc: 'Wide, transparent background', note: 'Displays at 100\u00D750px on documents' },
+  logo: { dim: '200\u00D7200px', desc: 'Square, transparent background', note: 'Displays at 80\u00D780px on documents' },
+  seal: { dim: '300\u00D7300px', desc: 'Square, transparent background', note: 'Displays at 120\u00D7120px on documents' },
+  signature: { dim: '400\u00D7150px', desc: 'Wide, transparent background', note: 'Displays at 140\u00D770px on documents' },
 } as const
 
 export default function Settings() {

@@ -45,7 +45,7 @@ function genericReceipt(name: string, d: RecTemplateData): string {
   return wrap(`
     <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;position:relative;background:#fff;min-height:100vh;padding:12mm 14mm">
       <div style="text-align:center;margin-bottom:6mm">
-        ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:50px;max-height:50px;margin-bottom:4px;display:block;margin-left:auto;margin-right:auto" /><br/>` : ''}
+        ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:80px;max-height:80px;margin-bottom:4px;display:block;margin-left:auto;margin-right:auto" /><br/>` : ''}
         <div style="font-size:17px;font-weight:700">${esc(c.name)}</div>
         ${c.sub ? `<div style="font-size:12px;color:#666">${esc(c.sub)}</div>` : ''}
         <div style="font-size:11px;color:#999;margin-top:2px">${[c.loc, c.tel, c.email].filter(Boolean).join(' \u00B7 ')}</div>
@@ -72,8 +72,8 @@ function genericReceipt(name: string, d: RecTemplateData): string {
         <div style="grid-column:1/-1"><strong>Purpose:</strong> ${esc(d.bg)}</div>
       </div>
       <div style="border-top:1px solid #ddd;margin-top:6mm;padding-top:3mm;display:flex;gap:20px;align-items:flex-end">
-        ${c.seal ? `<div><img src="${esc(c.seal)}" style="max-width:70px;max-height:70px" /></div>` : ''}
-        ${c.signature ? `<div><img src="${esc(c.signature)}" style="max-width:90px;max-height:40px" /><div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center">Authorized Signature</div></div>` : ''}
+        ${c.seal ? `<div><img src="${esc(c.seal)}" style="max-width:100px;max-height:100px" /></div>` : ''}
+        ${c.signature ? `<div><img src="${esc(c.signature)}" style="max-width:130px;max-height:55px" /><div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center">Authorized Signature</div></div>` : ''}
         ${d.rv ? `<div><div style="border-top:1px solid #999;width:100px;padding-top:2px;font-size:12px;text-align:center">${esc(d.rv)}</div><div style="font-size:11px;color:#666;text-align:center">Receiver</div></div>` : ''}
         ${d.sg ? `<div><div style="border-top:1px solid #999;width:100px;padding-top:2px;font-size:12px;text-align:center">${esc(d.sg)}</div><div style="font-size:11px;color:#666;text-align:center">Signatory</div></div>` : ''}
       </div>

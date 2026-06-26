@@ -24,7 +24,7 @@ function genericQuotation(name: string, d: QuotTemplateData): string {
   return wrapHtml(`
     <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;position:relative;background:#fff;min-height:100vh;padding:14mm 16mm">
       <div style="text-align:center;margin-bottom:6mm">
-        ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:50px;max-height:50px;margin-bottom:4px;display:block;margin-left:auto;margin-right:auto" /><br/>` : ''}
+        ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:80px;max-height:80px;margin-bottom:4px;display:block;margin-left:auto;margin-right:auto" /><br/>` : ''}
         <div style="font-size:18px;font-weight:700">${esc(c.name)}</div>
         ${c.sub ? `<div style="font-size:12px;color:#666">${esc(c.sub)}</div>` : ''}
         <div style="font-size:11px;color:#999;margin-top:2px">${[c.loc, c.tel, c.email].filter(Boolean).join(' \u00B7 ')}</div>
@@ -50,7 +50,7 @@ function genericQuotation(name: string, d: QuotTemplateData): string {
       </table>
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:6mm">
         <div>
-          ${c.seal ? `<img src="${esc(c.seal)}" style="max-width:80px;max-height:80px;object-fit:contain" />` : ''}
+          ${c.seal ? `<img src="${esc(c.seal)}" style="max-width:120px;max-height:120px;object-fit:contain" />` : ''}
         </div>
         <div style="text-align:right">
           <div style="display:inline-block;min-width:200px;text-align:right">
@@ -65,8 +65,8 @@ function genericQuotation(name: string, d: QuotTemplateData): string {
       </div>
       ${c.signature ? `
       <div style="margin-top:6mm;text-align:left">
-        <img src="${esc(c.signature)}" style="max-width:100px;max-height:50px;object-fit:contain" />
-        <div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center;width:100px">Authorized Signature</div>
+        <img src="${esc(c.signature)}" style="max-width:140px;max-height:70px;object-fit:contain" />
+        <div style="font-size:11px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px;text-align:center;width:140px">Authorized Signature</div>
       </div>
       ` : ''}
       ${d.notes ? `<div style="margin-top:4mm;font-size:12px"><strong>Notes:</strong> ${esc(d.notes)}</div>` : ''}
