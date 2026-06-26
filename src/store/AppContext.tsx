@@ -35,7 +35,7 @@ type AppAction =
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_ALL':
-      return { ...action.payload, editingDoc: null }
+      return { ...action.payload, editingDoc: null, dbError: null }
     case 'UPSERT_COMPANY': {
       const idx = state.companies.findIndex((c) => c.id === action.payload.id)
       const companies = idx >= 0
@@ -155,7 +155,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         } else if (companies.length > 0) {
           activeId = companies[0].id
         }
-        dispatch({ type: 'SET_ALL', payload: { companies, invoices, receipts, quotations, activeId, editingDoc: null } })
+        dispatch({ type: 'SET_ALL', payload: { companies, invoices, receipts, quotations, activeId, editingDoc: null, dbError: null } })
       } catch (err: any) {
         console.error('Failed to load DB:', err)
         if (err?.name === 'VersionError') {
