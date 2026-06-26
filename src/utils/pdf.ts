@@ -560,7 +560,7 @@ async function renderInvoiceModern(pdf: jsPDF, inv: Invoice, co: Company, imgs: 
   pdf.text(`Tel: ${co.tel}${co.email ? ` | ${co.email}` : ''}`, MARGIN + W - 2, 284, { align: 'right' })
 }
 
-export async function createInvoicePDF(inv: Invoice, co: Company): Promise<void> {
+async function buildInvoicePDF(inv: Invoice, co: Company): Promise<jsPDF> {
   const pdf = new jsPDF('p', 'mm', 'a4')
   const imgs = await loadImages(co)
   const tpl = co.invTemplate || 'classic'
@@ -573,7 +573,17 @@ export async function createInvoicePDF(inv: Invoice, co: Company): Promise<void>
     await renderInvoiceGeneric(pdf, inv, co, imgs, tpl)
   }
 
+  return pdf
+}
+
+export async function createInvoicePDF(inv: Invoice, co: Company): Promise<void> {
+  const pdf = await buildInvoicePDF(inv, co)
   pdf.save(`${inv.invNo || 'invoice'}.pdf`)
+}
+
+export async function createInvoicePDFBlob(inv: Invoice, co: Company): Promise<Blob> {
+  const pdf = await buildInvoicePDF(inv, co)
+  return pdf.output('blob')
 }
 
 // ─── QUOTATION PDF ───────────────────────────────────────────────────────────

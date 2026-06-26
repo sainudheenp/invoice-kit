@@ -9,7 +9,7 @@ import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { InvoiceSummary } from '@/components/invoice/InvoiceSummary'
 import { num2words, dp as getDp } from '@/utils'
 import { buildInvoiceHTML } from '@/templates'
-import { createInvoicePDF, printHTML, downloadText } from '@/utils/pdf'
+import { createInvoicePDF, createInvoicePDFBlob, printHTML, downloadText } from '@/utils/pdf'
 import type { LineItem, Customer, Invoice } from '@/types/invoice'
 
 interface InvoiceFormState {
@@ -206,6 +206,19 @@ export default function Invoice() {
     downloadText(html, form.invNo || 'invoice')
   }
 
+  const handleWhatsApp = async () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    if (!navigator.share) { showToast('Sharing not supported on this browser.', 'err'); return }
+    showPDFOverlay()
+    try {
+      const blob = await createInvoicePDFBlob(buildTempInvoice(), co)
+      const file = new File([blob], `${form.invNo || 'invoice'}.pdf`, { type: 'application/pdf' })
+      if (!navigator.canShare?.({ files: [file] })) { showToast('PDF sharing not supported on this browser.', 'err'); return }
+      await navigator.share({ files: [file], title: `Invoice ${form.invNo}` })
+    } catch { showToast('Failed to share invoice.', 'err') }
+    hidePDFOverlay()
+  }
+
   const showCheque = form.payMethod === 'Cheque'
   const showBank = form.payMethod === 'Cheque' || form.payMethod === 'Bank Transfer'
 
@@ -364,6 +377,7 @@ export default function Invoice() {
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
               <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
+              <Button variant="outline" size="sm" onClick={handleWhatsApp} className="justify-center w-full">WhatsApp</Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
               <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Invoice</Button>
             </div>
