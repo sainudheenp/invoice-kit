@@ -41,7 +41,7 @@ function parseCo(c: Company) {
   }
 }
 
-const TEMPLATE_OPTIONS = ['classic', 'modern', 'compact', 'minimal', 'elegant', 'bold', 'professional']
+const TEMPLATE_OPTIONS = ['classic', 'modern', 'beirak', 'compact', 'minimal', 'elegant', 'bold', 'professional']
 const WATERMARK_OPTIONS = ['', 'Draft', 'Paid', 'Sample', 'Copy']
 
 const IMAGE_INFO = {

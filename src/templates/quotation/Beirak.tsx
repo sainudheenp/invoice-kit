@@ -26,8 +26,10 @@ export function QuotationBeirak(d: QuotTemplateData) {
         <div style="font-size:18px;font-weight:700;color:${DB}">${esc(c.name)}</div>
         ${c.sub ? `<div style="font-size:13px;color:#000;margin-top:1px">${esc(c.sub)}</div>` : ''}
       </div>
-      <div style="text-align:center;margin:4mm auto;background:${LB};border:1px solid ${DB};border-radius:6px;padding:2mm 6mm;display:inline-block;width:auto">
-        <div style="font-size:13px;font-weight:700;color:${RD};letter-spacing:1px">QUOTATION</div>
+      <div style="text-align:center;margin:4mm 0">
+        <div style="display:inline-block;background:${LB};border:1px solid ${DB};border-radius:6px;padding:2mm 6mm">
+          <div style="font-size:13px;font-weight:700;color:${RD};letter-spacing:1px">QUOTATION</div>
+        </div>
       </div>
       <div style="border-bottom:2px solid ${DB};margin:0 12mm 4mm"></div>
       <div style="padding:0 12mm;display:flex;gap:4mm">
