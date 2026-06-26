@@ -325,20 +325,18 @@ export default function QuotationPage() {
             words={words}
             dp={decimals}
             curSymbol={cur?.symbol || ''}
-          />
-
-          <div className="flex flex-col gap-2">
-            <Button onClick={handleSave} className="justify-center w-full">
-              {isEditing ? 'Update Quotation' : 'Save Quotation'}
-            </Button>
+          >
             <div className="flex flex-col gap-2">
+              <Button onClick={handleSave} className="justify-center w-full">
+                {isEditing ? 'Update Quotation' : 'Save Quotation'}
+              </Button>
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
               <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
+              <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Quotation</Button>
             </div>
-            <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Quotation</Button>
-          </div>
+          </QuotationSummary>
         </div>
       </div>
     </div>

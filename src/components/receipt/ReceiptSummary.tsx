@@ -1,14 +1,17 @@
+import type { ReactNode } from 'react'
+
 interface Props {
   amount: number
   words: string
   dp: number
   curSymbol: string
+  children?: ReactNode
 }
 
-export function ReceiptSummary({ amount, words, dp, curSymbol }: Props) {
+export function ReceiptSummary({ amount, words, dp, curSymbol, children }: Props) {
   return (
-    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm p-5 sticky top-4">
-      <h3 className="text-sm font-semibold mb-4">Receipt Summary</h3>
+    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm p-5 sticky top-4 space-y-4">
+      <h3 className="text-sm font-semibold">Receipt Summary</h3>
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-[var(--color-text2)]">Amount</span>
@@ -25,6 +28,8 @@ export function ReceiptSummary({ amount, words, dp, curSymbol }: Props) {
           </div>
         )}
       </div>
+      {children && <div className="border-t border-[var(--color-border)]" />}
+      {children}
     </div>
   )
 }

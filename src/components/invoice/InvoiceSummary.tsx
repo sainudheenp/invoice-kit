@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 interface Props {
   subtotal: number
   vatPct: number
@@ -7,12 +9,13 @@ interface Props {
   words: string
   dp: number
   curSymbol: string
+  children?: ReactNode
 }
 
-export function InvoiceSummary({ subtotal, vatPct, vatAmt, discount, grand, words, dp, curSymbol }: Props) {
+export function InvoiceSummary({ subtotal, vatPct, vatAmt, discount, grand, words, dp, curSymbol, children }: Props) {
   return (
-    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm p-5 sticky top-4">
-      <h3 className="text-sm font-semibold mb-4">Total Summary</h3>
+    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm p-5 sticky top-4 space-y-4">
+      <h3 className="text-sm font-semibold">Total Summary</h3>
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-[var(--color-text2)]">Subtotal</span>
@@ -41,6 +44,8 @@ export function InvoiceSummary({ subtotal, vatPct, vatAmt, discount, grand, word
           </div>
         )}
       </div>
+      {children && <div className="border-t border-[var(--color-border)]" />}
+      {children}
     </div>
   )
 }
