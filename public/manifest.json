@@ -2,7 +2,7 @@
   "name": "invoicekitz",
   "short_name": "invoicekitz",
   "description": "Free offline invoice and receipt generator for small businesses",
-  "start_url": "app.html",
+  "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
   "background_color": "#FAF8F5",

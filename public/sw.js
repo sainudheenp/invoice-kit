@@ -1,63 +1,71 @@
-/* invoicekit service worker — caches app shell for offline install */
-var CACHE = 'invoicekit-v1';
-var URLS = [
-  'app.html',
-  'index.html',
-  'manifest.json',
-  'css/style.css',
-  'js/db.js',
-  'js/data.js',
-  'js/icons.js',
-  'js/settings.js',
-  'js/invoice.js',
-  'js/receipt.js',
-  'js/history.js',
-  'js/main.js',
-  'js/pdf.js',
-  'lib/jspdf.umd.min.js',
-  'lib/html2canvas.min.js',
-  'icons/icon.svg',
-  'icons/icon-192.png',
-  'icons/icon-512.png'
-];
+var CACHE = 'invoicekit-v2'
+var SHELL = [
+  '/index.html',
+  '/manifest.json',
+  '/icons/icon.svg',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+]
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
     caches.open(CACHE).then(function (c) {
-      return c.addAll(URLS);
+      return c.addAll(SHELL)
     }).then(function () {
-      return self.skipWaiting();
-    }).catch(function (e) {
-      console.warn('SW install cache error:', e);
-    })
-  );
-});
+      return self.skipWaiting()
+    }).catch(function () {})
+  )
+})
 
 self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
       return Promise.all(
-        keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); })
-      );
+        keys.filter(function (k) { return k !== CACHE }).map(function (k) { return caches.delete(k) })
+      )
     }).then(function () {
-      return self.clients.claim();
+      return self.clients.claim()
     })
-  );
-});
+  )
+})
 
 self.addEventListener('fetch', function (e) {
-  e.respondWith(
-    caches.match(e.request).then(function (r) {
-      if (r) return r;
-      return fetch(e.request).then(function (res) {
-        if (res && res.ok) {
-          var copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
-        }
-        return res;
+  var req = e.request
+  if (req.method !== 'GET') return
+
+  if (req.mode === 'navigate') {
+    e.respondWith(
+      fetch(req).then(function (res) {
+        var copy = res.clone()
+        caches.open(CACHE).then(function (c) { c.put(req, copy) })
+        return res
       }).catch(function () {
-        return caches.match('app.html');
-      });
+        return caches.match('/index.html')
+      })
+    )
+    return
+  }
+
+  e.respondWith(
+    caches.match(req).then(function (hit) {
+      if (hit) {
+        fetch(req).then(function (res) {
+          if (res && res.ok) {
+            var copy = res.clone()
+            caches.open(CACHE).then(function (c) { c.put(req, copy) })
+          }
+        }).catch(function () {})
+        return hit
+      }
+      return fetch(req).then(function (res) {
+        if (res && res.ok) {
+          var copy = res.clone()
+          caches.open(CACHE).then(function (c) { c.put(req, copy) })
+        }
+        return res
+      }).catch(function () {
+        return caches.match('/index.html')
+      })
     })
-  );
-});
+  )
+})
