@@ -44,12 +44,19 @@ function parseCo(c: Company) {
 const TEMPLATE_OPTIONS = ['classic', 'modern', 'compact', 'minimal', 'elegant', 'bold', 'professional']
 const WATERMARK_OPTIONS = ['', 'Draft', 'Paid', 'Sample', 'Copy']
 
+const IMAGE_INFO = {
+  logo: { dim: '200\u00D7200px', desc: 'Square, transparent background', note: 'Displays at 50\u00D750px on documents' },
+  seal: { dim: '300\u00D7300px', desc: 'Square, transparent background', note: 'Displays at 80\u00D780px on documents' },
+  signature: { dim: '400\u00D7150px', desc: 'Wide, transparent background', note: 'Displays at 100\u00D750px on documents' },
+} as const
+
 export default function Settings() {
   const { state, getCo, saveCompany, deleteCompany, setActive, resetAll, dispatch, saveInvoice, saveReceipt, saveQuotation } = useApp()
   const { ui, toggleDark, showToast, showResetModal, hideResetModal, showPreview } = useUI()
   const co = getCo()
   const [activeSection, setActiveSection] = useState('profiles')
   const [resetConfirm, setResetConfirm] = useState('')
+  const [uploadField, setUploadField] = useState<'logo' | 'seal' | 'signature' | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const [form, setForm] = useState(co ? parseCo(co) : null)
@@ -361,8 +368,8 @@ export default function Settings() {
               {(['logo', 'seal', 'signature'] as const).map((field) => (
                 <div key={field}>
                   <label className="text-xs font-medium text-[var(--color-text2)] capitalize mb-1.5 block">{field}</label>
-                  <div
-                    onClick={() => handleUpload(field)}
+                    <div
+                    onClick={() => setUploadField(field)}
                     onDragOver={(e) => { e.preventDefault(); setDragOverField(field) }}
                     onDragLeave={() => setDragOverField(null)}
                     onDrop={(e) => {
@@ -643,6 +650,60 @@ export default function Settings() {
 
         </div>
       </div>
+
+      {/* Image Upload Modal */}
+      <Modal open={uploadField !== null} onClose={() => setUploadField(null)} maxW="540px">
+        {uploadField && (() => {
+          const info = IMAGE_INFO[uploadField]
+          const full = [co.name, co.sub].filter(Boolean).join(' — ')
+          const prompt = {
+            logo: `If I have uploaded my logo, make its background transparent, enhance clarity, and resize it to 200\u00D7200px for use on invoices. Keep the exact original design. If no logo is uploaded, generate a clean minimalist logo for "${full}" — square 200\u00D7200px, transparent background, professional and simple.`,
+            seal: `If I have uploaded my seal, make its background transparent, clean it up, and resize to 300\u00D7300px for document use. Keep the exact original design. If no seal is uploaded, create a professional circular company seal with "${full}" around the edge — square 300\u00D7300px, transparent background.`,
+            signature: `If I have uploaded my signature, remove the background, enhance clarity, and resize to 400\u00D7150px for invoices. Keep the exact original design. If none is uploaded, generate an elegant cursive signature for "${full}" on a transparent background, 400\u00D7150px.`,
+          }[uploadField]
+          return (
+            <div>
+              <h2 className="text-lg font-bold capitalize mb-1">{uploadField}</h2>
+              <p className="text-xs text-[var(--color-text2)] mb-4">{info.dim} &middot; {info.desc} &middot; {info.note}</p>
+              {form[uploadField] ? (
+                <div className="mb-4 flex items-center justify-center h-28 rounded-lg border border-[var(--color-border)] bg-[var(--color-input-bg)] overflow-hidden">
+                  <img src={form[uploadField]} alt="" className="max-w-full max-h-full object-contain" />
+                </div>
+              ) : (
+                <p className="text-xs text-[var(--color-text3)] mb-4 italic">No image uploaded yet.</p>
+              )}
+              <div className="text-xs text-[var(--color-text2)] space-y-1.5 mb-3">
+                <p className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[var(--color-primary)] text-white text-[10px] font-bold flex items-center justify-center shrink-0">1</span>
+                  Open <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:underline">ChatGPT</a>
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[var(--color-primary)] text-white text-[10px] font-bold flex items-center justify-center shrink-0">2</span>
+                  Upload your existing <strong className="text-[var(--color-text1)] capitalize">{uploadField}</strong> image
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[var(--color-primary)] text-white text-[10px] font-bold flex items-center justify-center shrink-0">3</span>
+                  Copy the prompt below & paste it into ChatGPT
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-green-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">4</span>
+                  Download the result, then click <strong className="text-[var(--color-text1)]">Choose File</strong> to upload it
+                  <svg className="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-[var(--color-text2)]">ChatGPT Prompt</label>
+                <textarea readOnly rows={4} value={prompt} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-xs text-[var(--color-text1)] outline-none resize-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+                <button onClick={() => { navigator.clipboard.writeText(prompt); showToast('Copied!') }} className="text-xs text-[var(--color-primary)] hover:underline cursor-pointer">Copy Prompt</button>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <Button variant="outline" onClick={() => setUploadField(null)}>Cancel</Button>
+                <Button onClick={() => { handleUpload(uploadField); setUploadField(null) }}>Choose File</Button>
+              </div>
+            </div>
+          )
+        })()}
+      </Modal>
 
       {/* Reset Modal */}
       <Modal open={ui.resetModal} onClose={hideResetModal}>
