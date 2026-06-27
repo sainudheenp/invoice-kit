@@ -4,73 +4,84 @@ import { esc } from '@/utils/esc'
 export function InvoiceModern(d: InvTemplateData) {
   const pc = d.comp.pcolor || '#D97706'
   const c = d.comp
-  const itemsRows = d.items.map((item, i) => `<tr>
-    <td style="padding:8px 10px;border-bottom:1px solid #eee">${i + 1}</td>
-    <td style="padding:8px 10px;border-bottom:1px solid #eee">${esc(item.desc)}</td>
-    <td style="padding:8px 10px;border-bottom:1px solid #eee;text-align:center">${item.qty}</td>
-    <td style="padding:8px 10px;border-bottom:1px solid #eee;text-align:right">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-    <td style="padding:8px 10px;border-bottom:1px solid #eee;text-align:right">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
+  const itemsRows = d.items.map((item, i) => `<tr${i % 2 === 1 ? ' style="background:#f8fafc"' : ''}>
+    <td style="padding:12px 16px;border-bottom:1px solid #f1f5f9;color:#4b5563">${i + 1}</td>
+    <td style="padding:12px 16px;border-bottom:1px solid #f1f5f9;color:#1f2937">${esc(item.desc)}</td>
+    <td style="padding:12px 16px;border-bottom:1px solid #f1f5f9;text-align:center;color:#4b5563">${item.qty}</td>
+    <td style="padding:12px 16px;border-bottom:1px solid #f1f5f9;text-align:right;color:#4b5563">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+    <td style="padding:12px 16px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:600;color:#111827">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
   </tr>`).join('')
 
   return wrap(d, `
-    <div style="position:relative;min-height:100vh;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:18px;color:#333">
-      <div style="position:absolute;top:0;left:0;width:5px;height:100%;background:${pc}"></div>
-      <div style="padding:18mm 18mm 10mm 20mm">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;background:#f9fafb;border-radius:8px;padding:14px">
-          <div style="display:flex;align-items:center;gap:12px">
-            ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:50px;max-height:50px" />` : ''}
-            <div><div style="font-size:19px;font-weight:700">${esc(c.name)}</div>${c.sub ? `<div style="font-size:18px;color:#666">${esc(c.sub)}</div>` : ''}${contactLine(c)}</div>
+    <div style="position:relative;min-height:100vh;background:#fff;font-family:'Inter',Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#374151">
+      <div style="position:absolute;top:0;left:0;width:8px;height:100%;background:linear-gradient(to bottom, ${pc}, ${pc}dd)"></div>
+      <div style="padding:14mm 20mm 10mm 26mm">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;background:#f8fafc;border-radius:12px;padding:24px 28px;border:1px solid #f1f5f9">
+          <div style="display:flex;align-items:center;gap:18px">
+            ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:60px;max-height:60px;object-fit:contain" />` : ''}
+            <div>
+              <div style="font-size:26px;font-weight:700;color:#111827;letter-spacing:-0.5px">${esc(c.name)}</div>
+              ${c.sub ? `<div style="font-size:14px;color:#6b7280;margin-top:4px">${esc(c.sub)}</div>` : ''}
+              ${contactLine(c)}
+            </div>
           </div>
-          <div style="border-left:3px solid ${pc};padding-left:12px;text-align:right">
-            <div style="font-size:15px;text-transform:uppercase;letter-spacing:2px;color:${pc}">INVOICE</div>
-            <div style="font-size:18px;font-weight:700">${esc(d.no)}</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:6mm;margin-top:6mm">
-          <div style="flex:1;background:#f9fafb;border-radius:8px;padding:12px">
-            <div style="font-size:15px;text-transform:uppercase;letter-spacing:1px;color:#999">Bill To</div>
-            <div style="font-weight:600">${esc(d.cust)}</div>
-            <div style="font-size:18px;color:#555">${[d.addr, d.ph, d.em].filter(Boolean).join('<br/>')}</div>
-          </div>
-          <div style="width:200px;text-align:right;font-size:18px">
-            <div><strong>Date:</strong> ${d.dt}</div>
-            ${c.vatReg ? `<div><strong>VAT:</strong> ${esc(c.vatReg)}</div>` : ''}
+          <div style="border-left:4px solid ${pc};padding-left:18px;text-align:right">
+            <div style="font-size:14px;text-transform:uppercase;letter-spacing:2px;font-weight:600;color:${pc};margin-bottom:6px">INVOICE</div>
+            <div style="font-size:18px;font-weight:700;color:#111827">${esc(d.no)}</div>
           </div>
         </div>
-        <table style="width:100%;border-collapse:collapse;margin-top:6mm;font-size:15px;border-radius:8px;overflow:hidden">
+        <div style="display:flex;gap:6mm;margin-top:8mm">
+          <div style="flex:1;background:#f8fafc;border-radius:10px;padding:20px 24px;border:1px solid #f1f5f9">
+            <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:600;color:#94a3b8;margin-bottom:8px">Bill To</div>
+            <div style="font-weight:700;color:#111827;font-size:16px">${esc(d.cust)}</div>
+            <div style="font-size:14px;color:#4b5563;margin-top:6px">${[d.addr, d.ph, d.em].filter(Boolean).join('<br/>')}</div>
+          </div>
+          <div style="width:260px;text-align:right;font-size:13px;color:#4b5563;display:flex;flex-direction:column;justify-content:flex-end;background:#f8fafc;border-radius:10px;padding:20px 24px;border:1px solid #f1f5f9">
+            <div style="margin-bottom:6px"><strong style="color:#111827">Date:</strong> ${d.dt}</div>
+            ${c.vatReg ? `<div><strong style="color:#111827">VAT Reg.:</strong> ${esc(c.vatReg)}</div>` : ''}
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:separate;border-spacing:0;margin-top:8mm;font-size:13px;border:1px solid #f1f5f9;border-radius:10px;overflow:hidden">
           <thead><tr style="background:${pc};color:#fff">
-            <th style="padding:10px 8px;text-align:left">#</th><th style="padding:10px 8px;text-align:left">Description</th><th style="padding:10px 8px;text-align:center;width:60px">Qty</th><th style="padding:10px 8px;text-align:right;width:90px">Price</th><th style="padding:10px 8px;text-align:right;width:90px">Amount</th>
+            <th style="padding:12px 16px;text-align:left;font-weight:600;width:40px">#</th>
+            <th style="padding:12px 16px;text-align:left;font-weight:600">Description</th>
+            <th style="padding:12px 16px;text-align:center;width:60px;font-weight:600">Qty</th>
+            <th style="padding:12px 16px;text-align:right;width:100px;font-weight:600">Price</th>
+            <th style="padding:12px 16px;text-align:right;width:100px;font-weight:600">Amount</th>
           </tr></thead>
-          <tbody>${itemsRows || '<tr><td colspan="5" style="padding:20px;text-align:center;color:#999">No items</td></tr>'}</tbody>
+          <tbody>${itemsRows || '<tr><td colspan="5" style="padding:40px;text-align:center;color:#9ca3af">No items</td></tr>'}</tbody>
         </table>
-        <div style="background:#f9fafb;border:1px solid #eee;border-radius:8px;padding:12px;margin-top:6mm;max-width:280px;margin-left:auto">
-          <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-          ${d.disc > 0 ? `<div style="display:flex;justify-content:space-between;padding:3px 0;color:red"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
-          ${d.vp > 0 ? `<div style="display:flex;justify-content:space-between;padding:3px 0"><span>VAT ${d.vp}%</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
-          <div style="border-top:1px dashed #ccc;margin:3px 0"></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:18px;font-weight:700;color:${pc}"><span>Total Due</span><span>${d.cur.symbol}${d.gv}</span></div>
-          <div style="font-size:15px;color:#666;font-style:italic;padding-top:4px">${esc(d.gw)}</div>
+        <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:10px;padding:20px 24px;margin-top:8mm;max-width:320px;margin-left:auto">
+          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span style="color:#6b7280">Subtotal</span><span style="font-weight:500;color:#1f2937">${d.cur.symbol}${d.sv}</span></div>
+          ${d.disc > 0 ? `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#dc2626"><span>Discount</span><span style="font-weight:500">-${d.cur.symbol}${d.dv}</span></div>` : ''}
+          ${d.vp > 0 ? `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span style="color:#6b7280">VAT ${d.vp}%</span><span style="font-weight:500;color:#1f2937">${d.cur.symbol}${d.vv}</span></div>` : ''}
+          <div style="border-top:1px dashed #d1d5db;margin:8px 0"></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:20px;font-weight:700;color:${pc}"><span>Total Due</span><span>${d.cur.symbol}${d.gv}</span></div>
+          <div style="font-size:12px;color:#9ca3af;font-style:italic;padding-top:6px">${esc(d.gw)}</div>
         </div>
-        ${d.notes || c.invTerms ? `<div style="background:#f9fafb;border-radius:8px;padding:12px;margin-top:4mm;font-size:18px">${d.notes ? `<div><strong>Notes:</strong> ${esc(d.notes)}</div>` : ''}${c.invTerms ? `<div><strong>Terms:</strong> ${esc(c.invTerms)}</div>` : ''}</div>` : ''}
+        ${d.notes || c.invTerms ? `<div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:10px;padding:20px 24px;margin-top:8mm;font-size:13px;color:#4b5563">${d.notes ? `<div style="margin-bottom:6px"><strong style="color:#111827">Notes:</strong> ${esc(d.notes)}</div>` : ''}${c.invTerms ? `<div><strong style="color:#111827">Terms:</strong> ${esc(c.invTerms)}</div>` : ''}</div>` : ''}
         ${sealSigBlock(c)}
       </div>
-      <div style="border-top:1px solid #eee;padding:3mm 16mm;font-size:15px;color:#666;display:flex;justify-content:space-between">
-        <span>${esc(c.name)}${c.loc ? ` - ${esc(c.loc)}` : ''}</span><span>${c.tel ? `Tel: ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}</span>
+      <div style="border-top:1px solid #e5e7eb;padding:4mm 20mm 4mm 26mm;font-size:12px;color:#9ca3af;display:flex;justify-content:space-between;background:#f8fafc">
+        <span style="color:#6b7280;font-weight:500">${esc(c.name)}${c.loc ? ` - ${esc(c.loc)}` : ''}</span>
+        <span>${c.tel ? `Tel: ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}</span>
       </div>
-      ${c.invFooter ? `<div style="text-align:center;font-size:15px;color:#666;padding:2mm 0">${esc(c.invFooter)}</div>` : ''}
+      ${c.invFooter ? `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:3mm 0">${esc(c.invFooter)}</div>` : ''}
     </div>
   `)
 }
 
 const contactLine = (c: any) => {
   const parts = [c.loc, c.tel, c.email].filter(Boolean)
-  return parts.length ? `<div style="font-size:15px;color:#999;margin-top:2px">${parts.join(' \u00B7 ')}</div>` : ''
+  return parts.length ? `<div style="font-size:12px;color:#94a3b8;margin-top:6px">${parts.join(' \u00B7 ')}</div>` : ''
 }
+
 const sealSigBlock = (c: any) => {
   const items: string[] = []
-  if (c.seal) items.push(`<div><img src="${esc(c.seal)}" style="max-width:70px;max-height:70px" /></div>`)
-  if (c.signature) items.push(`<div><img src="${esc(c.signature)}" style="max-width:90px;max-height:45px" /><div style="font-size:15px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px">Authorized Signature</div></div>`)
-  return items.length ? `<div style="display:flex;gap:20px;margin-top:6mm">${items.join('')}</div>` : ''
+  if (c.seal) items.push(`<div><img src="${esc(c.seal)}" style="max-width:90px;max-height:90px;object-fit:contain" /></div>`)
+  if (c.signature) items.push(`<div style="text-align:center"><img src="${esc(c.signature)}" style="max-width:130px;max-height:65px;object-fit:contain;margin-bottom:6px" /><div style="font-size:12px;color:#6b7280;border-top:1px solid #d1d5db;padding-top:6px;width:150px;margin:0 auto">Authorized Signature</div></div>`)
+  return items.length ? `<div style="display:flex;gap:28px;margin-top:8mm;align-items:flex-end">${items.join('')}</div>` : ''
 }
+
 const wrap = (d: InvTemplateData, html: string) => d.comp.watermark ? html.replace('</div>', watermarkDiv(d.comp.watermark)) : html
 const watermarkDiv = (t: string) => `<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none;z-index:999;font-size:80px;font-weight:900;color:rgba(128,128,128,0.15);transform:rotate(-30deg);text-transform:uppercase">${esc(t)}</div></div>`

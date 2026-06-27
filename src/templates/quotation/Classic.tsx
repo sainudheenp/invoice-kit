@@ -5,101 +5,105 @@ import { watermarkWrap } from '../shared'
 export function QuotationClassic(d: QuotTemplateData) {
   const pc = d.comp.pcolor || '#D97706'
   const c = d.comp
+
   const itemsRows = d.items.map((item, i) => (
-    `<tr${i % 2 === 1 ? ' style="background:#fafafa"' : ''}>
-      <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:center">${i + 1}</td>
-      <td style="padding:10px 8px;border-bottom:1px solid #eee">${esc(item.desc)}</td>
-      <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:center">${item.qty}</td>
-      <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:right">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:right">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
+    `<tr${i % 2 === 1 ? ' style="background:#f8fafc"' : ''}>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;text-align:center;color:#4b5563">${i + 1}</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#1f2937">${esc(item.desc)}</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;text-align:center;color:#4b5563">${item.qty}</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;text-align:right;color:#4b5563">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;color:#111827">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
     </tr>`
   )).join('')
 
   const showAr = c.showArabic && c.nameAr
   const arabicBlock = showAr
-    ? `<div style="text-align:right"><div dir="rtl" unicode-bidi="embed" style="font-size:20px;font-weight:700">${esc(c.nameAr)}</div>${c.subAr ? `<div dir="rtl" unicode-bidi="embed" style="font-size:20px;color:#666">${esc(c.subAr)}</div>` : ''}</div>`
+    ? `<div style="text-align:right"><div dir="rtl" unicode-bidi="embed" style="font-size:18px;font-weight:700;color:#111827">${esc(c.nameAr)}</div>${c.subAr ? `<div dir="rtl" unicode-bidi="embed" style="font-size:14px;color:#6b7280">${esc(c.subAr)}</div>` : ''}</div>`
     : ''
 
   const contactParts = [c.loc, c.tel, c.mob, c.email].filter(Boolean)
-  const contactStr = contactParts.length > 0 ? `<div style="font-size:15px;color:#666">${contactParts.join(' | ')}</div>` : ''
+  const contactStr = contactParts.length > 0 ? `<div style="font-size:12px;color:#9ca3af;margin-top:6px">${contactParts.join(' \u00B7 ')}</div>` : ''
 
   return watermarkWrap(`
-    <div style="font-family:Arial,Helvetica,sans-serif;font-size:20px;color:#2d2d2d;position:relative;background:#fff;min-height:100vh;padding:0">
-      <div style="height:4px;background:${pc};width:100%"></div>
-      <div style="padding:14mm 16mm 10mm">
+    <div style="font-family:'Inter',Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#374151;position:relative;background:#fff;min-height:100vh;padding:0">
+      <div style="height:6px;background:${pc};width:100%"></div>
+      <div style="padding:14mm 20mm 8mm">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div style="display:flex;align-items:center;gap:12px">
-            ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:55px;max-height:55px;object-fit:contain" />` : ''}
+          <div style="display:flex;align-items:center;gap:18px">
+            ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:65px;max-height:65px;object-fit:contain" />` : ''}
             <div>
-              <div style="font-size:20px;font-weight:700">${esc(c.name)}</div>
-              ${c.sub ? `<div style="font-size:20px;color:#666">${esc(c.sub)}</div>` : ''}
+              <div style="font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.5px">${esc(c.name)}</div>
+              ${c.sub ? `<div style="font-size:14px;color:#6b7280;margin-top:2px">${esc(c.sub)}</div>` : ''}
+              ${contactStr}
             </div>
           </div>
           ${arabicBlock}
         </div>
-        ${contactStr}
       </div>
-      <div style="border-bottom:1px solid #ddd;margin:0 16mm"></div>
-      <div style="padding:6mm 16mm">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="border-bottom:1px solid #e5e7eb;margin:0 20mm"></div>
+      <div style="padding:8mm 20mm">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end">
           <div>
-            <div style="font-size:20px;font-weight:700;color:${pc}">QUOTATION</div>
+            <div style="font-size:20px;font-weight:700;letter-spacing:1px;color:${pc};text-transform:uppercase">QUOTATION</div>
+            ${showAr ? '<div dir="rtl" unicode-bidi="embed" style="font-size:16px;color:#9ca3af;margin-top:4px">\u0639\u0631\u0636 \u0633\u0639\u0631</div>' : ''}
           </div>
-          <div style="text-align:right;font-size:20px">
-            <div><strong>Quotation No.:</strong> ${esc(d.no)}</div>
-            <div><strong>Date:</strong> ${d.dt}</div>
-            <div><strong>Valid Until:</strong> ${d.validDt}</div>
-            ${c.vatReg ? `<div><strong>VAT Reg.:</strong> ${esc(c.vatReg)}</div>` : ''}
+          <div style="text-align:right;font-size:13px;color:#4b5563;background:#f9fafb;padding:12px 20px;border-radius:6px">
+            <div style="margin-bottom:4px"><strong style="color:#111827">Quotation No.:</strong> ${esc(d.no)}</div>
+            <div style="margin-bottom:4px"><strong style="color:#111827">Date:</strong> ${d.dt}</div>
+            <div style="margin-bottom:4px"><strong style="color:#111827">Valid Until:</strong> ${d.validDt}</div>
+            ${c.vatReg ? `<div><strong style="color:#111827">VAT Reg.:</strong> ${esc(c.vatReg)}</div>` : ''}
           </div>
         </div>
       </div>
-      <div style="border-bottom:1px solid #eee;margin:0 16mm"></div>
-      <div style="padding:6mm 16mm">
-        <div style="font-size:15px;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:4px">Bill To</div>
-        <div style="font-weight:600">${esc(d.cust)}</div>
-        ${d.addr ? `<div style="font-size:20px;color:#555">${esc(d.addr)}</div>` : ''}
-        <div style="font-size:20px;color:#555">${[d.ph, d.cr, d.em].filter(Boolean).join(' | ')}</div>
+      <div style="padding:0 20mm 8mm">
+        <div style="background:#f8fafc;padding:20px 24px;border-radius:8px;border:1px solid #f1f5f9">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:600;color:#94a3b8;margin-bottom:6px">Bill To${showAr ? ' / \u0625\u0644\u0649 \u0627\u0644\u0633\u064A\u062F' : ''}</div>
+          <div style="font-weight:700;color:#111827;font-size:16px">${esc(d.cust)}</div>
+          ${d.addr ? `<div style="font-size:14px;color:#4b5563;margin-top:4px">${esc(d.addr)}</div>` : ''}
+          <div style="font-size:14px;color:#6b7280;margin-top:4px">${[d.ph, d.cr, d.em].filter(Boolean).join(' | ')}</div>
+        </div>
       </div>
-      <div style="padding:0 16mm">
-        <table style="width:100%;border-collapse:collapse;font-size:15px">
+      <div style="padding:0 20mm">
+        <table style="width:100%;border-collapse:separate;border-spacing:0;font-size:13px">
           <thead>
-            <tr style="background:${pc};color:#fff">
-              <th style="padding:10px 8px;text-align:center;width:30px">#</th>
-              <th style="padding:10px 8px;text-align:left">Description</th>
-              <th style="padding:10px 8px;text-align:center;width:60px">Qty</th>
-              <th style="padding:10px 8px;text-align:right;width:100px">Price</th>
-              <th style="padding:10px 8px;text-align:right;width:100px">Amount</th>
+            <tr>
+              <th style="padding:12px 16px;text-align:center;width:40px;background:${pc};color:#fff;border-top-left-radius:6px;border-bottom-left-radius:6px;font-weight:600">#</th>
+              <th style="padding:12px 16px;text-align:left;background:${pc};color:#fff;font-weight:600">Description${showAr ? ' / \u0627\u0644\u0628\u064A\u0627\u0646' : ''}</th>
+              <th style="padding:12px 16px;text-align:center;width:60px;background:${pc};color:#fff;font-weight:600">Qty${showAr ? ' / \u0627\u0644\u0643\u0645\u064A\u0629' : ''}</th>
+              <th style="padding:12px 16px;text-align:right;width:100px;background:${pc};color:#fff;font-weight:600">Price${showAr ? ' / \u0627\u0644\u0633\u0639\u0631' : ''}</th>
+              <th style="padding:12px 16px;text-align:right;width:100px;background:${pc};color:#fff;border-top-right-radius:6px;border-bottom-right-radius:6px;font-weight:600">Amount${showAr ? ' / \u0627\u0644\u0645\u0628\u0644\u063A' : ''}</th>
             </tr>
           </thead>
           <tbody>
-            ${itemsRows || '<tr><td colspan="5" style="padding:20px;text-align:center;color:#999">No items</td></tr>'}
+            ${itemsRows || '<tr><td colspan="5" style="padding:40px;text-align:center;color:#9ca3af;border-bottom:1px solid #e5e7eb">No items</td></tr>'}
           </tbody>
         </table>
       </div>
-      <div style="padding:6mm 16mm;display:flex;justify-content:flex-end">
-        <div style="min-width:240px;text-align:right">
-          <div style="display:flex;justify-content:space-between;padding:4px 0"><span>Subtotal:</span><span>${d.cur.symbol}${d.sv}</span></div>
-          ${d.disc > 0 ? `<div style="display:flex;justify-content:space-between;padding:4px 0;color:red"><span>Discount:</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
-          ${d.vp > 0 ? `<div style="display:flex;justify-content:space-between;padding:4px 0"><span>VAT (${d.vp}%):</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
-          <div style="border-top:2px solid #333;margin:4px 0"></div>
-          <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:20px;font-weight:700"><span>Total:</span><span>${d.cur.symbol}${d.gv}</span></div>
-          <div style="font-size:15px;color:#666;font-style:italic;padding-top:4px">${esc(d.gw)}</div>
+      <div style="padding:8mm 20mm 6mm;display:flex;justify-content:flex-end">
+        <div style="min-width:280px;text-align:right;font-size:13px">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6"><span style="color:#6b7280">Subtotal:</span><span style="font-weight:500;color:#1f2937">${d.cur.symbol}${d.sv}</span></div>
+          ${d.disc > 0 ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6;color:#dc2626"><span>Discount:</span><span style="font-weight:500">-${d.cur.symbol}${d.dv}</span></div>` : ''}
+          ${d.vp > 0 ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6"><span style="color:#6b7280">VAT (${d.vp}%):</span><span style="font-weight:500;color:#1f2937">${d.cur.symbol}${d.vv}</span></div>` : ''}
+          <div style="display:flex;justify-content:space-between;padding:12px 0 8px;font-size:20px;font-weight:700;color:#111827"><span>Total:</span><span>${d.cur.symbol}${d.gv}</span></div>
+          <div style="font-size:12px;color:#9ca3af;font-style:italic;padding-top:6px">${esc(d.gw)}</div>
         </div>
       </div>
-      <div style="padding:0 16mm">
-        ${d.notes ? `<div style="font-size:20px;margin-bottom:4px"><strong>Notes:</strong> ${esc(d.notes)}</div>` : ''}
-        ${d.terms ? `<div style="font-size:20px;margin-bottom:4px"><strong>Terms:</strong> ${esc(d.terms)}</div>` : ''}
-        ${c.invTerms ? `<div style="font-size:20px;margin-bottom:4px"><strong>Terms:</strong> ${esc(c.invTerms)}</div>` : ''}
+      <div style="padding:0 20mm">
+        <div style="background:#f8fafc;border-radius:6px;padding:16px 20px;font-size:13px;color:#4b5563;display:grid;gap:6px">
+          ${d.notes ? `<div><strong style="color:#111827">Notes:</strong> ${esc(d.notes)}</div>` : ''}
+          ${d.terms ? `<div><strong style="color:#111827">Terms:</strong> ${esc(d.terms)}</div>` : ''}
+          ${c.invTerms ? `<div><strong style="color:#111827">Terms:</strong> ${esc(c.invTerms)}</div>` : ''}
+        </div>
       </div>
-      <div style="padding:6mm 16mm;display:flex;gap:20px;align-items:flex-end">
-        ${c.seal ? `<div><img src="${esc(c.seal)}" style="max-width:80px;max-height:80px;object-fit:contain" /></div>` : ''}
-        ${c.signature ? `<div><img src="${esc(c.signature)}" style="max-width:100px;max-height:50px;object-fit:contain" /><div style="font-size:15px;color:#666;border-top:1px solid #999;padding-top:2px;margin-top:2px">Authorized Signature</div></div>` : ''}
+      <div style="padding:8mm 20mm;display:flex;gap:28px;align-items:flex-end">
+        ${c.seal ? `<div><img src="${esc(c.seal)}" style="max-width:100px;max-height:100px;object-fit:contain" /></div>` : ''}
+        ${c.signature ? `<div style="text-align:center"><img src="${esc(c.signature)}" style="max-width:130px;max-height:65px;object-fit:contain;margin-bottom:6px" /><div style="font-size:13px;color:#6b7280;border-top:1px solid #d1d5db;padding-top:6px;width:150px">Authorized Signature${showAr ? ' / \u0627\u0644\u062A\u0648\u0642\u064A\u0639' : ''}</div></div>` : ''}
       </div>
-      <div style="position:absolute;bottom:0;left:0;right:0;padding:4mm 16mm;border-top:1px solid #ddd;font-size:15px;color:#666;display:flex;justify-content:space-between">
-        <span>${esc(c.name)}${c.loc ? ` - ${esc(c.loc)}` : ''}</span>
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:5mm 20mm;border-top:1px solid #e5e7eb;font-size:12px;color:#9ca3af;display:flex;justify-content:space-between;background:#f8fafc">
+        <span style="color:#6b7280;font-weight:500">${esc(c.name)}${c.loc ? ` - ${esc(c.loc)}` : ''}</span>
         <span>${c.tel ? `Tel: ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}</span>
       </div>
-      ${c.invFooter ? `<div style="position:absolute;bottom:10mm;left:16mm;right:16mm;font-size:15px;color:#666;text-align:center">${esc(c.invFooter)}</div>` : ''}
+      ${c.invFooter ? `<div style="position:absolute;bottom:13mm;left:20mm;right:20mm;font-size:12px;color:#9ca3af;text-align:center">${esc(c.invFooter)}</div>` : ''}
     </div>
   `, d.comp.watermark)
 }
