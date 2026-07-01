@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
@@ -40,7 +39,6 @@ const emptyForm = (): QuotationFormState => ({
 })
 
 export default function QuotationPage() {
-  const navigate = useNavigate()
   const { state, getCo, saveCompany, createQuotation, setEditing } = useApp()
   const { markDirty, markClean, showToast, showPDFOverlay, hidePDFOverlay, showPreview } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()

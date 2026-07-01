@@ -4,7 +4,6 @@ import type { Invoice } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
 import type { Quotation } from '@/types/quotation'
 import { num2words, dp as getDp } from '@/utils'
-import { esc } from '@/utils/esc'
 
 const MARGIN = 14
 const W = 210 - MARGIN * 2
@@ -54,11 +53,11 @@ function imgToDataUrl(src: string): Promise<string> {
 // ─── SHARED COMPONENTS ───────────────────────────────────────────────────────
 
 function renderFooter(pdf: jsPDF, co: Company, y: number): void {
-  pdf.setDrawColor('#ddd')
+  pdf.setDrawColor('#cbd5e1')
   pdf.setLineWidth(0.3)
   pdf.line(MARGIN, y, MARGIN + W, y)
-  pdf.setFontSize(18)
-  pdf.setTextColor('#999')
+  pdf.setFontSize(10)
+  pdf.setTextColor('#64748b')
   pdf.text(`${co.name}${co.tel ? ` | ${co.tel}` : ''}${co.email ? ` | ${co.email}` : ''}`, MARGIN, y + 3.5)
   if (co.bankName) {
     pdf.text([co.bankName, co.bankAcc, co.bankIban].filter(Boolean).join(' | '), MARGIN, y + 6.5)
@@ -66,11 +65,11 @@ function renderFooter(pdf: jsPDF, co: Company, y: number): void {
 }
 
 function renderTableHeader(pdf: jsPDF, y: number, cols: { label: string; x: number; align: 'left' | 'right' }[], color: string): number {
-  pdf.setFontSize(17)
+  pdf.setFontSize(9)
   pdf.setTextColor(color)
   pdf.setFont('helvetica', 'bold')
   for (const c of cols) {
-    c.align === 'right' ? pdf.text(c.label, c.x, y, { align: 'right' }) : pdf.text(c.label, c.x, y)
+    if (c.align === 'right') { pdf.text(c.label, c.x, y, { align: 'right' }) } else { pdf.text(c.label, c.x, y) }
   }
   pdf.setFont('helvetica', 'normal')
   pdf.setDrawColor(color)
@@ -81,13 +80,13 @@ function renderTableHeader(pdf: jsPDF, y: number, cols: { label: string; x: numb
 }
 
 function renderTableRow(pdf: jsPDF, y: number, cols: { text: string; x: number; align: 'left' | 'right' }[], alt?: boolean): number {
-  if (alt) { pdf.setFillColor('#fafafa'); pdf.rect(MARGIN, y - 2.5, W, 7, 'F') }
-  pdf.setFontSize(18)
-  pdf.setTextColor('#333')
+  if (alt) { pdf.setFillColor('#f8fafc'); pdf.rect(MARGIN, y - 2.5, W, 7, 'F') }
+  pdf.setFontSize(10)
+  pdf.setTextColor('#1f2937')
   for (const c of cols) {
-    c.align === 'right' ? pdf.text(c.text, c.x, y, { align: 'right' }) : pdf.text(c.text, c.x, y)
+    if (c.align === 'right') { pdf.text(c.text, c.x, y, { align: 'right' }) } else { pdf.text(c.text, c.x, y) }
   }
-  pdf.setDrawColor('#eee')
+  pdf.setDrawColor('#e2e8f0')
   pdf.setLineWidth(0.2)
   const ly = y + 1.5
   pdf.line(MARGIN, ly, MARGIN + W, ly)
@@ -108,7 +107,7 @@ function beirakHeader(pdf: jsPDF, co: Company, imgs: LoadedImages, title: string
   y += 26
   pdf.setFont('helvetica', 'bold')
   pdf.setTextColor(BK_DB[0], BK_DB[1], BK_DB[2])
-  pdf.setFontSize(18)
+  pdf.setFontSize(10)
   pdf.text(co.name, 210 / 2, y, { align: 'center' })
   y += 5.5
   if (co.sub) {
@@ -228,18 +227,18 @@ async function renderReceiptGeneric(pdf: jsPDF, rec: Receipt, co: Company, imgs:
   if (imgs.logo) {
     try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
     pdf.text(co.name, MARGIN + 16, y + 5)
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN + 16, y + 9.5); pdf.setFontSize(17); pdf.setTextColor('#333') }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5); pdf.setFontSize(9); pdf.setTextColor('#1f2937') }
   } else {
-    pdf.setFontSize(18)
+    pdf.setFontSize(10)
     pdf.setTextColor(pc)
     pdf.text(co.name, MARGIN, y + 5)
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN, y + 10); pdf.setFontSize(17); pdf.setTextColor('#333') }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN, y + 10); pdf.setFontSize(9); pdf.setTextColor('#1f2937') }
   }
 
   const contact = [co.loc, co.tel, co.email].filter(Boolean).join(' | ')
   if (contact) {
-    pdf.setFontSize(17)
-    pdf.setTextColor('#999')
+    pdf.setFontSize(9)
+    pdf.setTextColor('#64748b')
     pdf.text(contact, MARGIN + (imgs.logo ? 16 : 0), y + (co.sub ? 14 : 10))
   }
 
@@ -247,21 +246,21 @@ async function renderReceiptGeneric(pdf: jsPDF, rec: Receipt, co: Company, imgs:
   pdf.setDrawColor(pc); pdf.setLineWidth(0.5); pdf.line(MARGIN, y, MARGIN + W, y)
   y += 6
 
-  pdf.setFontSize(18)
+  pdf.setFontSize(10)
   pdf.setTextColor(pc)
   pdf.setFont('helvetica', 'bold')
   pdf.text(`${cap(tplName)} Receipt`, MARGIN, y)
   pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(18)
-  pdf.setTextColor('#999')
+  pdf.setFontSize(10)
+  pdf.setTextColor('#64748b')
   pdf.text(`${rec.recNo} | ${rec.date}`, MARGIN, y + 4)
   y += 10
 
-  pdf.setFontSize(17)
-  pdf.setTextColor('#999')
+  pdf.setFontSize(9)
+  pdf.setTextColor('#64748b')
   pdf.text('RECEIVED FROM', MARGIN, y)
-  pdf.setFontSize(17)
-  pdf.setTextColor('#333')
+  pdf.setFontSize(9)
+  pdf.setTextColor('#1f2937')
   pdf.setFont('helvetica', 'bold')
   pdf.text(rec.receivedFrom, MARGIN, y + 4)
   pdf.setFont('helvetica', 'normal')
@@ -288,10 +287,10 @@ async function renderReceiptGeneric(pdf: jsPDF, rec: Receipt, co: Company, imgs:
   }
 
   y = addPageIfNeeded(pdf, y + 16)
-  pdf.setFillColor('#f9fafb'); pdf.setDrawColor('#eee'); pdf.rect(MARGIN, y, W, 11, 'FD')
-  pdf.setFontSize(17); pdf.setTextColor('#999'); pdf.text('AMOUNT', MARGIN + 2, y + 3)
-  if (words) { pdf.setFontSize(18); pdf.setTextColor('#999'); pdf.text(words, MARGIN + 2, y + 6); pdf.setTextColor('#333') }
-  pdf.setFontSize(17); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setFillColor('#f8fafc'); pdf.setDrawColor('#e2e8f0'); pdf.rect(MARGIN, y, W, 11, 'FD')
+  pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('AMOUNT', MARGIN + 2, y + 3)
+  if (words) { pdf.setFontSize(10); pdf.setTextColor('#64748b'); pdf.text(words, MARGIN + 2, y + 6); pdf.setTextColor('#1f2937') }
+  pdf.setFontSize(9); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text(`${cur.symbol}${fmt(amount, dp)}`, MARGIN + W - 2, y + 7, { align: 'right' })
   pdf.setFont('helvetica', 'normal')
   y += 15
@@ -302,24 +301,24 @@ async function renderReceiptGeneric(pdf: jsPDF, rec: Receipt, co: Company, imgs:
   if (rec.bankName) dets.push(`Bank: ${rec.bankName}`)
   if (rec.transDate) dets.push(`Date: ${rec.transDate}`)
   if (rec.being) dets.push(`Purpose: ${rec.being}`)
-  pdf.setFontSize(18); pdf.setTextColor('#333')
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937')
   dets.forEach((d, i) => { pdf.text(d, MARGIN + (i % 2) * 90, y + Math.floor(i / 2) * 4) })
   y += Math.ceil(dets.length / 2) * 4 + 6
 
   if (rec.receiver || rec.signatory) {
     y = addPageIfNeeded(pdf, y + 14)
-    pdf.setDrawColor('#ddd'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y)
+    pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y)
     y += 4
     if (rec.receiver) {
-      pdf.setDrawColor('#999'); pdf.line(MARGIN, y + 2, MARGIN + 40, y + 2)
-      pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text('Receiver', MARGIN, y + 6)
-      pdf.setFontSize(18); pdf.setTextColor('#333'); pdf.text(rec.receiver, MARGIN, y)
+      pdf.setDrawColor('#64748b'); pdf.line(MARGIN, y + 2, MARGIN + 40, y + 2)
+      pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text('Receiver', MARGIN, y + 6)
+      pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.text(rec.receiver, MARGIN, y)
     }
     if (rec.signatory) {
       const sx = MARGIN + 60
-      pdf.setDrawColor('#999'); pdf.line(sx, y + 2, sx + 40, y + 2)
-      pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text('Signatory', sx, y + 6)
-      pdf.setFontSize(18); pdf.setTextColor('#333'); pdf.text(rec.signatory, sx, y)
+      pdf.setDrawColor('#64748b'); pdf.line(sx, y + 2, sx + 40, y + 2)
+      pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text('Signatory', sx, y + 6)
+      pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.text(rec.signatory, sx, y)
     }
   }
 
@@ -340,46 +339,46 @@ async function renderReceiptClassic(pdf: jsPDF, rec: Receipt, co: Company, imgs:
 
   if (imgs.logo) {
     try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
-    pdf.setFontSize(17); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 16, y + 5)
     pdf.setFont('helvetica', 'normal')
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN + 16, y + 9.5) }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5) }
   } else {
-    pdf.setFontSize(17); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN, y + 5)
     pdf.setFont('helvetica', 'normal')
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN, y + 10) }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN, y + 10) }
   }
 
   const contact = [co.loc, co.tel, co.mob, co.email].filter(Boolean).join(' | ')
-  if (contact) { pdf.setFontSize(17); pdf.setTextColor('#666'); pdf.text(contact, MARGIN, y + (co.sub ? 14 : 10)) }
+  if (contact) { pdf.setFontSize(9); pdf.setTextColor('#4b5563'); pdf.text(contact, MARGIN, y + (co.sub ? 14 : 10)) }
 
   y = Math.max(y + 18, y + (imgs.logo ? 14 : 14) + 6)
-  pdf.setDrawColor('#ddd'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y)
+  pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y)
   y += 5
 
-  pdf.setFontSize(17); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text('RECEIPT VOUCHER', MARGIN, y)
   pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(18); pdf.setTextColor('#999')
+  pdf.setFontSize(10); pdf.setTextColor('#64748b')
   pdf.text(`No.: ${rec.recNo} | Date: ${rec.date}`, MARGIN, y + 4)
   y += 10
 
-  pdf.setDrawColor('#eee'); pdf.setLineWidth(0.2); pdf.line(MARGIN, y, MARGIN + W, y)
+  pdf.setDrawColor('#e2e8f0'); pdf.setLineWidth(0.2); pdf.line(MARGIN, y, MARGIN + W, y)
   y += 4
 
   const labelW = 50
   const label = (l: string, v: string, rowY: number) => {
-    pdf.setFontSize(18); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(l, MARGIN, rowY)
     pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(18); pdf.setTextColor('#555')
+    pdf.setFontSize(10); pdf.setTextColor('#374151')
     pdf.text(v, MARGIN + labelW, rowY)
   }
 
   label('Received from:', rec.receivedFrom, y); y += 5
   label('Amount:', `${cur.symbol}${fmt(amount, dp)}`, y);
-  if (words) { pdf.setFontSize(18); pdf.setTextColor('#999'); pdf.text(`(${words})`, MARGIN + labelW, y + 3.5); pdf.setTextColor('#333') }
+  if (words) { pdf.setFontSize(10); pdf.setTextColor('#64748b'); pdf.text(`(${words})`, MARGIN + labelW, y + 3.5); pdf.setTextColor('#1f2937') }
   y += 6
   label('Payment:', rec.payMethod + (rec.chequeNo ? ` - ${rec.chequeNo}` : ''), y); y += 5
   if (rec.bankName || rec.transDate) {
@@ -387,22 +386,22 @@ async function renderReceiptClassic(pdf: jsPDF, rec: Receipt, co: Company, imgs:
   }
   label('Purpose:', rec.being, y); y += 8
 
-  pdf.setDrawColor('#ddd'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y)
+  pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y)
   y += 4
 
   if (imgs.seal && imgs.seal !== imgs.logo) {
     try { pdf.addImage(imgs.seal, 'PNG', MARGIN, y, 16, 16) } catch {}
   }
   if (rec.receiver) {
-    pdf.setDrawColor('#999'); pdf.line(MARGIN + 30, y + 12, MARGIN + 70, y + 12)
-    pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text('Receiver', MARGIN + 30, y + 16)
-    pdf.setFontSize(18); pdf.setTextColor('#333'); pdf.text(rec.receiver, MARGIN + 30, y + 10)
+    pdf.setDrawColor('#64748b'); pdf.line(MARGIN + 30, y + 12, MARGIN + 70, y + 12)
+    pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text('Receiver', MARGIN + 30, y + 16)
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.text(rec.receiver, MARGIN + 30, y + 10)
   }
   if (rec.signatory) {
     const sx = MARGIN + 90
-    pdf.setDrawColor('#999'); pdf.line(sx, y + 12, sx + 40, y + 12)
-    pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text('Signatory', sx, y + 16)
-    pdf.setFontSize(18); pdf.setTextColor('#333'); pdf.text(rec.signatory, sx, y + 10)
+    pdf.setDrawColor('#64748b'); pdf.line(sx, y + 12, sx + 40, y + 12)
+    pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text('Signatory', sx, y + 16)
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.text(rec.signatory, sx, y + 10)
   }
 
   renderFooter(pdf, co, 280)
@@ -413,7 +412,9 @@ export async function createReceiptPDF(rec: Receipt, co: Company): Promise<void>
   const imgs = await loadImages(co)
   const tpl = co.recTemplate || 'classic'
 
-  if (tpl === 'classic') {
+  if (tpl === 'modern') {
+    await renderReceiptModern(pdf, rec, co, imgs)
+  } else if (tpl === 'classic') {
     await renderReceiptClassic(pdf, rec, co, imgs)
   } else if (tpl === 'beirak') {
     await renderReceiptBeirak(pdf, rec, co, imgs)
@@ -436,32 +437,32 @@ async function renderInvoiceGeneric(pdf: jsPDF, inv: Invoice, co: Company, imgs:
   if (imgs.logo) {
     try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
     pdf.text(co.name, MARGIN + 16, y + 5)
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN + 16, y + 9.5); pdf.setFontSize(17); pdf.setTextColor('#333') }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5); pdf.setFontSize(9); pdf.setTextColor('#1f2937') }
   } else {
-    pdf.setFontSize(18); pdf.setTextColor(pc); pdf.text(co.name, MARGIN, y + 5)
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN, y + 10); pdf.setFontSize(17); pdf.setTextColor('#333') }
+    pdf.setFontSize(10); pdf.setTextColor(pc); pdf.text(co.name, MARGIN, y + 5)
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN, y + 10); pdf.setFontSize(9); pdf.setTextColor('#1f2937') }
   }
 
   const contact = [co.loc, co.tel, co.email].filter(Boolean).join(' | ')
-  if (contact) { pdf.setFontSize(17); pdf.setTextColor('#999'); pdf.text(contact, MARGIN + (imgs.logo ? 16 : 0), y + (co.sub ? 14 : 10)) }
+  if (contact) { pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text(contact, MARGIN + (imgs.logo ? 16 : 0), y + (co.sub ? 14 : 10)) }
 
   y = Math.max(y + 20, y + (imgs.logo ? 14 : 14) + 4)
   pdf.setDrawColor(pc); pdf.setLineWidth(0.5); pdf.line(MARGIN, y, MARGIN + W, y)
   y += 6
 
-  pdf.setFontSize(18); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(10); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text(`${cap(tplName)} Invoice`, MARGIN, y)
   pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(18); pdf.setTextColor('#999')
+  pdf.setFontSize(10); pdf.setTextColor('#64748b')
   pdf.text(`${inv.invNo} | ${inv.date}`, MARGIN, y + 4)
   y += 10
 
-  pdf.setFontSize(17); pdf.setTextColor('#999'); pdf.text('BILL TO', MARGIN, y)
-  pdf.setFontSize(17); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('BILL TO', MARGIN, y)
+  pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
   pdf.text(inv.customer.name, MARGIN, y + 4)
   pdf.setFont('helvetica', 'normal')
   const cust = [inv.customer.address, inv.customer.phone, inv.customer.email, inv.customer.cr ? `CR: ${inv.customer.cr}` : ''].filter(Boolean).join(' | ')
-  if (cust) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(cust, MARGIN, y + 9, { maxWidth: W }) }
+  if (cust) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(cust, MARGIN, y + 9, { maxWidth: W }) }
   y += 15
 
   const c1 = MARGIN, c2 = MARGIN + 8, c3 = MARGIN + W - 65, c4 = MARGIN + W - 35, c5 = MARGIN + W
@@ -483,19 +484,19 @@ async function renderInvoiceGeneric(pdf: jsPDF, inv: Invoice, co: Company, imgs:
 
   y += 3; y = addPageIfNeeded(pdf, y + 30)
   const sx = MARGIN + W - 55
-  pdf.setFontSize(18); pdf.setTextColor('#333')
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937')
   pdf.text('Subtotal', sx, y); pdf.text(fmt(inv.subtotal, dp), MARGIN + W, y, { align: 'right' }); y += 5
   if (inv.vatPct > 0) { pdf.text(`VAT (${inv.vatPct}%)`, sx, y); pdf.text(fmt(inv.vatAmt, dp), MARGIN + W, y, { align: 'right' }); y += 5 }
   if (inv.discount > 0) { pdf.text('Discount', sx, y); pdf.text(`-${fmt(inv.discount, dp)}`, MARGIN + W, y, { align: 'right' }); y += 5 }
   pdf.setDrawColor(pc); pdf.setLineWidth(0.5); pdf.line(sx, y, MARGIN + W, y); y += 3
-  pdf.setFontSize(18); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(10); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text('Total:', sx, y); pdf.text(`${cur.symbol}${fmt(inv.grand, dp)}`, MARGIN + W, y, { align: 'right' })
   pdf.setFont('helvetica', 'normal'); y += 4
-  if (words) { pdf.setFontSize(18); pdf.setTextColor('#999'); pdf.text(words, sx, y, { maxWidth: 55 }) }
+  if (words) { pdf.setFontSize(10); pdf.setTextColor('#64748b'); pdf.text(words, sx, y, { maxWidth: 55 }) }
 
   y += 8
-  if (inv.notes) { y = addPageIfNeeded(pdf, y + 8); pdf.setDrawColor('#ddd'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y); y += 3; pdf.setFontSize(18); pdf.setTextColor('#999'); pdf.text('Notes:', MARGIN, y); pdf.setTextColor('#666'); pdf.text(inv.notes, MARGIN, y + 4, { maxWidth: W }) }
-  if (inv.payMethod) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(`Payment: ${[inv.payMethod, inv.payDetails, inv.bankName].filter(Boolean).join(' | ')}`, MARGIN, y + 8, { maxWidth: W }) }
+  if (inv.notes) { y = addPageIfNeeded(pdf, y + 8); pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y); y += 3; pdf.setFontSize(10); pdf.setTextColor('#64748b'); pdf.text('Notes:', MARGIN, y); pdf.setTextColor('#4b5563'); pdf.text(inv.notes, MARGIN, y + 4, { maxWidth: W }) }
+  if (inv.payMethod) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(`Payment: ${[inv.payMethod, inv.payDetails, inv.bankName].filter(Boolean).join(' | ')}`, MARGIN, y + 8, { maxWidth: W }) }
 
   renderFooter(pdf, co, 280)
 }
@@ -512,37 +513,37 @@ async function renderInvoiceClassic(pdf: jsPDF, inv: Invoice, co: Company, imgs:
 
   if (imgs.logo) {
     try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
-    pdf.setFontSize(17); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 16, y + 5); pdf.setFont('helvetica', 'normal')
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN + 16, y + 9.5) }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5) }
   } else {
-    pdf.setFontSize(17); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN, y + 5); pdf.setFont('helvetica', 'normal')
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN, y + 10) }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN, y + 10) }
   }
 
   const contact = [co.loc, co.tel, co.mob, co.email].filter(Boolean).join(' | ')
-  if (contact) { pdf.setFontSize(17); pdf.setTextColor('#666'); pdf.text(contact, MARGIN, y + (co.sub ? 14 : 10)) }
+  if (contact) { pdf.setFontSize(9); pdf.setTextColor('#4b5563'); pdf.text(contact, MARGIN, y + (co.sub ? 14 : 10)) }
 
   y = Math.max(y + 18, y + (imgs.logo ? 14 : 14) + 6)
-  pdf.setDrawColor('#ddd'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y)
+  pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y)
   y += 5
 
-  pdf.setFontSize(17); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text('TAX INVOICE', MARGIN, y)
-  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(18); pdf.setTextColor('#999')
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10); pdf.setTextColor('#64748b')
   pdf.text(`Invoice No.: ${inv.invNo} | Date: ${inv.date}${co.vatReg ? ` | VAT: ${co.vatReg}` : ''}`, MARGIN, y + 4)
   y += 10
 
-  pdf.setDrawColor('#eee'); pdf.setLineWidth(0.2); pdf.line(MARGIN, y, MARGIN + W, y)
+  pdf.setDrawColor('#e2e8f0'); pdf.setLineWidth(0.2); pdf.line(MARGIN, y, MARGIN + W, y)
   y += 4
 
-  pdf.setFontSize(17); pdf.setTextColor('#999'); pdf.text('Bill To', MARGIN, y)
-  pdf.setFontSize(17); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('Bill To', MARGIN, y)
+  pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
   pdf.text(inv.customer.name, MARGIN, y + 4)
   pdf.setFont('helvetica', 'normal')
   const cust = [inv.customer.address, inv.customer.phone, inv.customer.cr, inv.customer.email].filter(Boolean).join(' | ')
-  if (cust) { pdf.setFontSize(18); pdf.setTextColor('#555'); pdf.text(cust, MARGIN, y + 9, { maxWidth: W }) }
+  if (cust) { pdf.setFontSize(10); pdf.setTextColor('#374151'); pdf.text(cust, MARGIN, y + 9, { maxWidth: W }) }
   y += 16
 
   const c1 = MARGIN, c2 = MARGIN + 8, c3 = MARGIN + W - 65, c4 = MARGIN + W - 35, c5 = MARGIN + W
@@ -550,7 +551,7 @@ async function renderInvoiceClassic(pdf: jsPDF, inv: Invoice, co: Company, imgs:
   y = addPageIfNeeded(pdf, y + 18)
   pdf.setFillColor(pc)
   pdf.rect(MARGIN, y - 3, W, 6, 'F')
-  pdf.setFontSize(17); pdf.setTextColor('#fff'); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor('#fff'); pdf.setFont('helvetica', 'bold')
   pdf.text('#', c1, y); pdf.text('Description', c2, y); pdf.text('Qty', c3, y, { align: 'right' }); pdf.text('Price', c4, y, { align: 'right' }); pdf.text('Amount', c5, y, { align: 'right' })
   pdf.setFont('helvetica', 'normal')
   y += 5
@@ -566,19 +567,19 @@ async function renderInvoiceClassic(pdf: jsPDF, inv: Invoice, co: Company, imgs:
 
   y += 3; y = addPageIfNeeded(pdf, y + 30)
   const sx = MARGIN + W - 55
-  pdf.setFontSize(18); pdf.setTextColor('#333')
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937')
   pdf.text('Subtotal:', sx, y); pdf.text(fmt(inv.subtotal, dp), MARGIN + W, y, { align: 'right' }); y += 5
   if (inv.vatPct > 0) { pdf.text(`VAT (${inv.vatPct}%):`, sx, y); pdf.text(fmt(inv.vatAmt, dp), MARGIN + W, y, { align: 'right' }); y += 5 }
   if (inv.discount > 0) { pdf.text('Discount:', sx, y); pdf.text(`-${fmt(inv.discount, dp)}`, MARGIN + W, y, { align: 'right' }); y += 5 }
-  pdf.setDrawColor('#333'); pdf.setLineWidth(0.5); pdf.line(sx, y, MARGIN + W, y); y += 3
-  pdf.setFontSize(18); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.5); pdf.line(sx, y, MARGIN + W, y); y += 3
+  pdf.setFontSize(10); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text('Total Due:', sx, y); pdf.text(`${cur.symbol}${fmt(inv.grand, dp)}`, MARGIN + W, y, { align: 'right' })
   pdf.setFont('helvetica', 'normal'); y += 4
-  if (words) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(words, sx, y, { maxWidth: 55 }) }
+  if (words) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(words, sx, y, { maxWidth: 55 }) }
 
   y += 8
   const details = [`Payment: ${[inv.payMethod, inv.payDetails].filter(Boolean).join(' - ')}`, inv.notes, co.invTerms].filter(Boolean).join('\n')
-  if (details) { pdf.setDrawColor('#ddd'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y); y += 3; pdf.setFontSize(18); pdf.setTextColor('#555'); pdf.text(details, MARGIN, y, { maxWidth: W }) }
+  if (details) { pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y); y += 3; pdf.setFontSize(10); pdf.setTextColor('#374151'); pdf.text(details, MARGIN, y, { maxWidth: W }) }
 
   renderFooter(pdf, co, 280)
 }
@@ -592,39 +593,39 @@ async function renderInvoiceModern(pdf: jsPDF, inv: Invoice, co: Company, imgs: 
 
   pdf.setFillColor(pc); pdf.rect(MARGIN - 2, y, 3, 270, 'F')
 
-  pdf.setFillColor('#f9fafb')
+  pdf.setFillColor('#f8fafc')
   pdf.roundedRect(MARGIN + 3, y, W - 3, 18, 2, 2, 'F')
 
   if (imgs.logo) {
     try { pdf.addImage(imgs.logo, 'PNG', MARGIN + 6, y + 3, 12, 12) } catch {}
-    pdf.setFontSize(18); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 21, y + 8); pdf.setFont('helvetica', 'normal')
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN + 21, y + 13) }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 21, y + 13) }
   } else {
-    pdf.setFontSize(18); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 6, y + 8); pdf.setFont('helvetica', 'normal')
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN + 6, y + 13) }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 6, y + 13) }
   }
 
   pdf.setDrawColor(pc); pdf.setLineWidth(1.5)
   pdf.line(MARGIN + W - 45, y + 2, MARGIN + W - 2, y + 2)
-  pdf.setFontSize(18); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(10); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text('INVOICE', MARGIN + W - 2, y + 6, { align: 'right' })
-  pdf.setFontSize(18); pdf.setTextColor('#333')
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937')
   pdf.text(inv.invNo, MARGIN + W - 2, y + 12, { align: 'right' })
   pdf.setFont('helvetica', 'normal')
 
   y += 22
 
-  pdf.setFillColor('#f9fafb')
+  pdf.setFillColor('#f8fafc')
   pdf.roundedRect(MARGIN + 3, y, (W - 3) * 0.6, 14, 2, 2, 'F')
-  pdf.setFontSize(17); pdf.setTextColor('#999'); pdf.text('Bill To', MARGIN + 8, y + 2.5)
-  pdf.setFontSize(18); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('Bill To', MARGIN + 8, y + 2.5)
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
   pdf.text(inv.customer.name, MARGIN + 8, y + 7.5); pdf.setFont('helvetica', 'normal')
   const cust = [inv.customer.address, inv.customer.phone, inv.customer.email].filter(Boolean).join(' | ')
-  if (cust) { pdf.setFontSize(17); pdf.setTextColor('#555'); pdf.text(cust, MARGIN + 8, y + 12, { maxWidth: (W - 3) * 0.6 - 10 }) }
+  if (cust) { pdf.setFontSize(9); pdf.setTextColor('#374151'); pdf.text(cust, MARGIN + 8, y + 12, { maxWidth: (W - 3) * 0.6 - 10 }) }
 
-  pdf.setFontSize(17); pdf.setTextColor('#666'); pdf.text(`Date: ${inv.date}`, MARGIN + W - 45, y + 2.5, { align: 'right' })
+  pdf.setFontSize(9); pdf.setTextColor('#4b5563'); pdf.text(`Date: ${inv.date}`, MARGIN + W - 45, y + 2.5, { align: 'right' })
   if (co.vatReg) pdf.text(`VAT: ${co.vatReg}`, MARGIN + W - 45, y + 6.5, { align: 'right' })
 
   y += 18
@@ -634,15 +635,15 @@ async function renderInvoiceModern(pdf: jsPDF, inv: Invoice, co: Company, imgs: 
   y = addPageIfNeeded(pdf, y + 18)
   pdf.setFillColor(pc)
   pdf.roundedRect(c1, y - 3, W - 5, 6, 1.5, 1.5, 'F')
-  pdf.setFontSize(17); pdf.setTextColor('#fff'); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor('#fff'); pdf.setFont('helvetica', 'bold')
   pdf.text('#', c1 + 2, y); pdf.text('Description', c2, y); pdf.text('Qty', c3, y, { align: 'right' }); pdf.text('Price', c4, y, { align: 'right' }); pdf.text('Amount', c5, y, { align: 'right' })
   pdf.setFont('helvetica', 'normal')
   y += 5
 
   inv.items.forEach((item, i) => {
     y = addPageIfNeeded(pdf, y + 7)
-    if (i % 2 === 1) { pdf.setFillColor('#f9fafb'); pdf.roundedRect(c1, y - 2.5, W - 5, 7, 1, 1, 'F') }
-    pdf.setFontSize(18); pdf.setTextColor('#333')
+    if (i % 2 === 1) { pdf.setFillColor('#f8fafc'); pdf.roundedRect(c1, y - 2.5, W - 5, 7, 1, 1, 'F') }
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937')
     pdf.text(String(i + 1), c1 + 2, y); pdf.text(item.desc, c2, y)
     pdf.text(String(item.qty), c3, y, { align: 'right' }); pdf.text(fmt(item.price, dp), c4, y, { align: 'right' })
     pdf.text(fmt(item.amount, dp), c5, y, { align: 'right' })
@@ -650,33 +651,33 @@ async function renderInvoiceModern(pdf: jsPDF, inv: Invoice, co: Company, imgs: 
   })
 
   y += 2; y = addPageIfNeeded(pdf, y + 28)
-  pdf.setFillColor('#f9fafb'); pdf.setDrawColor('#eee')
+  pdf.setFillColor('#f8fafc'); pdf.setDrawColor('#e2e8f0')
   pdf.roundedRect(c3 - 10, y, W - c3 + 10, 16, 2, 2, 'FD')
 
   const my = y + 3
-  pdf.setFontSize(18); pdf.setTextColor('#333')
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937')
   pdf.text('Subtotal', c3 - 5, my); pdf.text(fmt(inv.subtotal, dp), c5, my, { align: 'right' })
   if (inv.vatPct > 0) { pdf.text(`VAT (${inv.vatPct}%)`, c3 - 5, my + 4); pdf.text(fmt(inv.vatAmt, dp), c5, my + 4, { align: 'right' }) }
   if (inv.discount > 0) { pdf.text('Discount', c3 - 5, my + (inv.vatPct > 0 ? 8 : 4)); pdf.text(`-${fmt(inv.discount, dp)}`, c5, my + (inv.vatPct > 0 ? 8 : 4), { align: 'right' }) }
   const lineOff = 1 + (inv.vatPct > 0 ? 4 : 0) + (inv.discount > 0 ? 4 : 0)
   pdf.setDrawColor('#ccc'); pdf.setLineWidth(0.3); pdf.line(c3 - 5, my + lineOff, c5, my + lineOff)
-  pdf.setFontSize(17); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text('Total Due', c3 - 5, my + lineOff + 4); pdf.text(`${cur.symbol}${fmt(inv.grand, dp)}`, c5, my + lineOff + 4, { align: 'right' })
   pdf.setFont('helvetica', 'normal')
-  if (words) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(words, c3 - 5, my + lineOff + 8, { maxWidth: W - c3 + 10 }) }
+  if (words) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(words, c3 - 5, my + lineOff + 8, { maxWidth: W - c3 + 10 }) }
 
   y += 18
   if (inv.notes || co.invTerms) {
     y = addPageIfNeeded(pdf, y + 8)
-    pdf.setDrawColor('#eee'); pdf.setLineWidth(0.3); pdf.line(MARGIN + 3, y, MARGIN + W - 2, y); y += 3
-    pdf.setFontSize(17); pdf.setTextColor('#555')
+    pdf.setDrawColor('#e2e8f0'); pdf.setLineWidth(0.3); pdf.line(MARGIN + 3, y, MARGIN + W - 2, y); y += 3
+    pdf.setFontSize(9); pdf.setTextColor('#374151')
     if (inv.notes) pdf.text(inv.notes, MARGIN + 3, y, { maxWidth: W - 5 })
     if (co.invTerms) pdf.text(co.invTerms, MARGIN + 3, y + 4, { maxWidth: W - 5 })
   }
 
-  pdf.setDrawColor('#eee'); pdf.setLineWidth(0.3)
+  pdf.setDrawColor('#e2e8f0'); pdf.setLineWidth(0.3)
   pdf.line(MARGIN + 3, 280, MARGIN + W - 2, 280)
-  pdf.setFontSize(18); pdf.setTextColor('#666')
+  pdf.setFontSize(10); pdf.setTextColor('#4b5563')
   pdf.text(`${co.name}${co.loc ? ` - ${co.loc}` : ''}`, MARGIN + 3, 284)
   pdf.text(`Tel: ${co.tel}${co.email ? ` | ${co.email}` : ''}`, MARGIN + W - 2, 284, { align: 'right' })
 }
@@ -741,20 +742,20 @@ async function renderInvoiceBeirak(pdf: jsPDF, inv: Invoice, co: Company, imgs: 
   pdf.text(`${cur.symbol}${fmt(inv.grand, dp)}`, sumX + sumW - 4, y + 5.5, { align: 'right' })
   y += 10
 
-  if (words) { pdf.setFontSize(12); pdf.setTextColor('#666'); pdf.setFont('helvetica', 'italic'); pdf.text(words, sumX + sumW - 4, y, { align: 'right' }); y += 5; pdf.setFont('helvetica', 'normal') }
+  if (words) { pdf.setFontSize(12); pdf.setTextColor('#4b5563'); pdf.setFont('helvetica', 'italic'); pdf.text(words, sumX + sumW - 4, y, { align: 'right' }); y += 5; pdf.setFont('helvetica', 'normal') }
 
   y = addPageIfNeeded(pdf, y + 30)
   const sigY = y
-  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Prepared By', 12, sigY)
-  pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
-  pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text('Accounts Department', 12, sigY + 6)
+  pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Prepared By', 12, sigY)
+  pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
+  pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text('Accounts Department', 12, sigY + 6)
   if (imgs.signature) {
     try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch {}
   }
-  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
-  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Authorized By', 210 - 12, sigY, { align: 'right' })
-  pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(210 - 100, sigY + 2, 210 - 12, sigY + 2)
-  pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(co.name, 210 - 12, sigY + 6, { align: 'right' })
+  pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
+  pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Authorized By', 210 - 12, sigY, { align: 'right' })
+  pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.3); pdf.line(210 - 100, sigY + 2, 210 - 12, sigY + 2)
+  pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text(co.name, 210 - 12, sigY + 6, { align: 'right' })
 
   beirakFooter(pdf, co, 280, 'TAX INVOICE')
 }
@@ -802,25 +803,25 @@ async function renderReceiptBeirak(pdf: jsPDF, rec: Receipt, co: Company, imgs: 
   pdf.text('Amount', sumX + 4, y + 5)
   pdf.text(`${cur.symbol}${fmt(amount, dp)}`, sumX + sumW - 4, y + 5, { align: 'right' })
   y += 9
-  if (words) { pdf.setFontSize(12); pdf.setTextColor('#666'); pdf.setFont('helvetica', 'italic'); pdf.text(words, sumX + sumW - 4, y, { align: 'right' }); y += 5; pdf.setFont('helvetica', 'normal') }
-  if (rec.being) { pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(`Purpose: ${rec.being}`, sumX, y); y += 5 }
+  if (words) { pdf.setFontSize(12); pdf.setTextColor('#4b5563'); pdf.setFont('helvetica', 'italic'); pdf.text(words, sumX + sumW - 4, y, { align: 'right' }); y += 5; pdf.setFont('helvetica', 'normal') }
+  if (rec.being) { pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text(`Purpose: ${rec.being}`, sumX, y); y += 5 }
 
   y = addPageIfNeeded(pdf, y + 24)
   const sigY = y
   if (rec.receiver) {
-    pdf.setFontSize(12); pdf.setTextColor('#333')
-    pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
-    pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Receiver', 12, sigY + 6)
-    pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(rec.receiver, 12, sigY)
+    pdf.setFontSize(12); pdf.setTextColor('#1f2937')
+    pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
+    pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Receiver', 12, sigY + 6)
+    pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text(rec.receiver, 12, sigY)
   }
   if (imgs.signature) {
     try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch {}
   }
-  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
+  pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
   if (rec.signatory) {
-    pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Signatory', 210 - 12, sigY + 6, { align: 'right' })
-    pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(210 - 100, sigY + 2, 210 - 12, sigY + 2)
-    pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(rec.signatory, 210 - 12, sigY, { align: 'right' })
+    pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Signatory', 210 - 12, sigY + 6, { align: 'right' })
+    pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.3); pdf.line(210 - 100, sigY + 2, 210 - 12, sigY + 2)
+    pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text(rec.signatory, 210 - 12, sigY, { align: 'right' })
   }
 
   beirakFooter(pdf, co, 280, 'RECEIPT VOUCHER')
@@ -884,23 +885,23 @@ async function renderQuotationBeirak(pdf: jsPDF, quot: Quotation, co: Company, i
   pdf.text(`${cur.symbol}${fmt(quot.grand, dp)}`, sumX + sumW - 4, y + 5.5, { align: 'right' })
   y += 10
 
-  if (words) { pdf.setFontSize(12); pdf.setTextColor('#666'); pdf.setFont('helvetica', 'italic'); pdf.text(words, sumX + sumW - 4, y, { align: 'right' }); y += 5; pdf.setFont('helvetica', 'normal') }
+  if (words) { pdf.setFontSize(12); pdf.setTextColor('#4b5563'); pdf.setFont('helvetica', 'italic'); pdf.text(words, sumX + sumW - 4, y, { align: 'right' }); y += 5; pdf.setFont('helvetica', 'normal') }
 
-  if (quot.notes) { pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(`Notes: ${quot.notes}`, sumX, y); y += 5 }
-  if (quot.terms) { pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(`Terms: ${quot.terms}`, sumX, y); y += 5 }
+  if (quot.notes) { pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text(`Notes: ${quot.notes}`, sumX, y); y += 5 }
+  if (quot.terms) { pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text(`Terms: ${quot.terms}`, sumX, y); y += 5 }
 
   y = addPageIfNeeded(pdf, y + 30)
   const sigY = y
-  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Prepared By', 12, sigY)
-  pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
-  pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text('Accounts Department', 12, sigY + 6)
+  pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Prepared By', 12, sigY)
+  pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
+  pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text('Accounts Department', 12, sigY + 6)
   if (imgs.signature) {
     try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch {}
   }
-  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
-  pdf.setFontSize(11); pdf.setTextColor('#666'); pdf.text('Authorized By', 210 - 12, sigY, { align: 'right' })
-  pdf.setDrawColor('#333'); pdf.setLineWidth(0.3); pdf.line(210 - 100, sigY + 2, 210 - 12, sigY + 2)
-  pdf.setFontSize(12); pdf.setTextColor('#333'); pdf.text(co.name, 210 - 12, sigY + 6, { align: 'right' })
+  pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
+  pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Authorized By', 210 - 12, sigY, { align: 'right' })
+  pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.3); pdf.line(210 - 100, sigY + 2, 210 - 12, sigY + 2)
+  pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text(co.name, 210 - 12, sigY + 6, { align: 'right' })
 
   beirakFooter(pdf, co, 280, 'QUOTATION')
 }
@@ -945,32 +946,32 @@ async function renderQuotationGeneric(pdf: jsPDF, quot: Quotation, co: Company, 
   if (imgs.logo) {
     try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
     pdf.text(co.name, MARGIN + 16, y + 5)
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN + 16, y + 9.5); pdf.setFontSize(17); pdf.setTextColor('#333') }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5); pdf.setFontSize(9); pdf.setTextColor('#1f2937') }
   } else {
-    pdf.setFontSize(18); pdf.setTextColor(pc); pdf.text(co.name, MARGIN, y + 5)
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN, y + 10); pdf.setFontSize(17); pdf.setTextColor('#333') }
+    pdf.setFontSize(10); pdf.setTextColor(pc); pdf.text(co.name, MARGIN, y + 5)
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN, y + 10); pdf.setFontSize(9); pdf.setTextColor('#1f2937') }
   }
 
   const contact = [co.loc, co.tel, co.email].filter(Boolean).join(' | ')
-  if (contact) { pdf.setFontSize(17); pdf.setTextColor('#999'); pdf.text(contact, MARGIN + (imgs.logo ? 16 : 0), y + (co.sub ? 14 : 10)) }
+  if (contact) { pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text(contact, MARGIN + (imgs.logo ? 16 : 0), y + (co.sub ? 14 : 10)) }
 
   y = Math.max(y + 20, y + (imgs.logo ? 14 : 14) + 4)
   pdf.setDrawColor(pc); pdf.setLineWidth(0.5); pdf.line(MARGIN, y, MARGIN + W, y)
   y += 6
 
-  pdf.setFontSize(18); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(10); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text(`${cap(tplName)} Quotation`, MARGIN, y)
   pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(18); pdf.setTextColor('#999')
+  pdf.setFontSize(10); pdf.setTextColor('#64748b')
   pdf.text(`${quot.quotNo} | ${quot.date}${quot.validUntil ? ` | Valid: ${quot.validUntil}` : ''}`, MARGIN, y + 4)
   y += 10
 
-  pdf.setFontSize(17); pdf.setTextColor('#999'); pdf.text('TO', MARGIN, y)
-  pdf.setFontSize(17); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('TO', MARGIN, y)
+  pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
   pdf.text(quot.customer.name, MARGIN, y + 4)
   pdf.setFont('helvetica', 'normal')
   const cust = [quot.customer.address, quot.customer.phone, quot.customer.email, quot.customer.cr ? `CR: ${quot.customer.cr}` : ''].filter(Boolean).join(' | ')
-  if (cust) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(cust, MARGIN, y + 9, { maxWidth: W }) }
+  if (cust) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(cust, MARGIN, y + 9, { maxWidth: W }) }
   y += 15
 
   const c1 = MARGIN, c2 = MARGIN + 8, c3 = MARGIN + W - 65, c4 = MARGIN + W - 35, c5 = MARGIN + W
@@ -992,19 +993,19 @@ async function renderQuotationGeneric(pdf: jsPDF, quot: Quotation, co: Company, 
 
   y += 3; y = addPageIfNeeded(pdf, y + 30)
   const sx = MARGIN + W - 55
-  pdf.setFontSize(18); pdf.setTextColor('#333')
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937')
   pdf.text('Subtotal', sx, y); pdf.text(fmt(quot.subtotal, dp), MARGIN + W, y, { align: 'right' }); y += 5
   if (quot.vatPct > 0) { pdf.text(`VAT (${quot.vatPct}%)`, sx, y); pdf.text(fmt(quot.vatAmt, dp), MARGIN + W, y, { align: 'right' }); y += 5 }
   if (quot.discount > 0) { pdf.text('Discount', sx, y); pdf.text(`-${fmt(quot.discount, dp)}`, MARGIN + W, y, { align: 'right' }); y += 5 }
   pdf.setDrawColor(pc); pdf.setLineWidth(0.5); pdf.line(sx, y, MARGIN + W, y); y += 3
-  pdf.setFontSize(18); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(10); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text('Total:', sx, y); pdf.text(`${cur.symbol}${fmt(quot.grand, dp)}`, MARGIN + W, y, { align: 'right' })
   pdf.setFont('helvetica', 'normal'); y += 4
-  if (words) { pdf.setFontSize(18); pdf.setTextColor('#999'); pdf.text(words, sx, y, { maxWidth: 55 }) }
+  if (words) { pdf.setFontSize(10); pdf.setTextColor('#64748b'); pdf.text(words, sx, y, { maxWidth: 55 }) }
 
   y += 8
-  if (quot.notes) { y = addPageIfNeeded(pdf, y + 8); pdf.setDrawColor('#ddd'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y); y += 3; pdf.setFontSize(18); pdf.setTextColor('#999'); pdf.text('Notes:', MARGIN, y); pdf.setTextColor('#666'); pdf.text(quot.notes, MARGIN, y + 4, { maxWidth: W }) }
-  if (quot.terms) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(`Terms: ${quot.terms}`, MARGIN, y + 8, { maxWidth: W }) }
+  if (quot.notes) { y = addPageIfNeeded(pdf, y + 8); pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y); y += 3; pdf.setFontSize(10); pdf.setTextColor('#64748b'); pdf.text('Notes:', MARGIN, y); pdf.setTextColor('#4b5563'); pdf.text(quot.notes, MARGIN, y + 4, { maxWidth: W }) }
+  if (quot.terms) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(`Terms: ${quot.terms}`, MARGIN, y + 8, { maxWidth: W }) }
 
   renderFooter(pdf, co, 280)
 }
@@ -1021,37 +1022,37 @@ async function renderQuotationClassic(pdf: jsPDF, quot: Quotation, co: Company, 
 
   if (imgs.logo) {
     try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
-    pdf.setFontSize(17); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 16, y + 5); pdf.setFont('helvetica', 'normal')
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN + 16, y + 9.5) }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5) }
   } else {
-    pdf.setFontSize(17); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN, y + 5); pdf.setFont('helvetica', 'normal')
-    if (co.sub) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(co.sub, MARGIN, y + 10) }
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN, y + 10) }
   }
 
   const contact = [co.loc, co.tel, co.mob, co.email].filter(Boolean).join(' | ')
-  if (contact) { pdf.setFontSize(17); pdf.setTextColor('#666'); pdf.text(contact, MARGIN, y + (co.sub ? 14 : 10)) }
+  if (contact) { pdf.setFontSize(9); pdf.setTextColor('#4b5563'); pdf.text(contact, MARGIN, y + (co.sub ? 14 : 10)) }
 
   y = Math.max(y + 18, y + (imgs.logo ? 14 : 14) + 6)
-  pdf.setDrawColor('#ddd'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y)
+  pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y)
   y += 5
 
-  pdf.setFontSize(17); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text('QUOTATION', MARGIN, y)
-  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(18); pdf.setTextColor('#999')
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10); pdf.setTextColor('#64748b')
   pdf.text(`Quotation No.: ${quot.quotNo} | Date: ${quot.date} | Valid: ${quot.validUntil}${co.vatReg ? ` | VAT: ${co.vatReg}` : ''}`, MARGIN, y + 4)
   y += 10
 
-  pdf.setDrawColor('#eee'); pdf.setLineWidth(0.2); pdf.line(MARGIN, y, MARGIN + W, y)
+  pdf.setDrawColor('#e2e8f0'); pdf.setLineWidth(0.2); pdf.line(MARGIN, y, MARGIN + W, y)
   y += 4
 
-  pdf.setFontSize(17); pdf.setTextColor('#999'); pdf.text('Bill To', MARGIN, y)
-  pdf.setFontSize(17); pdf.setTextColor('#333'); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('Bill To', MARGIN, y)
+  pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
   pdf.text(quot.customer.name, MARGIN, y + 4)
   pdf.setFont('helvetica', 'normal')
   const cust = [quot.customer.address, quot.customer.phone, quot.customer.cr, quot.customer.email].filter(Boolean).join(' | ')
-  if (cust) { pdf.setFontSize(18); pdf.setTextColor('#555'); pdf.text(cust, MARGIN, y + 9, { maxWidth: W }) }
+  if (cust) { pdf.setFontSize(10); pdf.setTextColor('#374151'); pdf.text(cust, MARGIN, y + 9, { maxWidth: W }) }
   y += 16
 
   const c1 = MARGIN, c2 = MARGIN + 8, c3 = MARGIN + W - 65, c4 = MARGIN + W - 35, c5 = MARGIN + W
@@ -1059,7 +1060,7 @@ async function renderQuotationClassic(pdf: jsPDF, quot: Quotation, co: Company, 
   y = addPageIfNeeded(pdf, y + 18)
   pdf.setFillColor(pc)
   pdf.rect(MARGIN, y - 3, W, 6, 'F')
-  pdf.setFontSize(17); pdf.setTextColor('#fff'); pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9); pdf.setTextColor('#fff'); pdf.setFont('helvetica', 'bold')
   pdf.text('#', c1, y); pdf.text('Description', c2, y); pdf.text('Qty', c3, y, { align: 'right' }); pdf.text('Price', c4, y, { align: 'right' }); pdf.text('Amount', c5, y, { align: 'right' })
   pdf.setFont('helvetica', 'normal')
   y += 5
@@ -1075,20 +1076,20 @@ async function renderQuotationClassic(pdf: jsPDF, quot: Quotation, co: Company, 
 
   y += 3; y = addPageIfNeeded(pdf, y + 30)
   const sx = MARGIN + W - 55
-  pdf.setFontSize(18); pdf.setTextColor('#333')
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937')
   pdf.text('Subtotal:', sx, y); pdf.text(fmt(quot.subtotal, dp), MARGIN + W, y, { align: 'right' }); y += 5
   if (quot.vatPct > 0) { pdf.text(`VAT (${quot.vatPct}%):`, sx, y); pdf.text(fmt(quot.vatAmt, dp), MARGIN + W, y, { align: 'right' }); y += 5 }
   if (quot.discount > 0) { pdf.text('Discount:', sx, y); pdf.text(`-${fmt(quot.discount, dp)}`, MARGIN + W, y, { align: 'right' }); y += 5 }
-  pdf.setDrawColor('#333'); pdf.setLineWidth(0.5); pdf.line(sx, y, MARGIN + W, y); y += 3
-  pdf.setFontSize(18); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.5); pdf.line(sx, y, MARGIN + W, y); y += 3
+  pdf.setFontSize(10); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
   pdf.text('Total:', sx, y); pdf.text(`${cur.symbol}${fmt(quot.grand, dp)}`, MARGIN + W, y, { align: 'right' })
   pdf.setFont('helvetica', 'normal'); y += 4
-  if (words) { pdf.setFontSize(18); pdf.setTextColor('#666'); pdf.text(words, sx, y, { maxWidth: 55 }) }
+  if (words) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(words, sx, y, { maxWidth: 55 }) }
 
   y += 8
   if (quot.notes || quot.terms || co.invTerms) {
-    pdf.setDrawColor('#ddd'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y); y += 3
-    pdf.setFontSize(18); pdf.setTextColor('#555')
+    pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y); y += 3
+    pdf.setFontSize(10); pdf.setTextColor('#374151')
     if (quot.notes) pdf.text(`Notes: ${quot.notes}`, MARGIN, y, { maxWidth: W })
     if (quot.terms) pdf.text(`Terms: ${quot.terms}`, MARGIN, y + 4, { maxWidth: W })
   }
@@ -1101,7 +1102,9 @@ export async function createQuotationPDF(quot: Quotation, co: Company): Promise<
   const imgs = await loadImages(co)
   const tpl = co.quotTemplate || 'classic'
 
-  if (tpl === 'classic') {
+  if (tpl === 'modern') {
+    await renderQuotationModern(pdf, quot, co, imgs)
+  } else if (tpl === 'classic') {
     await renderQuotationClassic(pdf, quot, co, imgs)
   } else if (tpl === 'beirak') {
     await renderQuotationBeirak(pdf, quot, co, imgs)
@@ -1140,8 +1143,7 @@ export async function capturePDF(html: string, filename: string): Promise<void> 
       pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pdfW, pdfH, undefined, 'FAST')
     }
     pdf.save(filename + '.pdf')
-  } catch (err) { throw err }
-  finally { document.body.removeChild(pageEl) }
+  } finally { document.body.removeChild(pageEl) }
 }
 
 export async function printHTML(html: string): Promise<void> {
@@ -1175,3 +1177,172 @@ function waitForImages(container: HTMLElement): Promise<void> {
     })
   )).then(() => {})
 }
+
+async function renderQuotationModern(pdf: jsPDF, quot: Quotation, co: Company, imgs: LoadedImages) {
+  const cur = co.currency
+  const dp = getDp(cur.subPer)
+  const pc = co.pcolor || '#D97706'
+  let y = TOP
+  const words = quot.grand > 0 ? num2words(quot.grand, cur) + ' only' : ''
+
+  pdf.setFillColor(pc); pdf.rect(MARGIN - 2, y, 3, 270, 'F')
+
+  pdf.setFillColor('#f8fafc')
+  pdf.roundedRect(MARGIN + 3, y, W - 3, 18, 2, 2, 'F')
+
+  if (imgs.logo) {
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN + 6, y + 3, 12, 12) } catch {}
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
+    pdf.text(co.name, MARGIN + 21, y + 8); pdf.setFont('helvetica', 'normal')
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 21, y + 13) }
+  } else {
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
+    pdf.text(co.name, MARGIN + 6, y + 8); pdf.setFont('helvetica', 'normal')
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 6, y + 13) }
+  }
+
+  pdf.setDrawColor(pc); pdf.setLineWidth(1.5)
+  pdf.line(MARGIN + W - 45, y + 2, MARGIN + W - 2, y + 2)
+  pdf.setFontSize(10); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.text('QUOTATION', MARGIN + W - 2, y + 6, { align: 'right' })
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937')
+  pdf.text(quot.quotNo, MARGIN + W - 2, y + 12, { align: 'right' })
+  pdf.setFont('helvetica', 'normal')
+
+  y += 22
+
+  pdf.setFillColor('#f8fafc')
+  pdf.roundedRect(MARGIN + 3, y, (W - 3) * 0.6, 14, 2, 2, 'F')
+  pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('Bill To', MARGIN + 8, y + 2.5)
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
+  pdf.text(quot.customer.name, MARGIN + 8, y + 7.5); pdf.setFont('helvetica', 'normal')
+  const cust = [quot.customer.address, quot.customer.phone, quot.customer.email].filter(Boolean).join(' | ')
+  if (cust) { pdf.setFontSize(9); pdf.setTextColor('#374151'); pdf.text(cust, MARGIN + 8, y + 12, { maxWidth: (W - 3) * 0.6 - 10 }) }
+
+  pdf.setFontSize(9); pdf.setTextColor('#4b5563'); pdf.text(`Date: ${quot.date}`, MARGIN + W - 45, y + 2.5, { align: 'right' })
+  pdf.text(`Valid: ${quot.validUntil}`, MARGIN + W - 45, y + 6.5, { align: 'right' })
+  if (co.vatReg) pdf.text(`VAT: ${co.vatReg}`, MARGIN + W - 45, y + 6.5, { align: 'right' })
+
+  y += 18
+
+  const c1 = MARGIN + 3, c2 = MARGIN + 12, c3 = MARGIN + W - 62, c4 = MARGIN + W - 32, c5 = MARGIN + W - 2
+
+  y = addPageIfNeeded(pdf, y + 18)
+  pdf.setFillColor(pc)
+  pdf.roundedRect(c1, y - 3, W - 5, 6, 1.5, 1.5, 'F')
+  pdf.setFontSize(9); pdf.setTextColor('#fff'); pdf.setFont('helvetica', 'bold')
+  pdf.text('#', c1 + 2, y); pdf.text('Description', c2, y); pdf.text('Qty', c3, y, { align: 'right' }); pdf.text('Price', c4, y, { align: 'right' }); pdf.text('Amount', c5, y, { align: 'right' })
+  pdf.setFont('helvetica', 'normal')
+  y += 5
+
+  quot.items.forEach((item, i) => {
+    y = addPageIfNeeded(pdf, y + 7)
+    if (i % 2 === 1) { pdf.setFillColor('#f8fafc'); pdf.roundedRect(c1, y - 2.5, W - 5, 7, 1, 1, 'F') }
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937')
+    pdf.text(String(i + 1), c1 + 2, y); pdf.text(item.desc, c2, y)
+    pdf.text(String(item.qty), c3, y, { align: 'right' }); pdf.text(fmt(item.price, dp), c4, y, { align: 'right' })
+    pdf.text(fmt(item.amount, dp), c5, y, { align: 'right' })
+    y += 5
+  })
+
+  y += 2; y = addPageIfNeeded(pdf, y + 28)
+  pdf.setFillColor('#f8fafc'); pdf.setDrawColor('#e2e8f0')
+  pdf.roundedRect(c3 - 10, y, W - c3 + 10, 16, 2, 2, 'FD')
+
+  const my = y + 3
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937')
+  pdf.text('Subtotal', c3 - 5, my); pdf.text(fmt(quot.subtotal, dp), c5, my, { align: 'right' })
+  if (quot.vatPct > 0) { pdf.text(`VAT (${quot.vatPct}%)`, c3 - 5, my + 4); pdf.text(fmt(quot.vatAmt, dp), c5, my + 4, { align: 'right' }) }
+  if (quot.discount > 0) { pdf.text('Discount', c3 - 5, my + (quot.vatPct > 0 ? 8 : 4)); pdf.text(`-${fmt(quot.discount, dp)}`, c5, my + (quot.vatPct > 0 ? 8 : 4), { align: 'right' }) }
+  const lineOff = 1 + (quot.vatPct > 0 ? 4 : 0) + (quot.discount > 0 ? 4 : 0)
+  pdf.setDrawColor('#ccc'); pdf.setLineWidth(0.3); pdf.line(c3 - 5, my + lineOff, c5, my + lineOff)
+  pdf.setFontSize(9); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.text('Total Due', c3 - 5, my + lineOff + 4); pdf.text(`${cur.symbol}${fmt(quot.grand, dp)}`, c5, my + lineOff + 4, { align: 'right' })
+  pdf.setFont('helvetica', 'normal')
+  if (words) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(words, c3 - 5, my + lineOff + 8, { maxWidth: W - c3 + 10 }) }
+
+  y += 18
+  if (quot.notes || co.invTerms) {
+    y = addPageIfNeeded(pdf, y + 8)
+    pdf.setDrawColor('#e2e8f0'); pdf.setLineWidth(0.3); pdf.line(MARGIN + 3, y, MARGIN + W - 2, y); y += 3
+    pdf.setFontSize(9); pdf.setTextColor('#374151')
+    if (quot.notes) pdf.text(quot.notes, MARGIN + 3, y, { maxWidth: W - 5 })
+    if (co.invTerms) pdf.text(co.invTerms, MARGIN + 3, y + 4, { maxWidth: W - 5 })
+  }
+
+  pdf.setDrawColor('#e2e8f0'); pdf.setLineWidth(0.3)
+  pdf.line(MARGIN + 3, 280, MARGIN + W - 2, 280)
+  pdf.setFontSize(10); pdf.setTextColor('#4b5563')
+  pdf.text(`${co.name}${co.loc ? ` - ${co.loc}` : ''}`, MARGIN + 3, 284)
+  pdf.text(`Tel: ${co.tel}${co.email ? ` | ${co.email}` : ''}`, MARGIN + W - 2, 284, { align: 'right' })
+}
+
+// ─── BEIRAK RENDER FUNCTIONS ─────────────────────────────────────────────────
+
+
+
+async function renderReceiptModern(pdf: jsPDF, rec: Receipt, co: Company, imgs: LoadedImages) {
+  const pc = co.pcolor || '#D97706'
+  let y = TOP
+  const cur = co.currency
+  const dp = getDp(cur.subPer)
+
+  pdf.setFillColor(pc); pdf.rect(MARGIN - 2, y, 3, 270, 'F')
+  pdf.setFillColor('#f8fafc'); pdf.roundedRect(MARGIN + 3, y, W - 3, 18, 2, 2, 'F')
+
+  if (imgs.logo) {
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN + 6, y + 3, 12, 12) } catch {}
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
+    pdf.text(co.name, MARGIN + 21, y + 8); pdf.setFont('helvetica', 'normal')
+  } else {
+    pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
+    pdf.text(co.name, MARGIN + 6, y + 8); pdf.setFont('helvetica', 'normal')
+  }
+
+  pdf.setDrawColor(pc); pdf.setLineWidth(1.5)
+  pdf.line(MARGIN + W - 45, y + 2, MARGIN + W - 2, y + 2)
+  pdf.setFontSize(10); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.text('RECEIPT', MARGIN + W - 2, y + 6, { align: 'right' })
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937')
+  pdf.text(rec.recNo, MARGIN + W - 2, y + 12, { align: 'right' })
+  pdf.setFont('helvetica', 'normal')
+
+  y += 22
+
+  pdf.setFillColor('#f8fafc'); pdf.roundedRect(MARGIN + 3, y, W - 3, 14, 2, 2, 'F')
+  pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('Received From', MARGIN + 8, y + 2.5)
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
+  pdf.text(rec.receivedFrom, MARGIN + 8, y + 7.5); pdf.setFont('helvetica', 'normal')
+  
+  pdf.setFontSize(9); pdf.setTextColor('#4b5563'); pdf.text(`Date: ${rec.date}`, MARGIN + W - 45, y + 2.5, { align: 'right' })
+
+  y += 18
+  
+  pdf.setFillColor('#f8fafc'); pdf.setDrawColor('#e2e8f0'); pdf.roundedRect(MARGIN + 3, y, W - 3, 20, 2, 2, 'FD')
+  const amount = rec.amount || rec.items.reduce((s, i) => s + i.amount, 0)
+  const words = rec.amountWords || (amount > 0 ? num2words(amount, cur) + ' only' : '')
+  pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('Amount Received', MARGIN + 8, y + 4)
+  pdf.setFontSize(14); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
+  pdf.text(`${cur.symbol}${fmt(amount, dp)}`, MARGIN + W - 8, y + 12, { align: 'right' })
+  pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.setFont('helvetica', 'italic')
+  if (words) pdf.text(words, MARGIN + 8, y + 10, { maxWidth: W - 50 })
+  pdf.setFont('helvetica', 'normal')
+
+  y += 24
+  
+  pdf.setFillColor('#f8fafc'); pdf.setDrawColor('#e2e8f0'); pdf.roundedRect(MARGIN + 3, y, W - 3, 20, 2, 2, 'FD')
+  pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold'); pdf.text('Payment Method:', MARGIN + 8, y + 6); pdf.setFont('helvetica', 'normal'); pdf.text(rec.payMethod, MARGIN + 45, y + 6)
+  if (rec.chequeNo) { pdf.setFont('helvetica', 'bold'); pdf.text('Cheque:', MARGIN + W / 2, y + 6); pdf.setFont('helvetica', 'normal'); pdf.text(rec.chequeNo, MARGIN + W / 2 + 20, y + 6) }
+  pdf.setFont('helvetica', 'bold'); pdf.text('Purpose:', MARGIN + 8, y + 12); pdf.setFont('helvetica', 'normal'); pdf.text(rec.being, MARGIN + 45, y + 12)
+
+  y += 30
+
+  const sx = MARGIN + W - 40
+  if (imgs.seal) { try { pdf.addImage(imgs.seal, 'PNG', MARGIN + 20, y - 10, 24, 24) } catch {} }
+  if (imgs.signature) {
+    try { pdf.addImage(imgs.signature, 'PNG', sx, y - 8, 26, 13) } catch {}
+    pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(sx, y + 6, sx + 26, y + 6)
+    pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('Authorized Signature', sx + 13, y + 10, { align: 'center' })
+  }
+}
+

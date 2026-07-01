@@ -5,7 +5,7 @@ import type { QuotTemplateData } from '@/types/template'
 import { esc } from '@/utils/esc'
 import { genericDoc } from '../shared'
 
-export function QuotationModern(d: QuotTemplateData) { return genericDoc(d, 'Quotation', `${esc(d.no)} | ${d.dt}${d.validDt ? ' | Valid: ' + d.validDt : ''}`, `${quotTerms(d)}`) }
+export { QuotationModern } from './Modern'
 export function QuotationCompact(d: QuotTemplateData) { return genericDoc(d, 'Quotation', `${esc(d.no)} | ${d.dt}${d.validDt ? ' | Valid: ' + d.validDt : ''}`, `${quotTerms(d)}`) }
 export function QuotationMinimal(d: QuotTemplateData) { return genericDoc(d, 'Quotation', `${esc(d.no)} | ${d.dt}${d.validDt ? ' | Valid: ' + d.validDt : ''}`, `${quotTerms(d)}`) }
 export function QuotationElegant(d: QuotTemplateData) { return genericDoc(d, 'Quotation', `${esc(d.no)} | ${d.dt}${d.validDt ? ' | Valid: ' + d.validDt : ''}`, `${quotTerms(d)}`) }

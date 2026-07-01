@@ -51,7 +51,7 @@ const IMAGE_INFO = {
 } as const
 
 export default function Settings() {
-  const { state, getCo, saveCompany, deleteCompany, setActive, resetAll, dispatch, saveInvoice, saveReceipt, saveQuotation } = useApp()
+  const { state, getCo, saveCompany, deleteCompany, setActive, resetAll, saveInvoice, saveReceipt, saveQuotation } = useApp()
   const { ui, toggleDark, showToast, showResetModal, hideResetModal, showPreview } = useUI()
   const co = getCo()
   const [activeSection, setActiveSection] = useState('profiles')

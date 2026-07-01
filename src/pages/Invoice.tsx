@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
@@ -39,9 +38,8 @@ const emptyForm = (): InvoiceFormState => ({
 })
 
 export default function Invoice() {
-  const navigate = useNavigate()
-  const { state, getCo, saveCompany, createInvoice, setEditing, deleteInvoice } = useApp()
-  const { markDirty, markClean, showToast, closeSidebar, showPDFOverlay, hidePDFOverlay, showPreview } = useUI()
+  const { state, getCo, saveCompany, createInvoice, setEditing } = useApp()
+  const { markDirty, markClean, showToast, showPDFOverlay, hidePDFOverlay, showPreview } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()
   const co = getCo()
   const [form, setForm] = useState<InvoiceFormState>(emptyForm)

@@ -5,7 +5,7 @@ const STATS = [
   {
     icon: 'building', label: 'Companies',
     color: '#6366f1', bg: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-600 dark:text-indigo-400',
-    get: (state: ReturnType<typeof useApp>['state'], coId: string | null) => state.companies.length,
+    get: (state: ReturnType<typeof useApp>['state'], _coId: string | null) => state.companies.length,
   },
   {
     icon: 'file', label: 'Invoices',

@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { ui, toggleSidebar, closeSidebar } = useUI()
+  const { ui, closeSidebar } = useUI()
   const { state } = useApp()
   const co = state.companies.find((c) => c.id === state.activeId)
 

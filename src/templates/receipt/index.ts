@@ -5,19 +5,19 @@ import type { RecTemplateData } from '@/types/template'
 import { esc } from '@/utils/esc'
 import { watermarkWrap } from '../shared'
 
-export function ReceiptModern(d: RecTemplateData) { return genericReceipt('Modern', d) }
+export { ReceiptModern } from './Modern'
 export function ReceiptCompact(d: RecTemplateData) { return genericReceipt('Compact', d) }
 export function ReceiptMinimal(d: RecTemplateData) { return genericReceipt('Minimal', d) }
 export function ReceiptElegant(d: RecTemplateData) { return genericReceipt('Elegant', d) }
 export function ReceiptBold(d: RecTemplateData) { return genericReceipt('Bold', d) }
 export function ReceiptProfessional(d: RecTemplateData) { return genericReceipt('Professional', d) }
 
-function genericReceipt(name: string, d: RecTemplateData): string {
+function genericReceipt(_name: string, d: RecTemplateData): string {
   const pc = d.comp.pcolor || '#D97706'
   const c = d.comp
 
   const itemsHtml = d.items.length > 0 ? `
-    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:4mm">
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:4mm">
       <thead>
         <tr style="border-bottom:2px solid #ddd;font-size:11px;color:#999;text-transform:uppercase">
           <th style="padding:10px 8px;text-align:left">#</th>
@@ -50,7 +50,7 @@ function genericReceipt(name: string, d: RecTemplateData): string {
         <div style="font-size:11px;color:#999;margin-top:2px">${[c.loc, c.tel, c.email].filter(Boolean).join(' \u00B7 ')}</div>
       </div>
       <div style="text-align:center;margin-bottom:4mm">
-        <div style="font-size:13px;text-transform:uppercase;letter-spacing:2px;color:${pc}">Receipt</div>
+        <div style="font-size:14px;text-transform:uppercase;letter-spacing:2px;color:${pc}">Receipt</div>
         <div style="font-size:12px;color:#666">${esc(d.no)} | ${d.dt}</div>
       </div>
       <div style="margin-bottom:4mm">
@@ -63,7 +63,7 @@ function genericReceipt(name: string, d: RecTemplateData): string {
         <div style="font-size:12px;color:#666;font-style:italic">${esc(d.ww)}</div>
         <div style="font-size:24px;font-weight:700;color:${pc};margin-top:4px">${d.cur.symbol}${d.amFmt}</div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px">
         <div><strong>Payment:</strong> ${d.pm}</div>
         ${d.ch ? `<div><strong>Cheque:</strong> ${esc(d.ch)}</div>` : ''}
         ${d.bk ? `<div><strong>Bank:</strong> ${esc(d.bk)}</div>` : ''}
