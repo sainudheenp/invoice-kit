@@ -56,7 +56,7 @@ export function InvoiceModern(d: InvTemplateData) {
           ${d.disc > 0 ? `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;color:#dc2626"><span>Discount</span><span style="font-weight:500">-${d.cur.symbol}${d.dv}</span></div>` : ''}
           ${d.vp > 0 ? `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px"><span style="color:#6b7280">VAT ${d.vp}%</span><span style="font-weight:500;color:#1f2937">${d.cur.symbol}${d.vv}</span></div>` : ''}
           <div style="border-top:1px dashed #d1d5db;margin:8px 0"></div>
-          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:20px;font-weight:700;color:${pc}"><span>Total Due</span><span>${d.cur.symbol}${d.gv}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:20px;font-weight:700;color:${pc}"><span>Total</span><span>${d.cur.symbol}${d.gv}</span></div>
           <div style="font-size:12px;color:#64748b;font-style:italic;padding-top:6px">${esc(d.gw)}</div>
         </div>
         ${d.notes || c.invTerms ? `<div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:10px;padding:20px 24px;margin-top:8mm;font-size:14px;color:#374151">${d.notes ? `<div style="margin-bottom:6px"><strong style="color:#111827">Notes:</strong> ${esc(d.notes)}</div>` : ''}${c.invTerms ? `<div><strong style="color:#111827">Terms:</strong> ${esc(c.invTerms)}</div>` : ''}</div>` : ''}

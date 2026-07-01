@@ -83,7 +83,7 @@ export function InvoiceClassic(d: InvTemplateData) {
           <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6"><span style="color:#6b7280">Subtotal:</span><span style="font-weight:500;color:#1f2937">${d.cur.symbol}${d.sv}</span></div>
           ${d.disc > 0 ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6;color:#dc2626"><span>Discount:</span><span style="font-weight:500">-${d.cur.symbol}${d.dv}</span></div>` : ''}
           ${d.vp > 0 ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6"><span style="color:#6b7280">VAT (${d.vp}%):</span><span style="font-weight:500;color:#1f2937">${d.cur.symbol}${d.vv}</span></div>` : ''}
-          <div style="display:flex;justify-content:space-between;padding:12px 0 8px;font-size:20px;font-weight:700;color:#111827"><span>Total Due:</span><span>${d.cur.symbol}${d.gv}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 0 8px;font-size:20px;font-weight:700;color:#111827"><span>Total:</span><span>${d.cur.symbol}${d.gv}</span></div>
           <div style="font-size:12px;color:#64748b;font-style:italic;padding-top:6px">${esc(d.gw)}</div>
         </div>
       </div>

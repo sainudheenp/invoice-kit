@@ -102,7 +102,7 @@ const BK_GR: [number, number, number] = [204, 204, 204]
 
 function beirakHeader(pdf: jsPDF, co: Company, imgs: LoadedImages, title: string, y: number): number {
   if (imgs.logo) {
-    try { pdf.addImage(imgs.logo, 'PNG', 210 / 2 - 13, y, 26, 22) } catch {}
+    try { pdf.addImage(imgs.logo, 'PNG', 210 / 2 - 13, y, 26, 22) } catch { }
   }
   y += 26
   pdf.setFont('helvetica', 'bold')
@@ -225,7 +225,7 @@ async function renderReceiptGeneric(pdf: jsPDF, rec: Receipt, co: Company, imgs:
   const words = rec.amountWords || (amount > 0 ? num2words(amount, cur) + ' only' : '')
 
   if (imgs.logo) {
-    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch { }
     pdf.text(co.name, MARGIN + 16, y + 5)
     if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5); pdf.setFontSize(9); pdf.setTextColor('#1f2937') }
   } else {
@@ -338,7 +338,7 @@ async function renderReceiptClassic(pdf: jsPDF, rec: Receipt, co: Company, imgs:
   y += 8
 
   if (imgs.logo) {
-    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch { }
     pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 16, y + 5)
     pdf.setFont('helvetica', 'normal')
@@ -390,7 +390,7 @@ async function renderReceiptClassic(pdf: jsPDF, rec: Receipt, co: Company, imgs:
   y += 4
 
   if (imgs.seal && imgs.seal !== imgs.logo) {
-    try { pdf.addImage(imgs.seal, 'PNG', MARGIN, y, 16, 16) } catch {}
+    try { pdf.addImage(imgs.seal, 'PNG', MARGIN, y, 16, 16) } catch { }
   }
   if (rec.receiver) {
     pdf.setDrawColor('#64748b'); pdf.line(MARGIN + 30, y + 12, MARGIN + 70, y + 12)
@@ -435,7 +435,7 @@ async function renderInvoiceGeneric(pdf: jsPDF, inv: Invoice, co: Company, imgs:
   const words = inv.grand > 0 ? num2words(inv.grand, cur) + ' only' : ''
 
   if (imgs.logo) {
-    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch { }
     pdf.text(co.name, MARGIN + 16, y + 5)
     if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5); pdf.setFontSize(9); pdf.setTextColor('#1f2937') }
   } else {
@@ -512,7 +512,7 @@ async function renderInvoiceClassic(pdf: jsPDF, inv: Invoice, co: Company, imgs:
   y += 8
 
   if (imgs.logo) {
-    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch { }
     pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 16, y + 5); pdf.setFont('helvetica', 'normal')
     if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5) }
@@ -573,7 +573,7 @@ async function renderInvoiceClassic(pdf: jsPDF, inv: Invoice, co: Company, imgs:
   if (inv.discount > 0) { pdf.text('Discount:', sx, y); pdf.text(`-${fmt(inv.discount, dp)}`, MARGIN + W, y, { align: 'right' }); y += 5 }
   pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.5); pdf.line(sx, y, MARGIN + W, y); y += 3
   pdf.setFontSize(10); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
-  pdf.text('Total Due:', sx, y); pdf.text(`${cur.symbol}${fmt(inv.grand, dp)}`, MARGIN + W, y, { align: 'right' })
+  pdf.text('Total:', sx, y); pdf.text(`${cur.symbol}${fmt(inv.grand, dp)}`, MARGIN + W, y, { align: 'right' })
   pdf.setFont('helvetica', 'normal'); y += 4
   if (words) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(words, sx, y, { maxWidth: 55 }) }
 
@@ -597,7 +597,7 @@ async function renderInvoiceModern(pdf: jsPDF, inv: Invoice, co: Company, imgs: 
   pdf.roundedRect(MARGIN + 3, y, W - 3, 18, 2, 2, 'F')
 
   if (imgs.logo) {
-    try { pdf.addImage(imgs.logo, 'PNG', MARGIN + 6, y + 3, 12, 12) } catch {}
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN + 6, y + 3, 12, 12) } catch { }
     pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 21, y + 8); pdf.setFont('helvetica', 'normal')
     if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 21, y + 13) }
@@ -662,7 +662,7 @@ async function renderInvoiceModern(pdf: jsPDF, inv: Invoice, co: Company, imgs: 
   const lineOff = 1 + (inv.vatPct > 0 ? 4 : 0) + (inv.discount > 0 ? 4 : 0)
   pdf.setDrawColor('#ccc'); pdf.setLineWidth(0.3); pdf.line(c3 - 5, my + lineOff, c5, my + lineOff)
   pdf.setFontSize(9); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
-  pdf.text('Total Due', c3 - 5, my + lineOff + 4); pdf.text(`${cur.symbol}${fmt(inv.grand, dp)}`, c5, my + lineOff + 4, { align: 'right' })
+  pdf.text('Total', c3 - 5, my + lineOff + 4); pdf.text(`${cur.symbol}${fmt(inv.grand, dp)}`, c5, my + lineOff + 4, { align: 'right' })
   pdf.setFont('helvetica', 'normal')
   if (words) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(words, c3 - 5, my + lineOff + 8, { maxWidth: W - c3 + 10 }) }
 
@@ -750,7 +750,7 @@ async function renderInvoiceBeirak(pdf: jsPDF, inv: Invoice, co: Company, imgs: 
   pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
   pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text('Accounts Department', 12, sigY + 6)
   if (imgs.signature) {
-    try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch {}
+    try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch { }
   }
   pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
   pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Authorized By', 210 - 12, sigY, { align: 'right' })
@@ -815,7 +815,7 @@ async function renderReceiptBeirak(pdf: jsPDF, rec: Receipt, co: Company, imgs: 
     pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text(rec.receiver, 12, sigY)
   }
   if (imgs.signature) {
-    try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch {}
+    try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch { }
   }
   pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
   if (rec.signatory) {
@@ -896,7 +896,7 @@ async function renderQuotationBeirak(pdf: jsPDF, quot: Quotation, co: Company, i
   pdf.setDrawColor('#1f2937'); pdf.setLineWidth(0.3); pdf.line(12, sigY + 2, 100, sigY + 2)
   pdf.setFontSize(12); pdf.setTextColor('#1f2937'); pdf.text('Accounts Department', 12, sigY + 6)
   if (imgs.signature) {
-    try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch {}
+    try { pdf.addImage(imgs.signature, 'PNG', 210 / 2 - 20, sigY - 4, 40, 20) } catch { }
   }
   pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Authorized Signature', 210 / 2, sigY + 20, { align: 'center' })
   pdf.setFontSize(11); pdf.setTextColor('#4b5563'); pdf.text('Authorized By', 210 - 12, sigY, { align: 'right' })
@@ -944,7 +944,7 @@ async function renderQuotationGeneric(pdf: jsPDF, quot: Quotation, co: Company, 
   const words = quot.grand > 0 ? num2words(quot.grand, cur) + ' only' : ''
 
   if (imgs.logo) {
-    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch { }
     pdf.text(co.name, MARGIN + 16, y + 5)
     if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5); pdf.setFontSize(9); pdf.setTextColor('#1f2937') }
   } else {
@@ -1021,7 +1021,7 @@ async function renderQuotationClassic(pdf: jsPDF, quot: Quotation, co: Company, 
   y += 8
 
   if (imgs.logo) {
-    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch {}
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN, y, 12, 12) } catch { }
     pdf.setFontSize(9); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 16, y + 5); pdf.setFont('helvetica', 'normal')
     if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 16, y + 9.5) }
@@ -1175,7 +1175,7 @@ function waitForImages(container: HTMLElement): Promise<void> {
       if (img.complete) resolve()
       else { img.onload = () => resolve(); img.onerror = () => resolve() }
     })
-  )).then(() => {})
+  )).then(() => { })
 }
 
 async function renderQuotationModern(pdf: jsPDF, quot: Quotation, co: Company, imgs: LoadedImages) {
@@ -1191,7 +1191,7 @@ async function renderQuotationModern(pdf: jsPDF, quot: Quotation, co: Company, i
   pdf.roundedRect(MARGIN + 3, y, W - 3, 18, 2, 2, 'F')
 
   if (imgs.logo) {
-    try { pdf.addImage(imgs.logo, 'PNG', MARGIN + 6, y + 3, 12, 12) } catch {}
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN + 6, y + 3, 12, 12) } catch { }
     pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 21, y + 8); pdf.setFont('helvetica', 'normal')
     if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 21, y + 13) }
@@ -1257,7 +1257,7 @@ async function renderQuotationModern(pdf: jsPDF, quot: Quotation, co: Company, i
   const lineOff = 1 + (quot.vatPct > 0 ? 4 : 0) + (quot.discount > 0 ? 4 : 0)
   pdf.setDrawColor('#ccc'); pdf.setLineWidth(0.3); pdf.line(c3 - 5, my + lineOff, c5, my + lineOff)
   pdf.setFontSize(9); pdf.setTextColor(pc); pdf.setFont('helvetica', 'bold')
-  pdf.text('Total Due', c3 - 5, my + lineOff + 4); pdf.text(`${cur.symbol}${fmt(quot.grand, dp)}`, c5, my + lineOff + 4, { align: 'right' })
+  pdf.text('Total', c3 - 5, my + lineOff + 4); pdf.text(`${cur.symbol}${fmt(quot.grand, dp)}`, c5, my + lineOff + 4, { align: 'right' })
   pdf.setFont('helvetica', 'normal')
   if (words) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(words, c3 - 5, my + lineOff + 8, { maxWidth: W - c3 + 10 }) }
 
@@ -1291,7 +1291,7 @@ async function renderReceiptModern(pdf: jsPDF, rec: Receipt, co: Company, imgs: 
   pdf.setFillColor('#f8fafc'); pdf.roundedRect(MARGIN + 3, y, W - 3, 18, 2, 2, 'F')
 
   if (imgs.logo) {
-    try { pdf.addImage(imgs.logo, 'PNG', MARGIN + 6, y + 3, 12, 12) } catch {}
+    try { pdf.addImage(imgs.logo, 'PNG', MARGIN + 6, y + 3, 12, 12) } catch { }
     pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 21, y + 8); pdf.setFont('helvetica', 'normal')
   } else {
@@ -1313,11 +1313,11 @@ async function renderReceiptModern(pdf: jsPDF, rec: Receipt, co: Company, imgs: 
   pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('Received From', MARGIN + 8, y + 2.5)
   pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
   pdf.text(rec.receivedFrom, MARGIN + 8, y + 7.5); pdf.setFont('helvetica', 'normal')
-  
+
   pdf.setFontSize(9); pdf.setTextColor('#4b5563'); pdf.text(`Date: ${rec.date}`, MARGIN + W - 45, y + 2.5, { align: 'right' })
 
   y += 18
-  
+
   pdf.setFillColor('#f8fafc'); pdf.setDrawColor('#e2e8f0'); pdf.roundedRect(MARGIN + 3, y, W - 3, 20, 2, 2, 'FD')
   const amount = rec.amount || rec.items.reduce((s, i) => s + i.amount, 0)
   const words = rec.amountWords || (amount > 0 ? num2words(amount, cur) + ' only' : '')
@@ -1329,7 +1329,7 @@ async function renderReceiptModern(pdf: jsPDF, rec: Receipt, co: Company, imgs: 
   pdf.setFont('helvetica', 'normal')
 
   y += 24
-  
+
   pdf.setFillColor('#f8fafc'); pdf.setDrawColor('#e2e8f0'); pdf.roundedRect(MARGIN + 3, y, W - 3, 20, 2, 2, 'FD')
   pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold'); pdf.text('Payment Method:', MARGIN + 8, y + 6); pdf.setFont('helvetica', 'normal'); pdf.text(rec.payMethod, MARGIN + 45, y + 6)
   if (rec.chequeNo) { pdf.setFont('helvetica', 'bold'); pdf.text('Cheque:', MARGIN + W / 2, y + 6); pdf.setFont('helvetica', 'normal'); pdf.text(rec.chequeNo, MARGIN + W / 2 + 20, y + 6) }
@@ -1338,9 +1338,9 @@ async function renderReceiptModern(pdf: jsPDF, rec: Receipt, co: Company, imgs: 
   y += 30
 
   const sx = MARGIN + W - 40
-  if (imgs.seal) { try { pdf.addImage(imgs.seal, 'PNG', MARGIN + 20, y - 10, 24, 24) } catch {} }
+  if (imgs.seal) { try { pdf.addImage(imgs.seal, 'PNG', MARGIN + 20, y - 10, 24, 24) } catch { } }
   if (imgs.signature) {
-    try { pdf.addImage(imgs.signature, 'PNG', sx, y - 8, 26, 13) } catch {}
+    try { pdf.addImage(imgs.signature, 'PNG', sx, y - 8, 26, 13) } catch { }
     pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(sx, y + 6, sx + 26, y + 6)
     pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('Authorized Signature', sx + 13, y + 10, { align: 'center' })
   }
