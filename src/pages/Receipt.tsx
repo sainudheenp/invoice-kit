@@ -229,7 +229,26 @@ export default function Receipt() {
                 </div>
               </div>
               <div>
+                <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-medium text-[var(--color-text2)]">Received From <span className="text-red">*</span></label>
+                  {state.customers.filter((c) => c.companyId === co?.id).length > 0 && (
+                    <select
+                      onChange={(e) => {
+                        const found = state.customers.find((c) => c.id === e.target.value)
+                        if (found) {
+                          set('receivedFrom', found.name)
+                        }
+                        e.target.value = ''
+                      }}
+                      className="text-xs max-w-[180px] px-2 py-0.5 rounded border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-[var(--color-text)] outline-none focus:ring-1 focus:ring-[var(--color-primary)] cursor-pointer"
+                    >
+                      <option value="">-- Load Saved Customer --</option>
+                      {state.customers.filter((c) => c.companyId === co?.id).map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
                 <input value={form.receivedFrom} onChange={(e) => set('receivedFrom', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
               </div>
               <div>

@@ -3,6 +3,8 @@ import type { Company } from '@/types/company'
 import type { Invoice, LineItem, Customer } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
 import type { Quotation } from '@/types/quotation'
+import type { CustomerRecord } from '@/types/customer'
+import type { ProductRecord } from '@/types/product'
 import type { EditingDoc } from '@/types'
 import { db } from '@/db'
 import { uid } from '@/utils/uid'
@@ -12,6 +14,8 @@ interface AppState {
   invoices: Invoice[]
   receipts: Receipt[]
   quotations: Quotation[]
+  customers: CustomerRecord[]
+  products: ProductRecord[]
   activeId: string | null
   editingDoc: EditingDoc | null
   dbError: string | null
@@ -28,6 +32,10 @@ type AppAction =
   | { type: 'REMOVE_RECEIPT'; payload: string }
   | { type: 'UPSERT_QUOTATION'; payload: Quotation }
   | { type: 'REMOVE_QUOTATION'; payload: string }
+  | { type: 'UPSERT_CUSTOMER'; payload: CustomerRecord }
+  | { type: 'REMOVE_CUSTOMER'; payload: string }
+  | { type: 'UPSERT_PRODUCT'; payload: ProductRecord }
+  | { type: 'REMOVE_PRODUCT'; payload: string }
   | { type: 'SET_EDITING'; payload: EditingDoc | null }
   | { type: 'DB_ERROR'; payload: string }
   | { type: 'RESET' }
@@ -74,12 +82,30 @@ function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'REMOVE_QUOTATION':
       return { ...state, quotations: state.quotations.filter((q) => q.id !== action.payload) }
+    case 'UPSERT_CUSTOMER': {
+      const idx = state.customers.findIndex((c) => c.id === action.payload.id)
+      const customers = idx >= 0
+        ? state.customers.map((c, i) => (i === idx ? action.payload : c))
+        : [...state.customers, action.payload]
+      return { ...state, customers }
+    }
+    case 'REMOVE_CUSTOMER':
+      return { ...state, customers: state.customers.filter((c) => c.id !== action.payload) }
+    case 'UPSERT_PRODUCT': {
+      const idx = state.products.findIndex((p) => p.id === action.payload.id)
+      const products = idx >= 0
+        ? state.products.map((p, i) => (i === idx ? action.payload : p))
+        : [...state.products, action.payload]
+      return { ...state, products }
+    }
+    case 'REMOVE_PRODUCT':
+      return { ...state, products: state.products.filter((p) => p.id !== action.payload) }
     case 'SET_EDITING':
       return { ...state, editingDoc: action.payload }
     case 'DB_ERROR':
       return { ...state, dbError: action.payload }
     case 'RESET':
-      return { companies: [], invoices: [], receipts: [], quotations: [], activeId: null, editingDoc: null, dbError: null }
+      return { companies: [], invoices: [], receipts: [], quotations: [], customers: [], products: [], activeId: null, editingDoc: null, dbError: null }
     default:
       return state
   }
@@ -90,6 +116,8 @@ const initialState: AppState = {
   invoices: [],
   receipts: [],
   quotations: [],
+  customers: [],
+  products: [],
   activeId: null,
   editingDoc: null,
   dbError: null,
@@ -110,6 +138,10 @@ interface AppContextValue {
   deleteReceipt: (id: string) => Promise<void>
   saveQuotation: (quot: Quotation) => Promise<void>
   deleteQuotation: (id: string) => Promise<void>
+  saveCustomerRecord: (cust: CustomerRecord) => Promise<void>
+  deleteCustomerRecord: (id: string) => Promise<void>
+  saveProductRecord: (prod: ProductRecord) => Promise<void>
+  deleteProductRecord: (id: string) => Promise<void>
   setEditing: (doc: EditingDoc | null) => void
   resetAll: () => Promise<void>
   createInvoice: (company: Company, form: {
@@ -142,11 +174,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async function init() {
       try {
         await db.open()
-        const [companies, invoices, receipts, quotations] = await Promise.all([
+        const [companies, invoices, receipts, quotations, customers, products] = await Promise.all([
           db.companies.toArray(),
           db.invoices.toArray(),
           db.receipts.toArray(),
           db.quotations.toArray(),
+          db.customers.toArray(),
+          db.products.toArray(),
         ])
         let activeId: string | null = null
         const stored = sessionStorage.getItem('dg_activeId')
@@ -155,7 +189,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         } else if (companies.length > 0) {
           activeId = companies[0].id
         }
-        dispatch({ type: 'SET_ALL', payload: { companies, invoices, receipts, quotations, activeId, editingDoc: null, dbError: null } })
+        dispatch({ type: 'SET_ALL', payload: { companies, invoices, receipts, quotations, customers, products, activeId, editingDoc: null, dbError: null } })
       } catch (err: any) {
         console.error('Failed to load DB:', err)
         if (err?.name === 'VersionError') {
@@ -190,16 +224,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const invs = state.invoices.filter((i) => i.companyId === id)
     const recs = state.receipts.filter((r) => r.companyId === id)
     const quots = state.quotations.filter((q) => q.companyId === id)
+    const custs = state.customers.filter((c) => c.companyId === id)
+    const prods = state.products.filter((p) => p.companyId === id)
     await Promise.all([
       db.companies.delete(id),
       ...invs.map((i) => db.invoices.delete(i.id)),
       ...recs.map((r) => db.receipts.delete(r.id)),
       ...quots.map((q) => db.quotations.delete(q.id)),
+      ...custs.map((c) => db.customers.delete(c.id)),
+      ...prods.map((p) => db.products.delete(p.id)),
     ])
     dispatch({ type: 'REMOVE_COMPANY', payload: id })
     invs.forEach((i) => dispatch({ type: 'REMOVE_INVOICE', payload: i.id }))
     recs.forEach((r) => dispatch({ type: 'REMOVE_RECEIPT', payload: r.id }))
     quots.forEach((q) => dispatch({ type: 'REMOVE_QUOTATION', payload: q.id }))
+    custs.forEach((c) => dispatch({ type: 'REMOVE_CUSTOMER', payload: c.id }))
+    prods.forEach((p) => dispatch({ type: 'REMOVE_PRODUCT', payload: p.id }))
   }
 
   const setActive = (id: string) => {
@@ -243,6 +283,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteQuotation = async (id: string) => {
     await db.quotations.delete(id)
     dispatch({ type: 'REMOVE_QUOTATION', payload: id })
+  }
+
+  const saveCustomerRecord = async (cust: CustomerRecord) => {
+    await db.customers.put(cust)
+    dispatch({ type: 'UPSERT_CUSTOMER', payload: cust })
+  }
+
+  const deleteCustomerRecord = async (id: string) => {
+    await db.customers.delete(id)
+    dispatch({ type: 'REMOVE_CUSTOMER', payload: id })
+  }
+
+  const saveProductRecord = async (prod: ProductRecord) => {
+    await db.products.put(prod)
+    dispatch({ type: 'UPSERT_PRODUCT', payload: prod })
+  }
+
+  const deleteProductRecord = async (id: string) => {
+    await db.products.delete(id)
+    dispatch({ type: 'REMOVE_PRODUCT', payload: id })
   }
 
   const setEditing = (doc: EditingDoc | null) => {
@@ -355,6 +415,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       saveInvoice, deleteInvoice, markInvoicePaid,
       saveReceipt, deleteReceipt,
       saveQuotation, deleteQuotation,
+      saveCustomerRecord, deleteCustomerRecord,
+      saveProductRecord, deleteProductRecord,
       setEditing, resetAll,
       createInvoice, createReceipt, createQuotation,
     }}>

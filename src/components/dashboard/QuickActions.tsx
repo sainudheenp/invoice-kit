@@ -6,6 +6,8 @@ const ACTIONS = [
   { page: 'invoice', label: 'New Invoice', sub: 'Create a tax invoice', icon: 'file' },
   { page: 'receipt', label: 'New Receipt', sub: 'Create a receipt voucher', icon: 'receipt' },
   { page: 'quotation', label: 'New Quotation', sub: 'Create a quotation', icon: 'file' },
+  { page: 'customers', label: 'Customers', sub: 'Manage client directory', icon: 'users' },
+  { page: 'products', label: 'Products', sub: 'Manage items & pricing', icon: 'box' },
   { page: 'settings', label: 'Settings', sub: 'Manage your company', icon: 'settings' },
 ]
 

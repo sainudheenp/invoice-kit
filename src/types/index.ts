@@ -4,6 +4,8 @@ export type { Invoice, LineItem, Customer } from './invoice'
 export type { Receipt } from './receipt'
 export type { Quotation } from './quotation'
 export type { InvTemplateData, RecTemplateData, QuotTemplateData } from './template'
+export type { CustomerRecord } from './customer'
+export type { ProductRecord } from './product'
 
 export interface EditingDoc {
   type: 'inv' | 'rec' | 'quot'

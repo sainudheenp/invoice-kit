@@ -11,6 +11,8 @@ import Dashboard from '@/pages/Dashboard'
 import Invoice from '@/pages/Invoice'
 import Receipt from '@/pages/Receipt'
 import QuotationPage from '@/pages/Quotation'
+import Customers from '@/pages/Customers'
+import Products from '@/pages/Products'
 import History from '@/pages/History'
 import Settings from '@/pages/Settings'
 
@@ -66,6 +68,8 @@ function AppContent() {
           <Route path="/invoice" element={<Invoice />} />
           <Route path="/receipt" element={<Receipt />} />
           <Route path="/quotation" element={<QuotationPage />} />
+          <Route path="/customers" element={<Customers />} />
+          <Route path="/products" element={<Products />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

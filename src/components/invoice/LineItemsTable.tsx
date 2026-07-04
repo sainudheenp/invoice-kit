@@ -1,4 +1,5 @@
 import type { LineItem } from '@/types/invoice'
+import { useApp } from '@/store/AppContext'
 
 interface Props {
   items: LineItem[]
@@ -7,6 +8,10 @@ interface Props {
 }
 
 export function LineItemsTable({ items, onChange, dp }: Props) {
+  const { state } = useApp()
+  const coId = state.activeId
+  const activeProducts = state.products.filter((p) => p.companyId === coId)
+
   const updateItem = (idx: number, field: keyof LineItem, value: string) => {
     const next = items.map((item, i) => {
       if (i !== idx) return item
@@ -84,7 +89,7 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
           </tbody>
         </table>
       </div>
-      <div className="flex gap-2 mt-2">
+      <div className="flex flex-wrap gap-2 mt-2">
         <button onClick={addRow} className="text-xs px-3 py-1.5 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-input-bg)] cursor-pointer transition-colors">
           + Add Row
         </button>
@@ -92,6 +97,40 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
           <button onClick={removeRow} className="text-xs px-3 py-1.5 rounded-full border border-red/30 text-red hover:bg-red-bg cursor-pointer transition-colors">
             - Remove
           </button>
+        )}
+        {activeProducts.length > 0 && (
+          <select
+            onChange={(e) => {
+              const found = activeProducts.find((p) => p.id === e.target.value)
+              if (found) {
+                const last = items[items.length - 1]
+                if (last && !last.desc.trim() && last.price === 0) {
+                  const next = [...items]
+                  next[items.length - 1] = {
+                    desc: found.name + (found.desc ? ` - ${found.desc}` : ''),
+                    qty: 1,
+                    price: found.price,
+                    amount: found.price,
+                  }
+                  onChange(next)
+                } else {
+                  onChange([...items, {
+                    desc: found.name + (found.desc ? ` - ${found.desc}` : ''),
+                    qty: 1,
+                    price: found.price,
+                    amount: found.price,
+                  }])
+                }
+              }
+              e.target.value = ''
+            }}
+            className="text-xs px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] outline-none focus:ring-1 focus:ring-[var(--color-primary)] cursor-pointer"
+          >
+            <option value="">+ Add Saved Product</option>
+            {activeProducts.map((p) => (
+              <option key={p.id} value={p.id}>{p.name} ({p.price.toFixed(dp)})</option>
+            ))}
+          </select>
         )}
       </div>
     </div>

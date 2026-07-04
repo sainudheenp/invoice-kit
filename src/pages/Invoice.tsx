@@ -243,7 +243,34 @@ export default function Invoice() {
           </Card>
 
           <Card>
-            <CardHeader><h2 className="text-sm font-semibold">Customer</h2></CardHeader>
+            <CardHeader>
+              <h2 className="text-sm font-semibold">Customer</h2>
+              {state.customers.filter((c) => c.companyId === co?.id).length > 0 && (
+                <select
+                  onChange={(e) => {
+                    const found = state.customers.find((c) => c.id === e.target.value)
+                    if (found) {
+                      setForm((f) => ({
+                        ...f,
+                        custName: found.name,
+                        custAddr: found.address,
+                        custPhone: found.phone,
+                        custCr: found.cr,
+                        custEmail: found.email,
+                      }))
+                      markDirty()
+                    }
+                    e.target.value = ''
+                  }}
+                  className="text-xs max-w-[180px] px-2 py-1 rounded border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-[var(--color-text)] outline-none focus:ring-1 focus:ring-[var(--color-primary)] cursor-pointer"
+                >
+                  <option value="">-- Load Saved Customer --</option>
+                  {state.customers.filter((c) => c.companyId === co?.id).map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              )}
+            </CardHeader>
             <div className="p-5 space-y-3">
               <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Customer Name <span className="text-red">*</span></label>

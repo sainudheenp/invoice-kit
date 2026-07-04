@@ -1,4 +1,5 @@
 import type { LineItem } from '@/types/invoice'
+import { useApp } from '@/store/AppContext'
 
 interface Props {
   items: LineItem[]
@@ -7,6 +8,10 @@ interface Props {
 }
 
 export function ReceiptItems({ items, onChange, dp }: Props) {
+  const { state } = useApp()
+  const coId = state.activeId
+  const activeProducts = state.products.filter((p) => p.companyId === coId)
+
   const updateItem = (idx: number, field: keyof LineItem, value: string) => {
     const next = items.map((item, i) => {
       if (i !== idx) return item
@@ -75,12 +80,48 @@ export function ReceiptItems({ items, onChange, dp }: Props) {
           </div>
         ))}
       </div>
-      <button
-        onClick={addRow}
-        className="mt-3 w-full py-2.5 rounded-xl border-2 border-dashed border-[var(--color-border)] text-sm text-[var(--color-text3)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-bg)] cursor-pointer transition-colors"
-      >
-        + Add Item
-      </button>
+      <div className="flex gap-2 mt-3">
+        <button
+          onClick={addRow}
+          className="flex-1 py-2.5 rounded-xl border-2 border-dashed border-[var(--color-border)] text-sm text-[var(--color-text3)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-bg)] cursor-pointer transition-colors"
+        >
+          + Add Item
+        </button>
+        {activeProducts.length > 0 && (
+          <select
+            onChange={(e) => {
+              const found = activeProducts.find((p) => p.id === e.target.value)
+              if (found) {
+                const last = items[items.length - 1]
+                if (last && !last.desc.trim() && last.price === 0) {
+                  const next = [...items]
+                  next[items.length - 1] = {
+                    desc: found.name + (found.desc ? ` - ${found.desc}` : ''),
+                    qty: 1,
+                    price: found.price,
+                    amount: found.price,
+                  }
+                  onChange(next)
+                } else {
+                  onChange([...items, {
+                    desc: found.name + (found.desc ? ` - ${found.desc}` : ''),
+                    qty: 1,
+                    price: found.price,
+                    amount: found.price,
+                  }])
+                }
+              }
+              e.target.value = ''
+            }}
+            className="px-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] text-sm text-[var(--color-text)] outline-none focus:ring-1 focus:ring-[var(--color-primary)] cursor-pointer"
+          >
+            <option value="">+ Add Saved Product</option>
+            {activeProducts.map((p) => (
+              <option key={p.id} value={p.id}>{p.name} ({p.price.toFixed(dp)})</option>
+            ))}
+          </select>
+        )}
+      </div>
     </div>
   )
 }
