@@ -1,4 +1,4 @@
-import { type SVGProps } from 'react'
+import { type SVGProps, type ReactElement } from 'react'
 
 function IconBase(props: SVGProps<SVGSVGElement>) {
   return (
@@ -207,7 +207,7 @@ export function BoxIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-const ICON_MAP: Record<string, (props: SVGProps<SVGSVGElement>) => JSX.Element> = {
+const ICON_MAP: Record<string, (props: SVGProps<SVGSVGElement>) => ReactElement> = {
   dashboard: DashboardIcon,
   file: FileIcon,
   receipt: ReceiptIcon,
