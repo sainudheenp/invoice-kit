@@ -3,7 +3,7 @@ import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { Card, CardHeader, Button } from '@/components/ui'
+import { Card, CardHeader, Button, Field, Input, Textarea, Select } from '@/components/ui'
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { InvoiceSummary } from '@/components/invoice/InvoiceSummary'
 import { num2words, dp as getDp } from '@/utils'
@@ -106,8 +106,11 @@ export default function Invoice() {
     const validItems = form.items.filter((i) => i.desc.trim() && i.qty > 0 && i.price > 0)
     if (validItems.length === 0) { showToast('At least one line item with description, quantity, and price is required.', 'err'); return }
 
-    // duplicate check (skip when editing same doc)
     const editingId = state.editingDoc?.type === 'inv' ? state.editingDoc.id : null
+    // preserve existing paid status when editing
+    const existingInv = editingId ? state.invoices.find((i) => i.id === editingId) : null
+    const isPaid = existingInv?.paid ?? false
+
     const dupe = state.invoices.find(
       (i) => i.invNo === form.invNo && i.companyId === co.id && i.id !== editingId
     )
@@ -117,7 +120,7 @@ export default function Invoice() {
       const saved = await createInvoice(co, {
         invNo: form.invNo,
         date: form.date,
-        paid: false,
+        paid: isPaid,
         customer,
         items: form.items,
         subtotal, vatPct: form.vatPct, vatAmt, discount: form.discount, grand,
@@ -152,12 +155,16 @@ export default function Invoice() {
 
   useKeyboardShortcuts({ s: handleSave, enter: handleSave })
 
-  const buildTempInvoice = (): Invoice => ({
+  const buildTempInvoice = (): Invoice => {
+    const editingId = state.editingDoc?.type === 'inv' ? state.editingDoc.id : null
+    const existingInv = editingId ? state.invoices.find((i) => i.id === editingId) : null
+    const isPaid = existingInv?.paid ?? false
+    return {
     id: '',
     companyId: co?.id || '',
     invNo: form.invNo,
     date: form.date,
-    paid: false,
+    paid: isPaid,
     customer,
     items: form.items,
     subtotal, vatPct: form.vatPct, vatAmt, discount: form.discount, grand,
@@ -166,7 +173,8 @@ export default function Invoice() {
     payDetails: form.chequeNo,
     bankName: form.bankName,
     createdAt: Date.now(),
-  })
+    }
+  }
 
   const handlePrint = async () => {
     if (!co) { showToast('No active company.', 'err'); return }
@@ -230,14 +238,12 @@ export default function Invoice() {
             </CardHeader>
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Invoice No. <span className="text-red">*</span></label>
-                  <input value={form.invNo} onChange={(e) => set('invNo', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Date</label>
-                  <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
+                <Field label="Invoice No." required>
+                  <Input value={form.invNo} onChange={(e) => set('invNo', e.target.value)} />
+                </Field>
+                <Field label="Date">
+                  <Input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
+                </Field>
               </div>
             </div>
           </Card>
@@ -272,32 +278,27 @@ export default function Invoice() {
               )}
             </CardHeader>
             <div className="p-5 space-y-3">
-              <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Customer Name <span className="text-red">*</span></label>
-                <input value={form.custName} onChange={(e) => set('custName', e.target.value)} list="custNameList" className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+              <Field label="Customer Name" required>
+                <Input value={form.custName} onChange={(e) => set('custName', e.target.value)} list="custNameList" />
                 <datalist id="custNameList">
                   {customers.map((c) => <option key={c} value={c} />)}
                 </datalist>
+              </Field>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Field label="Address">
+                  <Input value={form.custAddr} onChange={(e) => set('custAddr', e.target.value)} />
+                </Field>
+                <Field label="Phone">
+                  <Input value={form.custPhone} onChange={(e) => set('custPhone', e.target.value)} />
+                </Field>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Address</label>
-                  <input value={form.custAddr} onChange={(e) => set('custAddr', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Phone</label>
-                  <input value={form.custPhone} onChange={(e) => set('custPhone', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">C.R.</label>
-                  <input value={form.custCr} onChange={(e) => set('custCr', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Email</label>
-                  <input value={form.custEmail} onChange={(e) => set('custEmail', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
+                <Field label="C.R.">
+                  <Input value={form.custCr} onChange={(e) => set('custCr', e.target.value)} />
+                </Field>
+                <Field label="Email">
+                  <Input value={form.custEmail} onChange={(e) => set('custEmail', e.target.value)} />
+                </Field>
               </div>
             </div>
           </Card>
@@ -313,63 +314,53 @@ export default function Invoice() {
             <CardHeader><h2 className="text-sm font-semibold">Summary</h2></CardHeader>
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Subtotal</label>
-                  <input readOnly value={subtotal.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">VAT %</label>
-                  <input type="number" min="0" max="100" step="0.01" value={form.vatPct} onChange={(e) => set('vatPct', Math.max(0, parseFloat(e.target.value) || 0))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">VAT Amount</label>
-                  <input readOnly value={vatAmt.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
-                </div>
+                <Field label="Subtotal">
+                  <Input readOnly value={subtotal.toFixed(decimals)} />
+                </Field>
+                <Field label="VAT %">
+                  <Input type="number" min="0" max="100" step="0.01" value={form.vatPct} onChange={(e) => set('vatPct', Math.max(0, parseFloat(e.target.value) || 0))} />
+                </Field>
+                <Field label="VAT Amount">
+                  <Input readOnly value={vatAmt.toFixed(decimals)} />
+                </Field>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Discount</label>
-                  <input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => set('discount', Math.max(0, parseFloat(e.target.value) || 0))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Grand Total</label>
-                  <input readOnly value={grand.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
-                </div>
+                <Field label="Discount">
+                  <Input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => set('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
+                </Field>
+                <Field label="Grand Total">
+                  <Input readOnly value={grand.toFixed(decimals)} />
+                </Field>
               </div>
-              <div>
-                <label className="text-xs font-medium text-[var(--color-text2)]">Amount in Words</label>
-                <input readOnly value={words} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
-              </div>
+              <Field label="Amount in Words">
+                <Input readOnly value={words} />
+              </Field>
             </div>
           </Card>
 
           <Card>
             <CardHeader><h2 className="text-sm font-semibold">Additional</h2></CardHeader>
             <div className="p-5 space-y-4">
-              <div>
-                <label className="text-xs font-medium text-[var(--color-text2)]">Payment Method</label>
-                <select value={form.payMethod} onChange={(e) => set('payMethod', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]">
+              <Field label="Payment Method">
+                <Select value={form.payMethod} onChange={(e) => set('payMethod', e.target.value)}>
                   <option>Cash</option>
                   <option>Cheque</option>
                   <option>Bank Transfer</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
               {showCheque && (
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Cheque No.</label>
-                  <input value={form.chequeNo} onChange={(e) => set('chequeNo', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
+                <Field label="Cheque No.">
+                  <Input value={form.chequeNo} onChange={(e) => set('chequeNo', e.target.value)} />
+                </Field>
               )}
               {showBank && (
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Bank Name</label>
-                  <input value={form.bankName} onChange={(e) => set('bankName', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
+                <Field label="Bank Name">
+                  <Input value={form.bankName} onChange={(e) => set('bankName', e.target.value)} />
+                </Field>
               )}
-              <div>
-                <label className="text-xs font-medium text-[var(--color-text2)]">Notes</label>
-                <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] resize-none" />
-              </div>
+              <Field label="Notes">
+                <Textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} />
+              </Field>
             </div>
           </Card>
         </div>

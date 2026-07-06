@@ -4,7 +4,7 @@ import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { Card, CardHeader } from '@/components/ui'
 import { Svg } from '@/icons'
-import { invStatus } from '@/utils'
+import { invStatus, uid } from '@/utils'
 import { buildInvoiceHTML, buildReceiptHTML, buildQuotationHTML } from '@/templates'
 import { capturePDF, printHTML, downloadText } from '@/utils/pdf'
 import type { Invoice } from '@/types/invoice'
@@ -15,7 +15,7 @@ type Tab = 'inv' | 'rec' | 'quot'
 
 export default function History() {
   const navigate = useNavigate()
-  const { state, deleteInvoice, deleteReceipt, deleteQuotation, markInvoicePaid, setEditing } = useApp()
+  const { state, deleteInvoice, deleteReceipt, deleteQuotation, markInvoicePaid, setEditing, saveInvoice, saveReceipt, saveQuotation } = useApp()
   const { showToast, showPDFOverlay, hidePDFOverlay } = useUI()
   const co = state.companies.find((c) => c.id === state.activeId)
   const [tab, setTab] = useState<Tab>('inv')
@@ -57,6 +57,43 @@ export default function History() {
       await markInvoicePaid(id)
       showToast('Status updated.')
     } catch { showToast('Failed to update.', 'err') }
+  }
+
+  const handleDuplicate = async (type: Tab, doc: any) => {
+    if (!confirm(`Duplicate this ${type === 'inv' ? 'invoice' : type === 'rec' ? 'receipt' : 'quotation'}?`)) return
+    try {
+      const now = Date.now()
+      const newId = uid()
+      if (type === 'inv') {
+        const dupe: Invoice = {
+          ...doc,
+          id: newId,
+          invNo: doc.invNo + '-COPY',
+          createdAt: now,
+          paid: false,
+        }
+        await saveInvoice(dupe)
+      } else if (type === 'rec') {
+        const dupe: Receipt = {
+          ...doc,
+          id: newId,
+          recNo: doc.recNo + '-COPY',
+          createdAt: now,
+        }
+        await saveReceipt(dupe)
+      } else {
+        const dupe: Quotation = {
+          ...doc,
+          id: newId,
+          quotNo: doc.quotNo + '-COPY',
+          createdAt: now,
+        }
+        await saveQuotation(dupe)
+      }
+      showToast('Duplicated.')
+    } catch {
+      showToast('Failed to duplicate.', 'err')
+    }
   }
 
   const handlePrint = (type: Tab, doc: Invoice | Receipt | Quotation) => {
@@ -180,6 +217,9 @@ export default function History() {
                           <button onClick={() => handleEdit('inv', inv.id)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Edit">
                             <Svg name="edit" />
                           </button>
+                          <button onClick={() => handleDuplicate('inv', inv)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Duplicate">
+                            <Svg name="copy" />
+                          </button>
                           <button onClick={() => handleDelete('inv', inv.id)} className="p-1.5 rounded-lg hover:bg-red-bg text-red cursor-pointer" title="Delete">
                             <Svg name="trash" />
                           </button>
@@ -225,6 +265,9 @@ export default function History() {
                         <button onClick={() => handleEdit('rec', rec.id)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Edit">
                           <Svg name="edit" />
                         </button>
+                        <button onClick={() => handleDuplicate('rec', rec)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Duplicate">
+                          <Svg name="copy" />
+                        </button>
                         <button onClick={() => handleDelete('rec', rec.id)} className="p-1.5 rounded-lg hover:bg-red-bg text-red cursor-pointer" title="Delete">
                           <Svg name="trash" />
                         </button>
@@ -268,6 +311,9 @@ export default function History() {
                         </button>
                         <button onClick={() => handleEdit('quot', q.id)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Edit">
                           <Svg name="edit" />
+                        </button>
+                        <button onClick={() => handleDuplicate('quot', q)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Duplicate">
+                          <Svg name="copy" />
                         </button>
                         <button onClick={() => handleDelete('quot', q.id)} className="p-1.5 rounded-lg hover:bg-red-bg text-red cursor-pointer" title="Delete">
                           <Svg name="trash" />

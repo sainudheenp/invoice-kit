@@ -1,20 +1,23 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { AppProvider, useApp } from '@/store/AppContext'
 import { UIProvider, useUI } from '@/store/UIContext'
 import { Sidebar } from '@/components/layout/Sidebar'
+import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
 import { WelcomeOverlay } from '@/components/layout/WelcomeOverlay'
 import { PDFOverlay } from '@/components/layout/PDFOverlay'
 import { PreviewModal } from '@/components/layout/PreviewModal'
 import { ToastContainer } from '@/components/ui'
 import { Svg } from '@/icons'
-import Dashboard from '@/pages/Dashboard'
-import Invoice from '@/pages/Invoice'
-import Receipt from '@/pages/Receipt'
-import QuotationPage from '@/pages/Quotation'
-import Customers from '@/pages/Customers'
-import Products from '@/pages/Products'
-import History from '@/pages/History'
-import Settings from '@/pages/Settings'
+
+const Dashboard = lazy(() => import('@/pages/Dashboard'))
+const Invoice = lazy(() => import('@/pages/Invoice'))
+const Receipt = lazy(() => import('@/pages/Receipt'))
+const QuotationPage = lazy(() => import('@/pages/Quotation'))
+const Customers = lazy(() => import('@/pages/Customers'))
+const Products = lazy(() => import('@/pages/Products'))
+const History = lazy(() => import('@/pages/History'))
+const Settings = lazy(() => import('@/pages/Settings'))
 
 function AppContent() {
   const { state, loading } = useApp()
@@ -63,16 +66,24 @@ function AppContent() {
       </button>
 
       <main className="flex-1 ml-0 md:ml-[232px] p-5 md:p-8 max-w-5xl">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/invoice" element={<Invoice />} />
-          <Route path="/receipt" element={<Receipt />} />
-          <Route path="/quotation" element={<QuotationPage />} />
-          <Route path="/customers" element={<Customers />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
+        <ErrorBoundary>
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-20">
+              <div className="spinner" />
+            </div>
+          }>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/invoice" element={<Invoice />} />
+              <Route path="/receipt" element={<Receipt />} />
+              <Route path="/quotation" element={<QuotationPage />} />
+              <Route path="/customers" element={<Customers />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/settings" element={<Settings />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </main>
 
       <PDFOverlay />
