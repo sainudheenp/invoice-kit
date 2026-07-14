@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { AppProvider, useApp } from '@/store/AppContext'
 import { UIProvider, useUI } from '@/store/UIContext'
 import { Sidebar } from '@/components/layout/Sidebar'
@@ -81,6 +81,7 @@ function AppContent() {
               <Route path="/products" element={<Products />} />
               <Route path="/history" element={<History />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>

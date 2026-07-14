@@ -9,7 +9,7 @@ import type { EditingDoc } from '@/types'
 import { db } from '@/db'
 import { uid } from '@/utils/uid'
 
-const STORAGE_ACTIVE_ID_KEY = 'dg_activeId'
+const STORAGE_ACTIVE_ID_KEY = 'ik_activeId'
 
 interface AppState {
   companies: Company[]
@@ -185,7 +185,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           db.products.toArray(),
         ])
         let activeId: string | null = null
-        const stored = sessionStorage.getItem(STORAGE_ACTIVE_ID_KEY)
+        const stored = localStorage.getItem(STORAGE_ACTIVE_ID_KEY)
         if (stored && companies.some((c) => c.id === stored)) {
           activeId = stored
         } else if (companies.length > 0) {
@@ -245,7 +245,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   const setActive = (id: string) => {
-    sessionStorage.setItem(STORAGE_ACTIVE_ID_KEY, id)
+    localStorage.setItem(STORAGE_ACTIVE_ID_KEY, id)
     dispatch({ type: 'SET_ACTIVE', payload: id })
   }
 
@@ -314,7 +314,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const resetAll = async () => {
     await db.delete()
     dispatch({ type: 'RESET' })
-    sessionStorage.removeItem(STORAGE_ACTIVE_ID_KEY)
+    localStorage.removeItem(STORAGE_ACTIVE_ID_KEY)
   }
 
   const createInvoice = async (company: Company, form: {
