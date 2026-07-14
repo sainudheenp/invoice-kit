@@ -20,7 +20,7 @@ export function QuotationBeirak(d: QuotTemplateData) {
   `).join('')
 
   return watermarkWrap(`
-    <div style="font-family:'Inter',Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#374151;position:relative;background:#fff;min-height:100vh;padding:0">
+    <div style="font-family:'Inter',Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#374151;position:relative;background:#fff;min-height:100vh;padding:0;display:flex;flex-direction:column">
       <div style="text-align:center;padding:10mm 16mm 6mm">
         ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:80px;max-height:80px;margin-bottom:10px" />` : ''}
         <div style="font-size:24px;font-weight:700;color:${DB};letter-spacing:-0.5px">${esc(c.name)}</div>
@@ -103,7 +103,8 @@ export function QuotationBeirak(d: QuotTemplateData) {
           <div style="border-top:2px solid ${DB};width:160px;padding-top:6px;margin-left:auto;font-size:14px;color:#374151">${esc(c.name)}</div>
         </div>
       </div>
-      <div style="position:absolute;bottom:0;left:0;right:0;border-top:2px solid ${DB};padding:5mm 16mm;font-size:12px;color:#6b7280;text-align:center;background:#f8fafc">
+      <div style="flex:1;min-height:4mm"></div>
+      <div style="border-top:2px solid ${DB};padding:5mm 16mm;font-size:12px;color:#6b7280;text-align:center;background:#f8fafc">
         <span style="font-weight:600;color:${DB}">QUOTATION</span> | ${esc(c.name)}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}
         ${c.loc ? `<div style="margin-top:4px">${esc(c.loc)}</div>` : ''}
       </div>

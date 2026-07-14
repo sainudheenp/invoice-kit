@@ -72,7 +72,7 @@ export function InvoiceModern(d: InvTemplateData) {
 }
 
 const contactLine = (c: any) => {
-  const parts = [c.loc, c.tel, c.email].filter(Boolean)
+  const parts = [c.loc, c.tel, c.mob, c.email].filter(Boolean)
   return parts.length ? `<div style="font-size:12px;color:#64748b;margin-top:6px">${parts.join(' \u00B7 ')}</div>` : ''
 }
 

@@ -266,7 +266,7 @@ async function renderReceiptGeneric(pdf: jsPDF, rec: Receipt, co: Company, imgs:
   pdf.setFont('helvetica', 'normal')
   y += 10
 
-  const c1 = MARGIN, c2 = MARGIN + 8, c3 = MARGIN + W - 60, c4 = MARGIN + W - 30, c5 = MARGIN + W
+  const c1 = MARGIN, c2 = MARGIN + 8, c3 = MARGIN + W - 65, c4 = MARGIN + W - 35, c5 = MARGIN + W
 
   if (rec.items.length > 0) {
     y = addPageIfNeeded(pdf, y + 18)
@@ -322,7 +322,7 @@ async function renderReceiptGeneric(pdf: jsPDF, rec: Receipt, co: Company, imgs:
     }
   }
 
-  renderFooter(pdf, co, 280)
+  renderFooter(pdf, co, Math.max(y + 10, 280))
 }
 
 async function renderReceiptClassic(pdf: jsPDF, rec: Receipt, co: Company, imgs: LoadedImages) {
@@ -498,7 +498,7 @@ async function renderInvoiceGeneric(pdf: jsPDF, inv: Invoice, co: Company, imgs:
   if (inv.notes) { y = addPageIfNeeded(pdf, y + 8); pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y); y += 3; pdf.setFontSize(10); pdf.setTextColor('#64748b'); pdf.text('Notes:', MARGIN, y); pdf.setTextColor('#4b5563'); pdf.text(inv.notes, MARGIN, y + 4, { maxWidth: W }) }
   if (inv.payMethod) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(`Payment: ${[inv.payMethod, inv.payDetails, inv.bankName].filter(Boolean).join(' | ')}`, MARGIN, y + 8, { maxWidth: W }) }
 
-  renderFooter(pdf, co, 280)
+  renderFooter(pdf, co, Math.max(y + 10, 280))
 }
 
 async function renderInvoiceClassic(pdf: jsPDF, inv: Invoice, co: Company, imgs: LoadedImages) {
@@ -1007,7 +1007,7 @@ async function renderQuotationGeneric(pdf: jsPDF, quot: Quotation, co: Company, 
   if (quot.notes) { y = addPageIfNeeded(pdf, y + 8); pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(MARGIN, y, MARGIN + W, y); y += 3; pdf.setFontSize(10); pdf.setTextColor('#64748b'); pdf.text('Notes:', MARGIN, y); pdf.setTextColor('#4b5563'); pdf.text(quot.notes, MARGIN, y + 4, { maxWidth: W }) }
   if (quot.terms) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(`Terms: ${quot.terms}`, MARGIN, y + 8, { maxWidth: W }) }
 
-  renderFooter(pdf, co, 280)
+  renderFooter(pdf, co, Math.max(y + 10, 280))
 }
 
 async function renderQuotationClassic(pdf: jsPDF, quot: Quotation, co: Company, imgs: LoadedImages) {
@@ -1221,7 +1221,7 @@ async function renderQuotationModern(pdf: jsPDF, quot: Quotation, co: Company, i
 
   pdf.setFontSize(9); pdf.setTextColor('#4b5563'); pdf.text(`Date: ${quot.date}`, MARGIN + W - 45, y + 2.5, { align: 'right' })
   pdf.text(`Valid: ${quot.validUntil}`, MARGIN + W - 45, y + 6.5, { align: 'right' })
-  if (co.vatReg) pdf.text(`VAT: ${co.vatReg}`, MARGIN + W - 45, y + 6.5, { align: 'right' })
+  if (co.vatReg) pdf.text(`VAT: ${co.vatReg}`, MARGIN + W - 45, y + 10.5, { align: 'right' })
 
   y += 18
 
@@ -1294,9 +1294,11 @@ async function renderReceiptModern(pdf: jsPDF, rec: Receipt, co: Company, imgs: 
     try { pdf.addImage(imgs.logo, 'PNG', MARGIN + 6, y + 3, 12, 12) } catch { }
     pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 21, y + 8); pdf.setFont('helvetica', 'normal')
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 21, y + 13) }
   } else {
     pdf.setFontSize(10); pdf.setTextColor('#1f2937'); pdf.setFont('helvetica', 'bold')
     pdf.text(co.name, MARGIN + 6, y + 8); pdf.setFont('helvetica', 'normal')
+    if (co.sub) { pdf.setFontSize(10); pdf.setTextColor('#4b5563'); pdf.text(co.sub, MARGIN + 6, y + 13) }
   }
 
   pdf.setDrawColor(pc); pdf.setLineWidth(1.5)
@@ -1344,5 +1346,11 @@ async function renderReceiptModern(pdf: jsPDF, rec: Receipt, co: Company, imgs: 
     pdf.setDrawColor('#cbd5e1'); pdf.setLineWidth(0.3); pdf.line(sx, y + 6, sx + 26, y + 6)
     pdf.setFontSize(9); pdf.setTextColor('#64748b'); pdf.text('Authorized Signature', sx + 13, y + 10, { align: 'center' })
   }
+
+  pdf.setDrawColor('#e2e8f0'); pdf.setLineWidth(0.3)
+  pdf.line(MARGIN + 3, 280, MARGIN + W - 2, 280)
+  pdf.setFontSize(10); pdf.setTextColor('#4b5563')
+  pdf.text(`${co.name}${co.loc ? ` - ${co.loc}` : ''}`, MARGIN + 3, 284)
+  pdf.text(`Tel: ${co.tel}${co.email ? ` | ${co.email}` : ''}`, MARGIN + W - 2, 284, { align: 'right' })
 }
 

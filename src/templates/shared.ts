@@ -22,12 +22,12 @@ export function genericDoc(
   </tr>`).join('')
 
   return watermarkWrap(`
-    <div style="font-family:'Inter',Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#374151;position:relative;background:#fff;min-height:100vh;padding:15mm 20mm">
+    <div style="font-family:'Inter',Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#374151;position:relative;background:#fff;min-height:100vh;padding:15mm 20mm;display:flex;flex-direction:column">
       <div style="text-align:center;margin-bottom:10mm">
         ${c.logo ? `<img src="${esc(c.logo)}" style="max-width:80px;max-height:80px;margin-bottom:10px;display:block;margin-left:auto;margin-right:auto" /><br/>` : ''}
         <div style="font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.5px">${esc(c.name)}</div>
         ${c.sub ? `<div style="font-size:14px;color:#6b7280;margin-top:4px">${esc(c.sub)}</div>` : ''}
-        <div style="font-size:12px;color:#64748b;margin-top:6px">${[c.loc, c.tel, c.email].filter(Boolean).join(' \u00B7 ')}</div>
+        <div style="font-size:12px;color:#64748b;margin-top:6px">${[c.loc, c.tel, c.mob, c.email].filter(Boolean).join(' \u00B7 ')}</div>
       </div>
       <div style="text-align:center;margin-bottom:10mm">
         <div style="font-size:14px;text-transform:uppercase;letter-spacing:3px;font-weight:600;color:${pc};margin-bottom:6px">${title}</div>
@@ -72,7 +72,8 @@ export function genericDoc(
       ` : ''}
       ${d.notes ? `<div style="margin-top:10mm;background:#f9fafb;padding:16px 20px;border-radius:6px;font-size:14px;color:#374151"><strong style="color:#111827">Notes:</strong> ${esc(d.notes)}</div>` : ''}
       ${extraBeforeFooter}
-      <div style="position:absolute;bottom:15mm;left:20mm;right:20mm;border-top:1px solid #e5e7eb;padding-top:5mm;font-size:12px;color:#64748b;text-align:center">
+      <div style="flex:1;min-height:8mm"></div>
+      <div style="border-top:1px solid #e5e7eb;padding-top:5mm;font-size:12px;color:#64748b;text-align:center">
         <span style="color:#6b7280;font-weight:500">${esc(c.name)}</span>${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}
         ${c.invFooter ? `<div style="margin-top:6px">${esc(c.invFooter)}</div>` : ''}
       </div>

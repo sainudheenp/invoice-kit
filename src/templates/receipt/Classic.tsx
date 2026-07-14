@@ -37,7 +37,7 @@ export function ReceiptClassic(d: RecTemplateData) {
   const contactStr = contactParts.length > 0 ? `<div style="font-size:12px;color:#64748b;margin-top:6px">${contactParts.join(' \u00B7 ')}</div>` : ''
 
   return watermarkWrap(`
-    <div style="font-family:'Inter',Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#374151;position:relative;background:#fff;min-height:100vh;padding:0">
+    <div style="font-family:'Inter',Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#374151;position:relative;background:#fff;min-height:100vh;padding:0;display:flex;flex-direction:column">
       <div style="height:6px;background:${pc};width:100%"></div>
       <div style="padding:14mm 20mm 8mm">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -111,11 +111,12 @@ export function ReceiptClassic(d: RecTemplateData) {
         ${c.signature ? `<div style="text-align:center"><img src="${esc(c.signature)}" style="max-width:130px;max-height:65px;object-fit:contain;margin-bottom:6px" /><div style="font-size:14px;color:#6b7280;border-top:1px solid #d1d5db;padding-top:6px;width:150px">Authorized Signature${showAr ? ' / \u0627\u0644\u062A\u0648\u0642\u064A\u0639' : ''}</div></div>` : ''}
         ${d.sg ? `<div style="text-align:center"><div style="font-size:16px;color:#111827;margin-bottom:6px">${esc(d.sg)}</div><div style="border-top:1px solid #d1d5db;width:150px;padding-top:6px;font-size:12px;color:#6b7280">Signatory</div></div>` : ''}
       </div>
-      <div style="position:absolute;bottom:0;left:0;right:0;padding:5mm 20mm;border-top:1px solid #e5e7eb;font-size:12px;color:#64748b;display:flex;justify-content:space-between;background:#f8fafc">
+      <div style="flex:1;min-height:4mm"></div>
+      <div style="padding:5mm 20mm;border-top:1px solid #e5e7eb;font-size:12px;color:#64748b;display:flex;justify-content:space-between;background:#f8fafc">
         <span style="color:#6b7280;font-weight:500">${esc(c.name)}</span>
         <span>${c.tel ? `Tel: ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}</span>
       </div>
-      ${c.bankName ? `<div style="position:absolute;bottom:13mm;left:20mm;right:20mm;font-size:12px;color:#64748b;text-align:center">${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).join(' | ')}</div>` : ''}
+      ${c.bankName ? `<div style="padding:3mm 20mm 5mm;font-size:12px;color:#64748b;text-align:center">${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).join(' | ')}</div>` : ''}
     </div>
   `, d.comp.watermark)
 }
