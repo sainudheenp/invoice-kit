@@ -46,5 +46,5 @@ export function num2words(num: number, cur: Currency): string {
     const fracLabel = frac === 1 ? cur.sub : cur.subPl
     result += ` and ${fracW} ${fracLabel}`
   }
-  return result + ' only'
+  return result 
 }

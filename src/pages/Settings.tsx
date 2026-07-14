@@ -5,8 +5,7 @@ import { Card, CardHeader, Button, Modal } from '@/components/ui'
 import { Svg } from '@/icons'
 import { CUR_PRESETS } from '@/utils/currencyPresets'
 import { defCompany } from '@/utils/defCompany'
-import { sampleInvData, sampleRecData, sampleQuotData, INV_TEMPLATES, REC_TEMPLATES, QUOT_TEMPLATES } from '@/templates'
-import { applyWatermark } from '@/templates/registry'
+import { sampleInvData, sampleRecData, sampleQuotData, INV_TEMPLATES, REC_TEMPLATES, QUOT_TEMPLATES, applyWatermark } from '@/templates'
 import type { Company } from '@/types/company'
 
 const SECTIONS = [
@@ -41,7 +40,7 @@ function parseCo(c: Company) {
   }
 }
 
-const TEMPLATE_OPTIONS = ['classic', 'modern', 'beirak', 'compact', 'minimal', 'elegant', 'bold', 'professional']
+const TEMPLATE_OPTIONS = ['classic', 'modern', 'professional', 'minimal', 'elegant', 'bold', 'beirak']
 const WATERMARK_OPTIONS = ['', 'Draft', 'Paid', 'Sample', 'Copy']
 
 const IMAGE_INFO = {
