@@ -1,8 +1,19 @@
-import pdfMake from 'pdfmake'
-import pdfFonts from 'pdfmake/build/vfs_fonts'
-import htmlToPdfmake from 'html-to-pdfmake'
+let pdfMakeReady: Promise<typeof import('pdfmake/build/pdfmake').default> | null = null
 
-;(pdfMake as any).addVirtualFileSystem(pdfFonts)
+async function getPdfMake() {
+  if (!pdfMakeReady) {
+    pdfMakeReady = (async () => {
+      const [pdfMakeModule, pdfFonts] = await Promise.all([
+        import('pdfmake/build/pdfmake'),
+        import('pdfmake/build/vfs_fonts'),
+      ])
+      const pdfMake = pdfMakeModule.default
+      ;(pdfMake as any).addVirtualFileSystem(pdfFonts.default || pdfFonts)
+      return pdfMake
+    })()
+  }
+  return pdfMakeReady
+}
 
 export function watermarkHTML(html: string, text: string): string {
   if (!text) return html
@@ -11,9 +22,8 @@ export function watermarkHTML(html: string, text: string): string {
   return html + wm
 }
 
-function htmlToDocDef(html: string) {
-  const container = document.createElement('div')
-  container.innerHTML = html
+async function htmlToDocDef(html: string) {
+  const { default: htmlToPdfmake } = await import('html-to-pdfmake')
   const content = htmlToPdfmake(html, window) as any
   return {
     content: content.content || content,
@@ -23,12 +33,12 @@ function htmlToDocDef(html: string) {
 }
 
 export async function htmlToPDF(html: string, filename: string): Promise<void> {
-  const docDef = htmlToDocDef(html)
+  const [pdfMake, docDef] = await Promise.all([getPdfMake(), htmlToDocDef(html)])
   ;(pdfMake as any).createPdf(docDef).download(filename + '.pdf')
 }
 
 export async function htmlToPDFBlob(html: string): Promise<Blob> {
-  const docDef = htmlToDocDef(html)
+  const [pdfMake, docDef] = await Promise.all([getPdfMake(), htmlToDocDef(html)])
   return new Promise((resolve) => {
     const pdf = (pdfMake as any).createPdf(docDef)
     pdf.getBlob((blob: Blob) => resolve(blob))
