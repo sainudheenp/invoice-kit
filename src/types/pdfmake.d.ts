@@ -1,14 +1,5 @@
-declare module 'html-to-pdfmake' {
-  function htmlToPdfmake(
-    html: string,
-    win?: Window,
-    styles?: Record<string, Record<string, string>>
-  ): Record<string, unknown>[]
-  export default htmlToPdfmake
-}
-
 declare module 'pdfmake/build/vfs_fonts' {
-  const fonts: Record<string, Record<string, string>>
+  const fonts: Record<string, string>
   export default fonts
 }
 
@@ -17,7 +8,7 @@ declare module 'pdfmake/build/pdfmake' {
     addVirtualFileSystem(vfs: Record<string, unknown>): void
     createPdf(docDefinition: Record<string, unknown>): {
       download(filename?: string): void
-      open(printConfiguration?: Record<string, unknown>): void
+      open(): void
       print(): void
       getBlob(cb: (blob: Blob) => void): void
       getDataUrl(cb: (dataUrl: string) => void): void
