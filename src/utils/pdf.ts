@@ -36,7 +36,8 @@ export async function capturePDF(html: string, filename: string): Promise<void> 
 export async function printHTML(html: string): Promise<void> {
   const area = document.getElementById('printArea') || createPrintArea()
   area.innerHTML = html; area.style.display = 'block'
-  await waitForImages(area); window.print(); area.style.display = ''
+  await waitForImages(area); window.print()
+  area.innerHTML = ''; area.style.display = ''
 }
 
 export function downloadText(html: string, filename: string): void {
