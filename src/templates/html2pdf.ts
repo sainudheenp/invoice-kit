@@ -1,8 +1,8 @@
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
+import pdfMake from 'pdfmake'
+import pdfFonts from 'pdfmake/build/vfs_fonts'
+import htmlToPdfmake from 'html-to-pdfmake'
 
-const A4_W = 794
-const A4_H = 1123
+;(pdfMake as any).addVirtualFileSystem(pdfFonts)
 
 export function watermarkHTML(html: string, text: string): string {
   if (!text) return html
@@ -11,57 +11,26 @@ export function watermarkHTML(html: string, text: string): string {
   return html + wm
 }
 
-export async function htmlToPDF(html: string, filename: string): Promise<void> {
-  const pdf = new jsPDF('p', 'mm', 'a4')
-  await renderToPDF(html, pdf)
-  pdf.save(filename + '.pdf')
-}
-
-export async function htmlToPDFBlob(html: string): Promise<Blob> {
-  const pdf = new jsPDF('p', 'mm', 'a4')
-  await renderToPDF(html, pdf)
-  return pdf.output('blob')
-}
-
-async function renderToPDF(html: string, pdf: jsPDF): Promise<void> {
-  const iframe = document.createElement('iframe')
-  iframe.style.cssText = `position:fixed;top:-9999px;left:0;width:${A4_W}px;height:${A4_H}px;border:none;`
-  document.body.appendChild(iframe)
-
-  const doc = iframe.contentDocument!
-  doc.open()
-  doc.write(html)
-  doc.close()
-
-  await waitForImages(doc.body)
-
-  try {
-    const pdfW = 210; const pdfH = 297
-    const body = doc.body
-    const totalH = body.scrollHeight
-    const pageCount = Math.max(1, Math.ceil(totalH / A4_H))
-
-    for (let i = 0; i < pageCount; i++) {
-      body.style.marginTop = `${-i * A4_H}px`
-      const canvas = await html2canvas(body, {
-        scale: 2, useCORS: true, allowTaint: true, logging: false,
-        width: A4_W, height: A4_H,
-      })
-      if (i > 0) pdf.addPage()
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pdfW, pdfH, undefined, 'FAST')
-    }
-  } finally {
-    document.body.removeChild(iframe)
+function htmlToDocDef(html: string) {
+  const container = document.createElement('div')
+  container.innerHTML = html
+  const content = htmlToPdfmake(html, window) as any
+  return {
+    content: content.content || content,
+    defaultStyle: { font: 'Roboto', fontSize: 10 },
+    pageMargins: [40, 40, 40, 40] as [number, number, number, number],
   }
 }
 
-function waitForImages(container: HTMLElement): Promise<void> {
-  const imgs = container.querySelectorAll('img')
-  if (imgs.length === 0) return Promise.resolve()
-  return Promise.all(Array.from(imgs).map((img) =>
-    new Promise<void>((resolve) => {
-      if (img.complete) resolve()
-      else { img.onload = () => resolve(); img.onerror = () => resolve() }
-    })
-  )).then(() => {})
+export async function htmlToPDF(html: string, filename: string): Promise<void> {
+  const docDef = htmlToDocDef(html)
+  ;(pdfMake as any).createPdf(docDef).download(filename + '.pdf')
+}
+
+export async function htmlToPDFBlob(html: string): Promise<Blob> {
+  const docDef = htmlToDocDef(html)
+  return new Promise((resolve) => {
+    const pdf = (pdfMake as any).createPdf(docDef)
+    pdf.getBlob((blob: Blob) => resolve(blob))
+  })
 }

@@ -34,10 +34,21 @@ export async function capturePDF(html: string, filename: string): Promise<void> 
 }
 
 export async function printHTML(html: string): Promise<void> {
-  const area = document.getElementById('printArea') || createPrintArea()
-  area.innerHTML = html; area.style.display = 'block'
-  await waitForImages(area); window.print()
-  area.innerHTML = ''; area.style.display = ''
+  const iframe = document.createElement('iframe')
+  iframe.style.cssText = 'position:fixed;top:-9999px;left:0;width:794px;height:1123px;border:none;overflow:hidden;'
+  document.body.appendChild(iframe)
+  iframe.srcdoc = html
+  await new Promise<void>((resolve) => { iframe.onload = () => resolve() })
+
+  const doc = iframe.contentDocument
+  if (doc) {
+    const style = doc.createElement('style')
+    style.textContent = 'html,body{margin:0!important;padding:0!important;background:#fff!important;}@media print{html,body{margin:0!important;padding:0!important;background:#fff!important;}}'
+    doc.head.appendChild(style)
+  }
+
+  iframe.contentWindow!.print()
+  document.body.removeChild(iframe)
 }
 
 export function downloadText(html: string, filename: string): void {
@@ -48,20 +59,4 @@ export function downloadText(html: string, filename: string): void {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a'); a.href = url; a.download = filename + '.txt'
   a.click(); URL.revokeObjectURL(url)
-}
-
-function createPrintArea(): HTMLElement {
-  const el = document.createElement('div'); el.id = 'printArea'; el.className = 'print-only'
-  document.body.appendChild(el); return el
-}
-
-function waitForImages(container: HTMLElement): Promise<void> {
-  const imgs = container.querySelectorAll('img')
-  if (imgs.length === 0) return Promise.resolve()
-  return Promise.all(Array.from(imgs).map((img) =>
-    new Promise<void>((resolve) => {
-      if (img.complete) resolve()
-      else { img.onload = () => resolve(); img.onerror = () => resolve() }
-    })
-  )).then(() => {})
 }
