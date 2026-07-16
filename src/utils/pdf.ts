@@ -23,32 +23,39 @@ export async function createReceiptPDF(rec: Receipt, co: Company): Promise<void>
   await htmlToPDF(html, rec.recNo || 'receipt')
 }
 
+export async function createReceiptPDFBlob(rec: Receipt, co: Company): Promise<Blob> {
+  const html = buildReceiptHTML(rec, co)
+  if (!html) return new Blob()
+  return htmlToPDFBlob(html)
+}
+
 export async function createQuotationPDF(quot: Quotation, co: Company): Promise<void> {
   const html = buildQuotationHTML(quot, co)
   if (!html) return
   await htmlToPDF(html, quot.quotNo || 'quotation')
 }
 
-export async function capturePDF(html: string, filename: string): Promise<void> {
-  await htmlToPDF(html, filename)
+export async function createQuotationPDFBlob(quot: Quotation, co: Company): Promise<Blob> {
+  const html = buildQuotationHTML(quot, co)
+  if (!html) return new Blob()
+  return htmlToPDFBlob(html)
 }
 
-export async function printHTML(html: string): Promise<void> {
+export function printHTML(html: string): void {
   const iframe = document.createElement('iframe')
   iframe.style.cssText = 'position:fixed;top:-9999px;left:0;width:794px;height:1123px;border:none;overflow:hidden;'
   document.body.appendChild(iframe)
   iframe.srcdoc = html
-  await new Promise<void>((resolve) => { iframe.onload = () => resolve() })
-
-  const doc = iframe.contentDocument
-  if (doc) {
-    const style = doc.createElement('style')
-    style.textContent = 'html,body{margin:0!important;padding:0!important;background:#fff!important;}@media print{html,body{margin:0!important;padding:0!important;background:#fff!important;}}'
-    doc.head.appendChild(style)
+  iframe.onload = () => {
+    const doc = iframe.contentDocument
+    if (doc) {
+      const style = doc.createElement('style')
+      style.textContent = 'html,body{margin:0!important;padding:0!important;background:#fff!important;}@media print{html,body{margin:0!important;padding:0!important;background:#fff!important;}}'
+      doc.head.appendChild(style)
+    }
+    iframe.contentWindow!.print()
+    setTimeout(() => document.body.removeChild(iframe), 1000)
   }
-
-  iframe.contentWindow!.print()
-  document.body.removeChild(iframe)
 }
 
 export function downloadText(html: string, filename: string): void {

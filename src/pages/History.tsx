@@ -6,7 +6,7 @@ import { Card, CardHeader } from '@/components/ui'
 import { Svg } from '@/icons'
 import { invStatus, uid } from '@/utils'
 import { buildInvoiceHTML, buildReceiptHTML, buildQuotationHTML } from '@/templates'
-import { capturePDF, printHTML, downloadText } from '@/utils/pdf'
+import { createInvoicePDF, createReceiptPDF, createQuotationPDF, printHTML, downloadText } from '@/utils/pdf'
 import type { Invoice } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
 import type { Quotation } from '@/types/quotation'
@@ -109,14 +109,9 @@ export default function History() {
     if (!co) { showToast('No active company.', 'err'); return }
     showPDFOverlay()
     try {
-      const html = type === 'inv' ? buildInvoiceHTML(doc as Invoice, co)
-        : type === 'rec' ? buildReceiptHTML(doc as Receipt, co)
-        : buildQuotationHTML(doc as Quotation, co)
-      if (!html) { showToast('Cannot generate PDF.', 'err'); hidePDFOverlay(); return }
-      const name = type === 'inv' ? (doc as Invoice).invNo
-        : type === 'rec' ? (doc as Receipt).recNo
-        : (doc as Quotation).quotNo
-      await capturePDF(html, name || 'document')
+      if (type === 'inv') await createInvoicePDF(doc as Invoice, co)
+      else if (type === 'rec') await createReceiptPDF(doc as Receipt, co)
+      else await createQuotationPDF(doc as Quotation, co)
     } catch { showToast('PDF generation failed.', 'err') }
     hidePDFOverlay()
   }
