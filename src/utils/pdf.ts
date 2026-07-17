@@ -26,27 +26,27 @@ export async function createQuotationPDF(quot: Quotation, co: Company): Promise<
   await buildQuotationPDF(data, quot.quotNo || 'quotation')
 }
 
-// ─── Blob versions (for email/share — still uses jsPDF) ──────────────────────
+// ─── Blob versions (for email/share — uses react-pdf) ────────────────────────
 
 export async function createInvoicePDFBlob(inv: Invoice, co: Company): Promise<Blob> {
-  const { htmlToPDFBlob } = await import('@/templates/html2pdf')
-  const html = buildInvoiceHTML(inv, co)
-  if (!html) return new Blob()
-  return htmlToPDFBlob(html)
+  const { buildInvoicePDFBlob } = await import('@/templates/pdfEngine')
+  const data = transformInvDataExport(inv, co)
+  if (!data) return new Blob()
+  return buildInvoicePDFBlob(data)
 }
 
 export async function createReceiptPDFBlob(rec: Receipt, co: Company): Promise<Blob> {
-  const { htmlToPDFBlob } = await import('@/templates/html2pdf')
-  const html = buildReceiptHTML(rec, co)
-  if (!html) return new Blob()
-  return htmlToPDFBlob(html)
+  const { buildReceiptPDFBlob } = await import('@/templates/pdfEngine')
+  const data = transformRecDataExport(rec, co)
+  if (!data) return new Blob()
+  return buildReceiptPDFBlob(data)
 }
 
 export async function createQuotationPDFBlob(quot: Quotation, co: Company): Promise<Blob> {
-  const { htmlToPDFBlob } = await import('@/templates/html2pdf')
-  const html = buildQuotationHTML(quot, co)
-  if (!html) return new Blob()
-  return htmlToPDFBlob(html)
+  const { buildQuotationPDFBlob } = await import('@/templates/pdfEngine')
+  const data = transformQuotDataExport(quot, co)
+  if (!data) return new Blob()
+  return buildQuotationPDFBlob(data)
 }
 
 // ─── Print ────────────────────────────────────────────────────────────────────
