@@ -2,7 +2,6 @@ import type { Invoice } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
 import type { Quotation } from '@/types/quotation'
 import type { Company } from '@/types/company'
-import { buildInvoiceHTML, buildReceiptHTML, buildQuotationHTML } from '@/templates'
 import { buildInvoicePDF, buildReceiptPDF, buildQuotationPDF } from '@/templates/pdfEngine'
 import { transformInvDataExport, transformRecDataExport, transformQuotDataExport } from '@/templates/dataTransform'
 

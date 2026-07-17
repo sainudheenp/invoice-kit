@@ -47,17 +47,7 @@ function s(v: string | null | undefined): string {
   return v || ''
 }
 
-function hexToRgba(hex: string, alpha = 1): string {
-  const clean = hex.replace('#', '')
-  const full = clean.length === 3
-    ? clean.split('').map((c) => c + c).join('')
-    : clean
-  const n = parseInt(full, 16)
-  const r = (n >> 16) & 255
-  const g = (n >> 8) & 255
-  const b = n & 255
-  return `rgba(${r},${g},${b},${alpha})`
-}
+// hexToRgba unused, removed
 
 function lightenHex(hex: string, amt = 0.9): string {
   const clean = hex.replace('#', '')
@@ -228,7 +218,7 @@ function NotesBox({
   notes?: string
   terms?: string
   accentBg: string
-  borderColor: string
+  
 }) {
   const lines = [pd && `Payment: ${pd}`, notes, terms].filter(Boolean) as string[]
   if (!lines.length) return null
@@ -382,9 +372,9 @@ function InvoiceClassicDoc({ d }: { d: InvTemplateData }) {
           </View>
         </View>
 
-        <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={p} rowAlt={light} borderColor={lightenHex(p, 0.7)} />
+        <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={p} rowAlt={light}  />
         <TotalsBlock d={d} accentBg={p} />
-        <NotesBox pd={d.pd} notes={d.notes} terms={d.comp.invTerms} accentBg={p} borderColor={lightenHex(p, 0.6)} />
+        <NotesBox pd={d.pd} notes={d.notes} terms={d.comp.invTerms} accentBg={p}  />
         <SigRow comp={d.comp} accentBg={p} />
         <Footer comp={d.comp} accentBg={p} />
       </Page>
@@ -458,9 +448,9 @@ function InvoiceModernDoc({ d }: { d: InvTemplateData }) {
             </View>
           </View>
 
-          <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={p} rowAlt={light} borderColor={lightenHex(p, 0.6)} />
+          <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={p} rowAlt={light}  />
           <TotalsBlock d={d} accentBg={p} />
-          <NotesBox pd={d.pd} notes={d.notes} terms={d.comp.invTerms} accentBg={p} borderColor={lightenHex(p, 0.5)} />
+          <NotesBox pd={d.pd} notes={d.notes} terms={d.comp.invTerms} accentBg={p}  />
           <SigRow comp={d.comp} accentBg={p} />
         </View>
         <Footer comp={d.comp} accentBg={p} />
@@ -536,9 +526,9 @@ function InvoiceProfessionalDoc({ d }: { d: InvTemplateData }) {
           ))}
         </View>
 
-        <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={p} rowAlt={light} borderColor='#cbd5e1' />
+        <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={p} rowAlt={light}  />
         <TotalsBlock d={d} accentBg={p} />
-        <NotesBox pd={d.pd} notes={d.notes} terms={d.comp.invTerms} accentBg={p} borderColor={lightenHex(p, 0.5)} />
+        <NotesBox pd={d.pd} notes={d.notes} terms={d.comp.invTerms} accentBg={p}  />
         <SigRow comp={d.comp} accentBg={p} />
         <Footer comp={d.comp} accentBg={p} />
       </Page>
@@ -837,7 +827,7 @@ function InvoiceElegantDoc({ d }: { d: InvTemplateData }) {
           <Text style={{ fontSize: 7.5, color: warm, fontStyle: 'italic', textAlign: 'right', marginTop: 5 }}>{d.gw}</Text>
         ) : null}
 
-        <NotesBox pd={d.pd} notes={d.notes} terms={d.comp.invTerms} accentBg={p} borderColor={border} />
+        <NotesBox pd={d.pd} notes={d.notes} terms={d.comp.invTerms} accentBg={p}  />
 
         {/* Sig */}
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 18 }}>
@@ -931,7 +921,7 @@ function InvoiceBoldDoc({ d }: { d: InvTemplateData }) {
             symbol={d.cur.symbol}
             headerBg='#000000'
             rowAlt='#fef2f2'
-            borderColor='#000000'
+            
           />
 
           {/* Bold totals */}
@@ -1061,7 +1051,7 @@ function InvoiceBeirakDoc({ d }: { d: InvTemplateData }) {
         </View>
 
         {/* Items table */}
-        <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={p} rowAlt={light} borderColor='#c5ced9' />
+        <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={p} rowAlt={light}  />
 
         {/* Sum box */}
         <View style={{ alignSelf: 'flex-end', width: 185, marginTop: 14, border: `1.5 solid ${p}` }}>
@@ -1085,7 +1075,7 @@ function InvoiceBeirakDoc({ d }: { d: InvTemplateData }) {
           <Text style={{ fontSize: 7.5, color: '#6b7280', fontStyle: 'italic', textAlign: 'right', marginTop: 5 }}>{d.gw}</Text>
         ) : null}
 
-        <NotesBox pd={d.pd} notes={d.notes} terms={d.comp.invTerms} accentBg={p} borderColor='#c5ced9' />
+        <NotesBox pd={d.pd} notes={d.notes} terms={d.comp.invTerms} accentBg={p}  />
 
         {/* 3-col signature */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 18, borderTop: `1.5 solid ${p}`, paddingTop: 10 }}>
@@ -1138,8 +1128,7 @@ function ReceiptDocument({ d }: { d: RecTemplateData }) {
   const tpl = d.comp.recTemplate || 'classic'
 
   const isBold = tpl === 'bold'
-  const bgColor = isBold ? '#000000' : alt
-  const headerText = '#ffffff'
+  // vars unused in this template version
 
   return (
     <Document>
@@ -1240,7 +1229,7 @@ function ReceiptDocument({ d }: { d: RecTemplateData }) {
 
         {/* Items if any */}
         {d.items && d.items.length > 0 && (
-          <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={alt} rowAlt={light} borderColor='#e2e8f0' />
+          <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={alt} rowAlt={light}  />
         )}
 
         {/* Signature */}
@@ -1333,7 +1322,7 @@ function QuotationDocument({ d }: { d: QuotTemplateData }) {
           </View>
         </View>
 
-        <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={isBold ? '#000000' : p} rowAlt={light} borderColor={lightenHex(p, 0.6)} />
+        <ItemsTable items={d.items} dp={d.dp} symbol={d.cur.symbol} headerBg={isBold ? '#000000' : p} rowAlt={light}  />
         <TotalsBlock d={d} accentBg={isBold ? '#000000' : p} />
 
         {(d.notes || d.terms) ? (
@@ -1356,7 +1345,7 @@ function QuotationDocument({ d }: { d: QuotTemplateData }) {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 async function downloadPDF(element: React.ReactElement, filename: string): Promise<void> {
-  const blob = await pdf(element).toBlob()
+  const blob = await pdf(element as React.ReactElement<any>).toBlob()
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
