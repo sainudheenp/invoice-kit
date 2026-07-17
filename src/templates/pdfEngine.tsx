@@ -212,13 +212,11 @@ function NotesBox({
   notes,
   terms,
   accentBg,
-  borderColor,
 }: {
   pd?: string
   notes?: string
   terms?: string
   accentBg: string
-  
 }) {
   const lines = [pd && `Payment: ${pd}`, notes, terms].filter(Boolean) as string[]
   if (!lines.length) return null
