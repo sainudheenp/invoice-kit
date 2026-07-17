@@ -3,43 +3,53 @@ import type { Receipt } from '@/types/receipt'
 import type { Quotation } from '@/types/quotation'
 import type { Company } from '@/types/company'
 import { buildInvoiceHTML, buildReceiptHTML, buildQuotationHTML } from '@/templates'
-import { htmlToPDF, htmlToPDFBlob } from '@/templates/html2pdf'
+import { buildInvoicePDF, buildReceiptPDF, buildQuotationPDF } from '@/templates/pdfEngine'
+import { transformInvDataExport, transformRecDataExport, transformQuotDataExport } from '@/templates/dataTransform'
+
+// ─── PDF Download (jsPDF programmatic — crisp, design-faithful) ───────────────
 
 export async function createInvoicePDF(inv: Invoice, co: Company): Promise<void> {
-  const html = buildInvoiceHTML(inv, co)
-  if (!html) return
-  await htmlToPDF(html, inv.invNo || 'invoice')
-}
-
-export async function createInvoicePDFBlob(inv: Invoice, co: Company): Promise<Blob> {
-  const html = buildInvoiceHTML(inv, co)
-  if (!html) return new Blob()
-  return htmlToPDFBlob(html)
+  const data = transformInvDataExport(inv, co)
+  if (!data) return
+  await buildInvoicePDF(data, inv.invNo || 'invoice')
 }
 
 export async function createReceiptPDF(rec: Receipt, co: Company): Promise<void> {
-  const html = buildReceiptHTML(rec, co)
-  if (!html) return
-  await htmlToPDF(html, rec.recNo || 'receipt')
-}
-
-export async function createReceiptPDFBlob(rec: Receipt, co: Company): Promise<Blob> {
-  const html = buildReceiptHTML(rec, co)
-  if (!html) return new Blob()
-  return htmlToPDFBlob(html)
+  const data = transformRecDataExport(rec, co)
+  if (!data) return
+  await buildReceiptPDF(data, rec.recNo || 'receipt')
 }
 
 export async function createQuotationPDF(quot: Quotation, co: Company): Promise<void> {
-  const html = buildQuotationHTML(quot, co)
-  if (!html) return
-  await htmlToPDF(html, quot.quotNo || 'quotation')
+  const data = transformQuotDataExport(quot, co)
+  if (!data) return
+  await buildQuotationPDF(data, quot.quotNo || 'quotation')
+}
+
+// ─── Blob versions (for email/share — still uses jsPDF) ──────────────────────
+
+export async function createInvoicePDFBlob(inv: Invoice, co: Company): Promise<Blob> {
+  const { htmlToPDFBlob } = await import('@/templates/html2pdf')
+  const html = buildInvoiceHTML(inv, co)
+  if (!html) return new Blob()
+  return htmlToPDFBlob(html)
+}
+
+export async function createReceiptPDFBlob(rec: Receipt, co: Company): Promise<Blob> {
+  const { htmlToPDFBlob } = await import('@/templates/html2pdf')
+  const html = buildReceiptHTML(rec, co)
+  if (!html) return new Blob()
+  return htmlToPDFBlob(html)
 }
 
 export async function createQuotationPDFBlob(quot: Quotation, co: Company): Promise<Blob> {
+  const { htmlToPDFBlob } = await import('@/templates/html2pdf')
   const html = buildQuotationHTML(quot, co)
   if (!html) return new Blob()
   return htmlToPDFBlob(html)
 }
+
+// ─── Print ────────────────────────────────────────────────────────────────────
 
 export function printHTML(html: string): void {
   const iframe = document.createElement('iframe')
