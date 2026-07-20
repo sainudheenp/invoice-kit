@@ -7,7 +7,7 @@ import { ReceiptItems } from '@/components/receipt/ReceiptItems'
 import { ReceiptSummary } from '@/components/receipt/ReceiptSummary'
 import { num2words, dp as getDp } from '@/utils'
 import { buildReceiptHTML } from '@/templates'
-import { printHTML, downloadText } from '@/utils/pdf'
+import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
 import type { LineItem } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
 
@@ -180,6 +180,15 @@ export default function Receipt() {
     await printHTML(html)
   }
 
+  const handleDownloadPDF = async () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = buildReceiptHTML(buildTempReceipt(), co)
+    if (!html) { showToast('Cannot generate empty receipt.', 'err'); return }
+    try {
+      await htmlToPDF(html, form.recNo || 'receipt')
+    } catch { showToast('PDF generation failed.', 'err') }
+  }
+
   const handlePreview = () => {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = buildReceiptHTML(buildTempReceipt(), co)
@@ -330,6 +339,7 @@ export default function Receipt() {
               </Button>
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
+              <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="justify-center w-full">Download PDF</Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
               <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Receipt</Button>
             </div>

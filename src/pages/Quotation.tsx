@@ -8,7 +8,7 @@ import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { QuotationSummary } from '@/components/quotation/QuotationSummary'
 import { num2words, dp as getDp } from '@/utils'
 import { buildQuotationHTML } from '@/templates'
-import { printHTML, downloadText } from '@/utils/pdf'
+import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
 import type { LineItem, Customer } from '@/types/invoice'
 import type { Quotation } from '@/types/quotation'
 
@@ -174,6 +174,15 @@ export default function QuotationPage() {
     const html = buildQuotationHTML(buildTempQuotation(), co)
     if (!html) { showToast('Nothing to preview.', 'err'); return }
     showPreview(html)
+  }
+
+  const handleDownloadPDF = async () => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = buildQuotationHTML(buildTempQuotation(), co)
+    if (!html) { showToast('Cannot generate empty quotation.', 'err'); return }
+    try {
+      await htmlToPDF(html, form.quotNo || 'quotation')
+    } catch { showToast('PDF generation failed.', 'err') }
   }
 
   const handleText = () => {
@@ -348,6 +357,7 @@ export default function QuotationPage() {
               </Button>
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
+              <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="justify-center w-full">Download PDF</Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
               <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Quotation</Button>
             </div>

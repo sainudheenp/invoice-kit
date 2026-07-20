@@ -6,7 +6,7 @@ import { Card, CardHeader } from '@/components/ui'
 import { Svg } from '@/icons'
 import { invStatus, uid } from '@/utils'
 import { buildInvoiceHTML, buildReceiptHTML, buildQuotationHTML } from '@/templates'
-import { printHTML, downloadText } from '@/utils/pdf'
+import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
 import type { Invoice } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
 import type { Quotation } from '@/types/quotation'
@@ -105,6 +105,20 @@ export default function History() {
     printHTML(html)
   }
 
+  const handleDownloadPDF = async (type: Tab, doc: Invoice | Receipt | Quotation) => {
+    if (!co) { showToast('No active company.', 'err'); return }
+    const html = type === 'inv' ? buildInvoiceHTML(doc as Invoice, co)
+      : type === 'rec' ? buildReceiptHTML(doc as Receipt, co)
+      : buildQuotationHTML(doc as Quotation, co)
+    if (!html) { showToast('Cannot generate PDF.', 'err'); return }
+    const name = type === 'inv' ? (doc as Invoice).invNo
+      : type === 'rec' ? (doc as Receipt).recNo
+      : (doc as Quotation).quotNo
+    try {
+      await htmlToPDF(html, name || 'document')
+    } catch { showToast('PDF generation failed.', 'err') }
+  }
+
   const handleText = (type: Tab, doc: Invoice | Receipt | Quotation) => {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = type === 'inv' ? buildInvoiceHTML(doc as Invoice, co)
@@ -191,6 +205,9 @@ export default function History() {
                           )}
                           <button onClick={() => handlePrint('inv', inv)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Print">                            <Svg name="print" />
                           </button>
+                          <button onClick={() => handleDownloadPDF('inv', inv)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Download PDF">
+                            <Svg name="download" />
+                          </button>
                           <button onClick={() => handleText('inv', inv)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Export Text">
                             <Svg name="file" />
                           </button>
@@ -236,6 +253,9 @@ export default function History() {
                         <button onClick={() => handlePrint('rec', rec)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Print">
                           <Svg name="print" />
                         </button>
+                        <button onClick={() => handleDownloadPDF('rec', rec)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Download PDF">
+                          <Svg name="download" />
+                        </button>
                         <button onClick={() => handleText('rec', rec)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Export Text">
                           <Svg name="file" />
                         </button>
@@ -279,6 +299,9 @@ export default function History() {
                       <div className="flex gap-1 justify-end">
                         <button onClick={() => handlePrint('quot', q)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Print">
                           <Svg name="print" />
+                        </button>
+                        <button onClick={() => handleDownloadPDF('quot', q)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Download PDF">
+                          <Svg name="download" />
                         </button>
                         <button onClick={() => handleText('quot', q)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Export Text">
                           <Svg name="file" />
