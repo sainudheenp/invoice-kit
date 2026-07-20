@@ -32,7 +32,7 @@ const emptyForm = (): InvoiceFormState => ({
   invNo: '',
   date: new Date().toISOString().slice(0, 10),
   custName: '', custAddr: '', custPhone: '', custCr: '', custEmail: '',
-  items: [{ desc: '', qty: 1, price: 0, amount: 0 }, { desc: '', qty: 1, price: 0, amount: 0 }],
+  items: [{ desc: '', qty: 1, price: 0, amount: 0 }],
   vatPct: 0, discount: 0,
   notes: '', payMethod: 'Cash', chequeNo: '', bankName: '',
 })
