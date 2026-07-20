@@ -7,7 +7,6 @@ interface UIState {
   dark: boolean
   formDirty: boolean
   toasts: Toast[]
-  pdfOverlay: boolean
   resetModal: boolean
   previewModal: boolean
   previewContent: string
@@ -20,7 +19,6 @@ type UIAction =
   | { type: 'SET_FORM_DIRTY'; payload: boolean }
   | { type: 'ADD_TOAST'; payload: Toast }
   | { type: 'REMOVE_TOAST'; payload: string }
-  | { type: 'SET_PDF_OVERLAY'; payload: boolean }
   | { type: 'SET_RESET_MODAL'; payload: boolean }
   | { type: 'SET_PREVIEW'; payload: { open: boolean; content?: string } }
 
@@ -38,8 +36,6 @@ function uiReducer(state: UIState, action: UIAction): UIState {
       return { ...state, toasts: [...state.toasts, action.payload] }
     case 'REMOVE_TOAST':
       return { ...state, toasts: state.toasts.filter((t) => t.id !== action.payload) }
-    case 'SET_PDF_OVERLAY':
-      return { ...state, pdfOverlay: action.payload }
     case 'SET_RESET_MODAL':
       return { ...state, resetModal: action.payload }
     case 'SET_PREVIEW':
@@ -54,7 +50,6 @@ const initialUI: UIState = {
   dark: false,
   formDirty: false,
   toasts: [],
-  pdfOverlay: false,
   resetModal: false,
   previewModal: false,
   previewContent: '',
@@ -69,8 +64,6 @@ interface UIContextValue {
   markDirty: () => void
   markClean: () => void
   showToast: (msg: string, type?: ToastType, duration?: number) => void
-  showPDFOverlay: () => void
-  hidePDFOverlay: () => void
   showResetModal: () => void
   hideResetModal: () => void
   showPreview: (html: string) => void
@@ -118,8 +111,6 @@ export function UIProvider({ children }: { children: ReactNode }) {
     dispatchUI({ type: 'ADD_TOAST', payload: { id, msg, type, duration } })
     setTimeout(() => dispatchUI({ type: 'REMOVE_TOAST', payload: id }), duration)
   }
-  const showPDFOverlay = () => dispatchUI({ type: 'SET_PDF_OVERLAY', payload: true })
-  const hidePDFOverlay = () => dispatchUI({ type: 'SET_PDF_OVERLAY', payload: false })
   const showResetModal = () => dispatchUI({ type: 'SET_RESET_MODAL', payload: true })
   const hideResetModal = () => dispatchUI({ type: 'SET_RESET_MODAL', payload: false })
   const showPreview = (html: string) => dispatchUI({ type: 'SET_PREVIEW', payload: { open: true, content: html } })
@@ -130,7 +121,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
       ui, dispatchUI,
       toggleSidebar, closeSidebar, toggleDark,
       markDirty, markClean,
-      showToast, showPDFOverlay, hidePDFOverlay,
+      showToast,
       showResetModal, hideResetModal,
       showPreview, closePreview,
     }}>

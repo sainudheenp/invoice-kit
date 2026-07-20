@@ -8,7 +8,7 @@ import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { QuotationSummary } from '@/components/quotation/QuotationSummary'
 import { num2words, dp as getDp } from '@/utils'
 import { buildQuotationHTML } from '@/templates'
-import { createQuotationPDF, printHTML, downloadText } from '@/utils/pdf'
+import { printHTML, downloadText } from '@/utils/pdf'
 import type { LineItem, Customer } from '@/types/invoice'
 import type { Quotation } from '@/types/quotation'
 
@@ -40,7 +40,7 @@ const emptyForm = (): QuotationFormState => ({
 
 export default function QuotationPage() {
   const { state, getCo, saveCompany, createQuotation, setEditing } = useApp()
-  const { markDirty, markClean, showToast, showPDFOverlay, hidePDFOverlay, showPreview } = useUI()
+  const { markDirty, markClean, showToast, showPreview } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()
   const co = getCo()
   const [form, setForm] = useState<QuotationFormState>(emptyForm)
@@ -167,15 +167,6 @@ export default function QuotationPage() {
     const html = buildQuotationHTML(buildTempQuotation(), co)
     if (!html) { showToast('Cannot print empty quotation.', 'err'); return }
     await printHTML(html)
-  }
-
-  const handlePDF = async () => {
-    if (!co) { showToast('No active company.', 'err'); return }
-    showPDFOverlay()
-    try {
-      await createQuotationPDF(buildTempQuotation(), co)
-    } catch { showToast('PDF generation failed.', 'err') }
-    hidePDFOverlay()
   }
 
   const handlePreview = () => {
@@ -357,7 +348,6 @@ export default function QuotationPage() {
               </Button>
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
-              <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
               <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Quotation</Button>
             </div>

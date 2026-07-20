@@ -7,7 +7,7 @@ import { ReceiptItems } from '@/components/receipt/ReceiptItems'
 import { ReceiptSummary } from '@/components/receipt/ReceiptSummary'
 import { num2words, dp as getDp } from '@/utils'
 import { buildReceiptHTML } from '@/templates'
-import { createReceiptPDF, printHTML, downloadText } from '@/utils/pdf'
+import { printHTML, downloadText } from '@/utils/pdf'
 import type { LineItem } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
 
@@ -45,7 +45,7 @@ const emptyForm = (): ReceiptFormState => ({
 
 export default function Receipt() {
   const { state, getCo, saveCompany, createReceipt, setEditing } = useApp()
-  const { markDirty, markClean, showToast, showPDFOverlay, hidePDFOverlay, showPreview } = useUI()
+  const { markDirty, markClean, showToast, showPreview } = useUI()
   const co = getCo()
   const [form, setForm] = useState<ReceiptFormState>(emptyForm)
   const [isEditing, setIsEditing] = useState(false)
@@ -178,15 +178,6 @@ export default function Receipt() {
     const html = buildReceiptHTML(buildTempReceipt(), co)
     if (!html) { showToast('Cannot print empty receipt.', 'err'); return }
     await printHTML(html)
-  }
-
-  const handlePDF = async () => {
-    if (!co) { showToast('No active company.', 'err'); return }
-    showPDFOverlay()
-    try {
-      await createReceiptPDF(buildTempReceipt(), co)
-    } catch { showToast('PDF generation failed.', 'err') }
-    hidePDFOverlay()
   }
 
   const handlePreview = () => {
@@ -339,7 +330,6 @@ export default function Receipt() {
               </Button>
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
-              <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
               <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Receipt</Button>
             </div>

@@ -8,7 +8,7 @@ import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { InvoiceSummary } from '@/components/invoice/InvoiceSummary'
 import { num2words, dp as getDp } from '@/utils'
 import { buildInvoiceHTML } from '@/templates'
-import { createInvoicePDF, createInvoicePDFBlob, printHTML, downloadText } from '@/utils/pdf'
+import { printHTML, downloadText } from '@/utils/pdf'
 import type { LineItem, Customer, Invoice } from '@/types/invoice'
 
 interface InvoiceFormState {
@@ -39,7 +39,7 @@ const emptyForm = (): InvoiceFormState => ({
 
 export default function Invoice() {
   const { state, getCo, saveCompany, createInvoice, setEditing } = useApp()
-  const { markDirty, markClean, showToast, showPDFOverlay, hidePDFOverlay, showPreview } = useUI()
+  const { markDirty, markClean, showToast, showPreview } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()
   const co = getCo()
   const [form, setForm] = useState<InvoiceFormState>(emptyForm)
@@ -183,15 +183,6 @@ export default function Invoice() {
     await printHTML(html)
   }
 
-  const handlePDF = async () => {
-    if (!co) { showToast('No active company.', 'err'); return }
-    showPDFOverlay()
-    try {
-      await createInvoicePDF(buildTempInvoice(), co)
-    } catch { showToast('PDF generation failed.', 'err') }
-    hidePDFOverlay()
-  }
-
   const handlePreview = () => {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = buildInvoiceHTML(buildTempInvoice(), co)
@@ -204,19 +195,6 @@ export default function Invoice() {
     const html = buildInvoiceHTML(buildTempInvoice(), co)
     if (!html) { showToast('Cannot export text.', 'err'); return }
     downloadText(html, form.invNo || 'invoice')
-  }
-
-  const handleWhatsApp = async () => {
-    if (!co) { showToast('No active company.', 'err'); return }
-    if (!navigator.share) { showToast('Sharing not supported on this browser.', 'err'); return }
-    showPDFOverlay()
-    try {
-      const blob = await createInvoicePDFBlob(buildTempInvoice(), co)
-      const file = new File([blob], `${form.invNo || 'invoice'}.pdf`, { type: 'application/pdf' })
-      if (!navigator.canShare?.({ files: [file] })) { showToast('PDF sharing not supported on this browser.', 'err'); return }
-      await navigator.share({ files: [file], title: `Invoice ${form.invNo}` })
-    } catch { showToast('Failed to share invoice.', 'err') }
-    hidePDFOverlay()
   }
 
   const showCheque = form.payMethod === 'Cheque'
@@ -382,8 +360,6 @@ export default function Invoice() {
               </Button>
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
-              <Button variant="outline" size="sm" onClick={handlePDF} className="justify-center w-full">PDF</Button>
-              <Button variant="outline" size="sm" onClick={handleWhatsApp} className="justify-center w-full">WhatsApp</Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
               <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Invoice</Button>
             </div>

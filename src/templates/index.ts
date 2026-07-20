@@ -7,7 +7,6 @@ import type { LineItem } from '@/types/invoice'
 import { dp, fmtAmount } from '@/utils/format'
 import { num2words } from '@/utils/num2words'
 import { esc } from '@/utils/esc'
-import { watermarkHTML } from './html2pdf'
 import {
   InvoiceClassic, InvoiceModern, InvoiceProfessional,
   InvoiceMinimal, InvoiceElegant, InvoiceBold, InvoiceBeirak,
@@ -20,6 +19,13 @@ import {
   QuotationClassic, QuotationModern, QuotationProfessional,
   QuotationMinimal, QuotationElegant, QuotationBold, QuotationBeirak,
 } from './quotation'
+
+function watermarkHTML(html: string, text: string): string {
+  if (!text) return html
+  const s = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;display:flex;align-items:center;justify-content:center;z-index:9999;'
+  const w = `<div style="${s}"><div style="font-size:48px;color:rgba(0,0,0,0.06);transform:rotate(-30deg);font-weight:bold;white-space:pre-wrap;text-align:center;">${text}</div></div>`
+  return html + w
+}
 
 const TEMPLATE_LIST = ['classic', 'modern', 'professional', 'minimal', 'elegant', 'bold', 'beirak']
 
