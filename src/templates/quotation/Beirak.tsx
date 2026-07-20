@@ -80,7 +80,9 @@ export function QuotationBeirak(d: QuotTemplateData): string {
 </table>
 
 <table class="items">
-  <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
+  <thead>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
+  </thead>
   ${rows}
 </table>
 

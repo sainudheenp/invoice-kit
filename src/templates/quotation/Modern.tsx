@@ -80,7 +80,9 @@ export function QuotationModern(d: QuotTemplateData): string {
 </div>
 
 <table>
-  <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
+  <thead>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
+  </thead>
   ${rows}
 </table>
 

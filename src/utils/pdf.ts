@@ -7,7 +7,17 @@ export function printHTML(html: string): void {
     const doc = iframe.contentDocument
     if (doc) {
       const style = doc.createElement('style')
-      style.textContent = 'html,body{margin:0!important;padding:0!important;background:#fff!important;}@media print{html,body{margin:0!important;padding:0!important;background:#fff!important;}}'
+      style.textContent = `
+        html, body { margin:0; background:#fff; }
+        @media print {
+          @page { margin:0; size:A4; }
+          table { break-inside:auto; }
+          tr { break-inside:avoid; }
+          thead { display:table-header-group; }
+          .header, .rules, .notes, .terms, .sig-area, .amount-box,
+          .amount-block, .det-grid, .footer, .words, .info-row { break-inside:avoid; }
+        }
+      `
       doc.head.appendChild(style)
     }
     iframe.contentWindow!.print()
