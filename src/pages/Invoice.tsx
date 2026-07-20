@@ -44,6 +44,7 @@ export default function Invoice() {
   const co = getCo()
   const [form, setForm] = useState<InvoiceFormState>(emptyForm)
   const [isEditing, setIsEditing] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(false)
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
@@ -187,9 +188,11 @@ export default function Invoice() {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = buildInvoiceHTML(buildTempInvoice(), co)
     if (!html) { showToast('Cannot generate empty invoice.', 'err'); return }
+    setPdfLoading(true)
     try {
       await htmlToPDF(html, form.invNo || 'invoice')
     } catch { showToast('PDF generation failed.', 'err') }
+    finally { setPdfLoading(false) }
   }
 
   const handlePreview = () => {
@@ -369,7 +372,9 @@ export default function Invoice() {
               </Button>
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
-              <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="justify-center w-full">Download PDF</Button>
+              <Button variant="outline" size="sm" onClick={handleDownloadPDF} disabled={pdfLoading} className="justify-center w-full">
+                {pdfLoading ? <><span className="spinner-sm" />Generating...</> : 'Download PDF'}
+              </Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
               <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Invoice</Button>
             </div>

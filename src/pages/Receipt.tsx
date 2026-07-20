@@ -49,6 +49,7 @@ export default function Receipt() {
   const co = getCo()
   const [form, setForm] = useState<ReceiptFormState>(emptyForm)
   const [isEditing, setIsEditing] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(false)
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
@@ -184,9 +185,11 @@ export default function Receipt() {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = buildReceiptHTML(buildTempReceipt(), co)
     if (!html) { showToast('Cannot generate empty receipt.', 'err'); return }
+    setPdfLoading(true)
     try {
       await htmlToPDF(html, form.recNo || 'receipt')
     } catch { showToast('PDF generation failed.', 'err') }
+    finally { setPdfLoading(false) }
   }
 
   const handlePreview = () => {
@@ -339,7 +342,9 @@ export default function Receipt() {
               </Button>
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
-              <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="justify-center w-full">Download PDF</Button>
+              <Button variant="outline" size="sm" onClick={handleDownloadPDF} disabled={pdfLoading} className="justify-center w-full">
+                {pdfLoading ? <><span className="spinner-sm" />Generating...</> : 'Download PDF'}
+              </Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
               <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Receipt</Button>
             </div>

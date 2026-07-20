@@ -22,6 +22,8 @@ const PDF_FONT_FACES = `
 @font-face { font-family:'Courier'; src:url('/fonts/cousine-latin-400-normal.woff2') format('woff2'); font-weight:400; font-style:normal; }
 @font-face { font-family:'Courier'; src:url('/fonts/cousine-latin-700-normal.woff2') format('woff2'); font-weight:700; font-style:normal; }
 @font-face { font-family:'Lucida Sans Typewriter'; src:url('/fonts/cousine-latin-400-normal.woff2') format('woff2'); font-weight:400; font-style:normal; }
+@font-face { font-family:'Noto Sans Arabic'; src:url('/fonts/noto-sans-arabic-arabic-400-normal.woff2') format('woff2'); font-weight:400; font-style:normal; }
+@font-face { font-family:'Noto Sans Arabic'; src:url('/fonts/noto-sans-arabic-arabic-700-normal.woff2') format('woff2'); font-weight:700; font-style:normal; }
 </style>
 `
 
