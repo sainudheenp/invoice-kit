@@ -191,8 +191,11 @@ export default function Invoice() {
     setPdfLoading(true)
     try {
       await htmlToPDF(html, form.invNo || 'invoice')
-    } catch { showToast('PDF generation failed.', 'err') }
-    finally { setPdfLoading(false) }
+    } catch (e) {
+      console.error('PDF generation failed, falling back to print:', e)
+      showToast('PDF export unavailable, opening print instead.', 'err')
+      printHTML(html)
+    } finally { setPdfLoading(false) }
   }
 
   const handlePreview = () => {

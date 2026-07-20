@@ -118,8 +118,11 @@ export default function History() {
     setPdfLoadingId(doc.id)
     try {
       await htmlToPDF(html, name || 'document')
-    } catch { showToast('PDF generation failed.', 'err') }
-    finally { setPdfLoadingId(null) }
+    } catch (e) {
+      console.error('PDF generation failed, falling back to print:', e)
+      showToast('PDF export unavailable, opening print instead.', 'err')
+      printHTML(html)
+    } finally { setPdfLoadingId(null) }
   }
 
   const handleText = (type: Tab, doc: Invoice | Receipt | Quotation) => {

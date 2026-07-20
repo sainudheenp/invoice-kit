@@ -23,6 +23,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  // --- PDF ENGINE (taepdf) SAFETY: do not remove ---------------------------
+  // taepdf loads its Rust/WASM binary via `new URL('taetype_bg.wasm',
+  // import.meta.url)`. If Vite pre-bundles taepdf, that URL breaks and the WASM
+  // 404s, so `pdf.render` throws "Cannot read properties of undefined (reading
+  // 'list_registered_fonts')" and Download PDF silently fails.
+  //   - optimizeDeps.exclude: keep taepdf out of the dep optimizer (dev).
+  //   - assetsInclude: let Vite emit the .wasm as an asset (build).
+  // See src/utils/pdf.ts for the full rationale.
   optimizeDeps: {
     exclude: ['taepdf'],
   },

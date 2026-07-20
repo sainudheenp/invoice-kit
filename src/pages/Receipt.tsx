@@ -188,8 +188,11 @@ export default function Receipt() {
     setPdfLoading(true)
     try {
       await htmlToPDF(html, form.recNo || 'receipt')
-    } catch { showToast('PDF generation failed.', 'err') }
-    finally { setPdfLoading(false) }
+    } catch (e) {
+      console.error('PDF generation failed, falling back to print:', e)
+      showToast('PDF export unavailable, opening print instead.', 'err')
+      printHTML(html)
+    } finally { setPdfLoading(false) }
   }
 
   const handlePreview = () => {
