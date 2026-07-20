@@ -10,6 +10,7 @@ interface UIState {
   resetModal: boolean
   previewModal: boolean
   previewContent: string
+  pdfOverlay: boolean
 }
 
 type UIAction =
@@ -21,6 +22,7 @@ type UIAction =
   | { type: 'REMOVE_TOAST'; payload: string }
   | { type: 'SET_RESET_MODAL'; payload: boolean }
   | { type: 'SET_PREVIEW'; payload: { open: boolean; content?: string } }
+  | { type: 'SET_PDF_OVERLAY'; payload: boolean }
 
 function uiReducer(state: UIState, action: UIAction): UIState {
   switch (action.type) {
@@ -40,6 +42,8 @@ function uiReducer(state: UIState, action: UIAction): UIState {
       return { ...state, resetModal: action.payload }
     case 'SET_PREVIEW':
       return { ...state, previewModal: action.payload.open, previewContent: action.payload.content || '' }
+    case 'SET_PDF_OVERLAY':
+      return { ...state, pdfOverlay: action.payload }
     default:
       return state
   }
@@ -53,6 +57,7 @@ const initialUI: UIState = {
   resetModal: false,
   previewModal: false,
   previewContent: '',
+  pdfOverlay: false,
 }
 
 interface UIContextValue {
@@ -68,6 +73,8 @@ interface UIContextValue {
   hideResetModal: () => void
   showPreview: (html: string) => void
   closePreview: () => void
+  showPdfOverlay: () => void
+  hidePdfOverlay: () => void
 }
 
 const UIContext = createContext<UIContextValue | null>(null)
@@ -115,6 +122,8 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const hideResetModal = () => dispatchUI({ type: 'SET_RESET_MODAL', payload: false })
   const showPreview = (html: string) => dispatchUI({ type: 'SET_PREVIEW', payload: { open: true, content: html } })
   const closePreview = () => dispatchUI({ type: 'SET_PREVIEW', payload: { open: false } })
+  const showPdfOverlay = () => dispatchUI({ type: 'SET_PDF_OVERLAY', payload: true })
+  const hidePdfOverlay = () => dispatchUI({ type: 'SET_PDF_OVERLAY', payload: false })
 
   return (
     <UIContext.Provider value={{
@@ -124,6 +133,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
       showToast,
       showResetModal, hideResetModal,
       showPreview, closePreview,
+      showPdfOverlay, hidePdfOverlay,
     }}>
       {children}
     </UIContext.Provider>

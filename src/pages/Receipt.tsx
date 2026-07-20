@@ -45,11 +45,10 @@ const emptyForm = (): ReceiptFormState => ({
 
 export default function Receipt() {
   const { state, getCo, saveCompany, createReceipt, setEditing } = useApp()
-  const { markDirty, markClean, showToast, showPreview } = useUI()
+  const { markDirty, markClean, showToast, showPreview, showPdfOverlay, hidePdfOverlay } = useUI()
   const co = getCo()
   const [form, setForm] = useState<ReceiptFormState>(emptyForm)
   const [isEditing, setIsEditing] = useState(false)
-  const [pdfLoading, setPdfLoading] = useState(false)
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
@@ -185,14 +184,14 @@ export default function Receipt() {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = buildReceiptHTML(buildTempReceipt(), co)
     if (!html) { showToast('Cannot generate empty receipt.', 'err'); return }
-    setPdfLoading(true)
+    showPdfOverlay()
     try {
       await htmlToPDF(html, form.recNo || 'receipt')
     } catch (e) {
       console.error('PDF generation failed, falling back to print:', e)
       showToast('PDF export unavailable, opening print instead.', 'err')
       printHTML(html)
-    } finally { setPdfLoading(false) }
+    } finally { hidePdfOverlay() }
   }
 
   const handlePreview = () => {
@@ -345,9 +344,7 @@ export default function Receipt() {
               </Button>
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
-              <Button variant="outline" size="sm" onClick={handleDownloadPDF} disabled={pdfLoading} className="justify-center w-full">
-                {pdfLoading ? <><span className="spinner-sm" />Generating...</> : 'Download PDF'}
-              </Button>
+              <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="justify-center w-full">Download PDF</Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
               <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Receipt</Button>
             </div>

@@ -40,12 +40,11 @@ const emptyForm = (): QuotationFormState => ({
 
 export default function QuotationPage() {
   const { state, getCo, saveCompany, createQuotation, setEditing } = useApp()
-  const { markDirty, markClean, showToast, showPreview } = useUI()
+  const { markDirty, markClean, showToast, showPreview, showPdfOverlay, hidePdfOverlay } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()
   const co = getCo()
   const [form, setForm] = useState<QuotationFormState>(emptyForm)
   const [isEditing, setIsEditing] = useState(false)
-  const [pdfLoading, setPdfLoading] = useState(false)
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
@@ -181,14 +180,14 @@ export default function QuotationPage() {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = buildQuotationHTML(buildTempQuotation(), co)
     if (!html) { showToast('Cannot generate empty quotation.', 'err'); return }
-    setPdfLoading(true)
+    showPdfOverlay()
     try {
       await htmlToPDF(html, form.quotNo || 'quotation')
     } catch (e) {
       console.error('PDF generation failed, falling back to print:', e)
       showToast('PDF export unavailable, opening print instead.', 'err')
       printHTML(html)
-    } finally { setPdfLoading(false) }
+    } finally { hidePdfOverlay() }
   }
 
   const handleText = () => {
@@ -363,9 +362,7 @@ export default function QuotationPage() {
               </Button>
               <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
               <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
-              <Button variant="outline" size="sm" onClick={handleDownloadPDF} disabled={pdfLoading} className="justify-center w-full">
-                {pdfLoading ? <><span className="spinner-sm" />Generating...</> : 'Download PDF'}
-              </Button>
+              <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="justify-center w-full">Download PDF</Button>
               <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
               <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Quotation</Button>
             </div>

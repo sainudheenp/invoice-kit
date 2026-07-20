@@ -16,11 +16,10 @@ type Tab = 'inv' | 'rec' | 'quot'
 export default function History() {
   const navigate = useNavigate()
   const { state, deleteInvoice, deleteReceipt, deleteQuotation, markInvoicePaid, setEditing, saveInvoice, saveReceipt, saveQuotation } = useApp()
-  const { showToast } = useUI()
+  const { showToast, showPdfOverlay, hidePdfOverlay } = useUI()
   const co = state.companies.find((c) => c.id === state.activeId)
   const [tab, setTab] = useState<Tab>('inv')
   const [search, setSearch] = useState('')
-  const [pdfLoadingId, setPdfLoadingId] = useState<string | null>(null)
 
   const invoices = state.invoices
     .filter((i) => i.companyId === co?.id)
@@ -115,14 +114,14 @@ export default function History() {
     const name = type === 'inv' ? (doc as Invoice).invNo
       : type === 'rec' ? (doc as Receipt).recNo
       : (doc as Quotation).quotNo
-    setPdfLoadingId(doc.id)
+    showPdfOverlay()
     try {
       await htmlToPDF(html, name || 'document')
     } catch (e) {
       console.error('PDF generation failed, falling back to print:', e)
       showToast('PDF export unavailable, opening print instead.', 'err')
       printHTML(html)
-    } finally { setPdfLoadingId(null) }
+    } finally { hidePdfOverlay() }
   }
 
   const handleText = (type: Tab, doc: Invoice | Receipt | Quotation) => {
@@ -211,8 +210,8 @@ export default function History() {
                           )}
                           <button onClick={() => handlePrint('inv', inv)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Print">                            <Svg name="print" />
                           </button>
-                          <button onClick={() => handleDownloadPDF('inv', inv)} disabled={pdfLoadingId === inv.id} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" title="Download PDF">
-                            {pdfLoadingId === inv.id ? <span className="spinner-sm" /> : <Svg name="download" />}
+                          <button onClick={() => handleDownloadPDF('inv', inv)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Download PDF">
+                            <Svg name="download" />
                           </button>
                           <button onClick={() => handleText('inv', inv)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Export Text">
                             <Svg name="file" />
@@ -259,8 +258,8 @@ export default function History() {
                         <button onClick={() => handlePrint('rec', rec)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Print">
                           <Svg name="print" />
                         </button>
-                        <button onClick={() => handleDownloadPDF('rec', rec)} disabled={pdfLoadingId === rec.id} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" title="Download PDF">
-                          {pdfLoadingId === rec.id ? <span className="spinner-sm" /> : <Svg name="download" />}
+                        <button onClick={() => handleDownloadPDF('rec', rec)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Download PDF">
+                          <Svg name="download" />
                         </button>
                         <button onClick={() => handleText('rec', rec)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Export Text">
                           <Svg name="file" />
@@ -306,8 +305,8 @@ export default function History() {
                         <button onClick={() => handlePrint('quot', q)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Print">
                           <Svg name="print" />
                         </button>
-                        <button onClick={() => handleDownloadPDF('quot', q)} disabled={pdfLoadingId === q.id} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" title="Download PDF">
-                          {pdfLoadingId === q.id ? <span className="spinner-sm" /> : <Svg name="download" />}
+                        <button onClick={() => handleDownloadPDF('quot', q)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Download PDF">
+                          <Svg name="download" />
                         </button>
                         <button onClick={() => handleText('quot', q)} className="p-1.5 rounded-lg hover:bg-[var(--color-input-bg)] text-[var(--color-text2)] cursor-pointer" title="Export Text">
                           <Svg name="file" />

@@ -78,15 +78,6 @@ body {
   animation: spin 0.7s linear infinite;
 }
 
-.spinner-sm {
-  display: inline-block;
-  width: 13px;
-  height: 13px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
 
 @page { margin: 0; size: A4 portrait; }
 

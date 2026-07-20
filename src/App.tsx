@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
 import { WelcomeOverlay } from '@/components/layout/WelcomeOverlay'
 import { PreviewModal } from '@/components/layout/PreviewModal'
+import { PDFOverlay } from '@/components/layout/PDFOverlay'
 import { ToastContainer } from '@/components/ui'
 import { Svg } from '@/icons'
 import Dashboard from '@/pages/Dashboard'
@@ -86,6 +87,7 @@ function AppContent() {
       </main>
 
       <PreviewModal />
+      <PDFOverlay />
       <ToastContainer />
     </div>
   )
