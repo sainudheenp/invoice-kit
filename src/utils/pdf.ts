@@ -109,6 +109,9 @@ function ensureWarm(): Promise<void> {
  */
 export async function htmlToPDF(html: string, filename: string): Promise<void> {
   if (!html || !html.trim()) throw new Error('Cannot generate PDF from empty content.')
+  // Yield so the loading overlay can paint and its progress animation can start
+  // before the CPU-heavy WASM render blocks the main thread.
+  await new Promise((r) => setTimeout(r, 60))
   await ensureWarm()
   await pdf.download(withPdfFonts(html), 'A4', safePdfName(filename) + '.pdf')
 }

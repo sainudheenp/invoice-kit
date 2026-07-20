@@ -151,7 +151,7 @@ export default function History() {
         <p className="text-sm text-[var(--color-text2)]">View and manage saved documents.</p>
       </div>
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
           <h2 className="text-sm font-semibold">Saved Documents</h2>
           <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] font-medium">{count}</span>

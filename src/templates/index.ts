@@ -20,6 +20,23 @@ import {
   QuotationMinimal, QuotationElegant, QuotationBold, QuotationBeirak,
 } from './quotation'
 
+const SCALE = 1.1
+
+function scaleTemplate(html: string): string {
+  let out = html.replace(/font-size:\s*([\d.]+)px/g, (_m, px) => {
+    const v = Math.round(parseFloat(px) * SCALE * 10) / 10
+    return `font-size:${v}px`
+  })
+  out = out.replace(
+    /(<img\b[^>]*?)height:\s*([\d.]+)px([^>]*?alt="(?:logo|seal|signature)")/g,
+    (_m, pre, px, post) => {
+      const v = Math.round(parseFloat(px) * SCALE)
+      return `${pre}height:${v}px${post}`
+    },
+  )
+  return out
+}
+
 function watermarkHTML(html: string, text: string): string {
   if (!text) return html
   const s = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;display:flex;align-items:center;justify-content:center;z-index:9999;'
@@ -119,7 +136,7 @@ export function buildInvoiceHTML(savedInv: Invoice | null, comp?: Company | null
   if (!data) return ''
   const tplName = data.comp.invTemplate || 'classic'
   const fn = INV_TEMPLATES[tplName] || INV_TEMPLATES.classic
-  return watermarkHTML(fn(data), data.comp.watermark)
+  return watermarkHTML(scaleTemplate(fn(data)), data.comp.watermark)
 }
 
 export function buildReceiptHTML(savedRec: Receipt | null, comp?: Company | null): string {
@@ -127,7 +144,7 @@ export function buildReceiptHTML(savedRec: Receipt | null, comp?: Company | null
   if (!data) return ''
   const tplName = data.comp.recTemplate || 'classic'
   const fn = REC_TEMPLATES[tplName] || REC_TEMPLATES.classic
-  return watermarkHTML(fn(data), data.comp.watermark)
+  return watermarkHTML(scaleTemplate(fn(data)), data.comp.watermark)
 }
 
 export function buildQuotationHTML(savedQuot: Quotation | null, comp?: Company | null): string {
@@ -135,7 +152,7 @@ export function buildQuotationHTML(savedQuot: Quotation | null, comp?: Company |
   if (!data) return ''
   const tplName = data.comp.quotTemplate || 'classic'
   const fn = QUOT_TEMPLATES[tplName] || QUOT_TEMPLATES.classic
-  return watermarkHTML(fn(data), data.comp.watermark)
+  return watermarkHTML(scaleTemplate(fn(data)), data.comp.watermark)
 }
 
 export function applyWatermark(html: string, text: string): string {

@@ -64,7 +64,7 @@ function AppContent() {
         <Svg name={ui.sidebarOpen ? 'close' : 'menu'} />
       </button>
 
-      <main className="flex-1 ml-0 md:ml-[232px] p-5 md:p-8 max-w-5xl">
+      <main className="flex-1 min-w-0 ml-0 md:ml-[232px] p-5 md:p-8 max-w-5xl">
         <ErrorBoundary>
           <Suspense fallback={
             <div className="flex items-center justify-center py-20">
