@@ -43,8 +43,8 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
             <tr className="border-b border-[var(--color-border)] text-[var(--color-text2)] text-xs">
               <th className="py-2 px-2 text-left w-8">#</th>
               <th className="py-2 px-2 text-left">Description</th>
-              <th className="py-2 px-2 text-right w-20">Qty</th>
-              <th className="py-2 px-2 text-right w-28">Price</th>
+              <th className="py-2 px-2 text-right w-16">Qty</th>
+              <th className="py-2 px-2 text-right w-24">Price</th>
               <th className="py-2 px-2 text-right w-20">Tax%</th>
               <th className="py-2 px-2 text-right w-28">Tax</th>
               <th className="py-2 px-2 text-right w-28">Total</th>
@@ -84,9 +84,6 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
                       className="w-full px-2 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                     />
                   </td>
-                  <td className="py-1.5 px-2 text-right font-medium">
-                    {item.amount.toFixed(dp)}
-                  </td>
                   <td className="py-1.5 px-2">
                     <input
                       type="number"
@@ -100,6 +97,9 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
                   </td>
                   <td className="py-1.5 px-2 text-right font-medium">
                     {(item.taxRate || 0) > 0 ? taxAmt.toFixed(dp) : '-'}
+                  </td>
+                  <td className="py-1.5 px-2 text-right font-medium">
+                    {(item.amount + taxAmt).toFixed(dp)}
                   </td>
                 </tr>
               )

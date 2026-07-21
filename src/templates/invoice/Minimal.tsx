@@ -3,19 +3,19 @@ import type { InvTemplateData } from '@/types/template'
 
 export function InvoiceMinimal(d: InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#94a3b8'
-  const hasTax = d.hasTax
 
-  const taxCol = hasTax ? `<th>Tax%</th><th>Tax</th>` : ''
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
+    const total = item.amount + taxAmt
     return `
     <tr>
       <td style="padding:3px 0;font-size:9px;color:#475569;text-align:center;">${i + 1}</td>
       <td style="padding:3px 0;font-size:9px;color:#334155;">${esc(item.desc)}</td>
       <td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${item.qty}</td>
       <td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:3px 0;font-size:9px;color:#334155;text-align:right;font-weight:500;">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
-      ${hasTax ? `<td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td><td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>` : ''}
+      <td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td>
+      <td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>
+      <td style="padding:3px 0;font-size:9px;color:#334155;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -37,7 +37,7 @@ export function InvoiceMinimal(d: InvTemplateData): string {
   table { width:100%; border-collapse:collapse; }
   th { font-size:7px; color:#94a3b8; font-weight:500; padding:3px 0; border-bottom:1px solid #e2e8f0; text-align:left; text-transform:uppercase; letter-spacing:0.8px; }
   th:nth-child(1){ width:20px; text-align:center; }
-  th:nth-child(3), th:nth-child(4), th:nth-child(5)${hasTax ? ', th:nth-child(7)' : ''}{ text-align:right; }
+  th:nth-child(3), th:nth-child(4), th:nth-child(6), th:nth-child(7){ text-align:right; }
   .spacer { height:8px; }
   .total-line { display:flex; justify-content:space-between; padding:2px 0; font-size:9px; color:#64748b; }
   .total-line.final { font-size:12px; font-weight:600; color:#0f172a; border-top:1px solid #e2e8f0; padding-top:5px; margin-top:2px; }
@@ -79,7 +79,7 @@ export function InvoiceMinimal(d: InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th>${taxCol}</tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax%</th><th>Tax</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>

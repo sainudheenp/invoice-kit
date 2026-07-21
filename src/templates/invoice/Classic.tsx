@@ -3,22 +3,22 @@ import type { InvTemplateData } from '@/types/template'
 
 export function InvoiceClassic(d: InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#1f2937'
-  const hasTax = d.hasTax
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:36px;width:auto;" alt="logo"/>` : ''
   const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:48px;width:auto;" alt="seal"/>` : ''
   const sigHtml = c.signature ? `<img src="${esc(c.signature)}" style="height:30px;width:auto;" alt="signature"/>` : ''
 
-  const taxCol = hasTax ? `<th>Tax%</th><th>Tax</th>` : ''
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
+    const total = item.amount + taxAmt
     return `
     <tr${i % 2 === 1 ? ' style="background:#f3f4f6;"' : ''}>
       <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:center;">${i + 1}</td>
       <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;">${esc(item.desc)}</td>
       <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;">${item.qty}</td>
       <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
-      ${hasTax ? `<td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td><td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>` : ''}
+      <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td>
+      <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>
+      <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -45,7 +45,7 @@ export function InvoiceClassic(d: InvTemplateData): string {
   table { width:100%; border-collapse:collapse; }
   th { background:${p}; color:#fff; font-size:9px; padding:6px 8px; text-align:left; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
   th:nth-child(1){ text-align:center; width:30px; }
-  th:nth-child(3), th:nth-child(4), th:nth-child(5)${hasTax ? ', th:nth-child(7)' : ''}{ text-align:right; }
+  th:nth-child(3), th:nth-child(4), th:nth-child(6), th:nth-child(7){ text-align:right; }
   .totals { margin-top:16px; margin-left:auto; width:280px; }
   .t { display:flex; justify-content:space-between; padding:3px 0; font-size:10px; color:#4b5563; }
   .t.b { border-top:2px solid ${p}; padding-top:5px; margin-top:3px; font-weight:bold; font-size:13px; color:#111827; }
@@ -91,7 +91,7 @@ export function InvoiceClassic(d: InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th>${taxCol}</tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax%</th><th>Tax</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>

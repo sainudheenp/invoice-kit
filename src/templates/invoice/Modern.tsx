@@ -4,19 +4,19 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceModern(d: InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#D97706'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:32px;width:auto;" alt="logo"/>` : ''
-  const hasTax = d.hasTax
 
-  const taxCol = hasTax ? `<th>Tax%</th><th>Tax</th>` : ''
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
+    const total = item.amount + taxAmt
     return `
     <tr${i % 2 === 1 ? ' style="background:#f1f5f9;"' : ''}>
       <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;">${i + 1}</td>
       <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;">${esc(item.desc)}</td>
       <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;">${item.qty}</td>
       <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
-      ${hasTax ? `<td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td><td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>` : ''}
+      <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -85,7 +85,7 @@ export function InvoiceModern(d: InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th>${taxCol}</tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax%</th><th>Tax</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>
