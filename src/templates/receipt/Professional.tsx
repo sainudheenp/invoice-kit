@@ -76,7 +76,9 @@ export function ReceiptProfessional(d: RecTemplateData): string {
     ${d.bg ? `<div style="font-size:8px;color:#475569;margin-top:4px;"><strong>Purpose:</strong> ${esc(d.bg)}</div>` : ''}
   </div>
   <div style="text-align:right;">
-    <div class="num">${d.cur.symbol}${d.amFmt}</div>
+    ${d.totalTax > 0 ? `<div style="font-size:9px;color:#64748b;margin-bottom:2px;">Subtotal: ${d.cur.symbol}${d.amFmt}</div>
+    <div style="font-size:9px;color:#64748b;margin-bottom:2px;">Total Tax: ${d.cur.symbol}${d.tv}</div>` : ''}
+    <div class="num">${d.cur.symbol}${d.totalTax > 0 ? (d.am + d.totalTax).toFixed(d.dp) : d.amFmt}</div>
     <div style="font-size:9px;color:#64748b;">${d.wi}.${String(d.fr).padStart(d.dp, '0')}</div>
   </div>
 </div>

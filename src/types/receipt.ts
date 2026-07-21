@@ -8,6 +8,8 @@ export interface Receipt {
   receivedFrom: string
   items: LineItem[]
   amount: number
+  vatPct: number
+  vatAmt: number
   amountWords: string
   payMethod: string
   chequeNo: string

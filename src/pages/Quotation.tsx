@@ -22,7 +22,6 @@ interface QuotationFormState {
   custCr: string
   custEmail: string
   items: LineItem[]
-  vatPct: number
   discount: number
   notes: string
   terms: string
@@ -33,8 +32,8 @@ const emptyForm = (): QuotationFormState => ({
   date: new Date().toISOString().slice(0, 10),
   validUntil: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
   custName: '', custAddr: '', custPhone: '', custCr: '', custEmail: '',
-  items: [{ desc: '', qty: 1, price: 0, amount: 0 }],
-  vatPct: 0, discount: 0,
+  items: [{ desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }],
+  discount: 0,
   notes: '', terms: '',
 })
 
@@ -63,8 +62,7 @@ export default function QuotationPage() {
       custPhone: quot.customer.phone,
       custCr: quot.customer.cr,
       custEmail: quot.customer.email,
-      items: quot.items.length > 0 ? quot.items : [{ desc: '', qty: 1, price: 0, amount: 0 }],
-      vatPct: quot.vatPct,
+      items: quot.items.length > 0 ? quot.items : [{ desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }],
       discount: quot.discount,
       notes: quot.notes,
       terms: quot.terms,
@@ -77,7 +75,6 @@ export default function QuotationPage() {
     setForm((f) => ({
       ...f,
       quotNo: co.quotPref + co.quotNext,
-      vatPct: co.vatPct,
       notes: co.invNotes,
       terms: co.invTerms,
     }))
@@ -89,8 +86,8 @@ export default function QuotationPage() {
   }, [markDirty])
 
   const subtotal = form.items.reduce((s, i) => s + i.amount, 0)
-  const vatAmt = form.vatPct > 0 ? subtotal * (form.vatPct / 100) : 0
-  const grand = subtotal - form.discount + vatAmt
+  const totalTax = form.items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
+  const grand = subtotal + totalTax - form.discount
   const words = grand > 0 && cur ? num2words(grand, cur) : ''
 
   const customer: Customer = {
@@ -119,7 +116,7 @@ export default function QuotationPage() {
         validUntil: form.validUntil,
         customer,
         items: form.items,
-        subtotal, vatPct: form.vatPct, vatAmt, discount: form.discount, grand,
+        subtotal, vatPct: 0, vatAmt: totalTax, discount: form.discount, grand,
         notes: form.notes,
         terms: form.terms,
       })
@@ -156,7 +153,7 @@ export default function QuotationPage() {
     validUntil: form.validUntil,
     customer,
     items: form.items,
-    subtotal, vatPct: form.vatPct, vatAmt, discount: form.discount, grand,
+    subtotal, vatPct: 0, vatAmt: totalTax, discount: form.discount, grand,
     notes: form.notes,
     terms: form.terms,
     createdAt: Date.now(),
@@ -299,18 +296,14 @@ export default function QuotationPage() {
           <Card>
             <CardHeader><h2 className="text-sm font-semibold">Summary</h2></CardHeader>
             <div className="p-5 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Subtotal</label>
                   <input readOnly value={subtotal.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">VAT %</label>
-                  <input type="number" min="0" max="100" step="0.01" value={form.vatPct} onChange={(e) => set('vatPct', Math.max(0, parseFloat(e.target.value) || 0))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">VAT Amount</label>
-                  <input readOnly value={vatAmt.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
+                  <label className="text-xs font-medium text-[var(--color-text2)]">Total Tax</label>
+                  <input readOnly value={totalTax.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -348,8 +341,7 @@ export default function QuotationPage() {
         <div className="space-y-4">
           <QuotationSummary
             subtotal={subtotal}
-            vatPct={form.vatPct}
-            vatAmt={vatAmt}
+            totalTax={totalTax}
             discount={form.discount}
             grand={grand}
             words={words}

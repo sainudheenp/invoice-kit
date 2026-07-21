@@ -96,7 +96,7 @@ export function QuotationProfessional(d: QuotTemplateData): string {
 
 <div class="total-section">
   <div class="tr"><span>SUBTOTAL</span><span>${d.cur.symbol}${d.sv}</span></div>
-  ${d.vp > 0 ? `<div class="tr"><span>VAT (${d.vp}%)</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
+  ${d.totalTax > 0 ? `<div class="tr"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
   ${d.disc > 0 ? `<div class="tr"><span>DISCOUNT</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
   <div class="tr"><span>GRAND TOTAL</span><span>${d.cur.symbol}${d.gv}</span></div>
 </div>

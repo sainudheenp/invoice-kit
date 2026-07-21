@@ -81,7 +81,7 @@ export function QuotationMinimal(d: QuotTemplateData): string {
 
 <div class="spacer"></div>
 <div class="total-line"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-${d.vp > 0 ? `<div class="total-line"><span>VAT (${d.vp}%)</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
+${d.totalTax > 0 ? `<div class="total-line"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
 ${d.disc > 0 ? `<div class="total-line"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
 <div class="total-line final"><span>Grand Total</span><span>${d.cur.symbol}${d.gv}</span></div>
 

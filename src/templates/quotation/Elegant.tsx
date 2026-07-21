@@ -92,7 +92,7 @@ export function QuotationElegant(d: QuotTemplateData): string {
 
 <div class="total-box">
   <div class="r"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-  ${d.vp > 0 ? `<div class="r"><span>VAT (${d.vp}%)</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
+  ${d.totalTax > 0 ? `<div class="r"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
   ${d.disc > 0 ? `<div class="r"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
   <div class="r gr"><span>Grand Total</span><span>${d.cur.symbol}${d.gv}</span></div>
 </div>

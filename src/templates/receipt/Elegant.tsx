@@ -74,7 +74,9 @@ export function ReceiptElegant(d: RecTemplateData): string {
     ${d.bg ? `<div style="font-size:9px;color:#6b5d4a;margin-top:4px;"><em>${esc(d.bg)}</em></div>` : ''}
   </div>
   <div style="text-align:right;">
-    <div class="num">${d.cur.symbol}${d.amFmt}</div>
+    ${d.totalTax > 0 ? `<div style="font-size:9px;color:#8b7d62;margin-bottom:2px;">Subtotal: ${d.cur.symbol}${d.amFmt}</div>
+    <div style="font-size:9px;color:#8b7d62;margin-bottom:2px;">Total Tax: ${d.cur.symbol}${d.tv}</div>` : ''}
+    <div class="num">${d.cur.symbol}${d.totalTax > 0 ? (d.am + d.totalTax).toFixed(d.dp) : d.amFmt}</div>
     <div style="font-size:10px;color:#8b7d62;">${d.wi}.${String(d.fr).padStart(d.dp, '0')}</div>
   </div>
 </div>

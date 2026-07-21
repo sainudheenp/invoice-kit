@@ -3,6 +3,7 @@ export interface LineItem {
   qty: number
   price: number
   amount: number
+  taxRate: number
 }
 
 export interface Customer {

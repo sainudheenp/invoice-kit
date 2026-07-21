@@ -2,8 +2,7 @@ import type { ReactNode } from 'react'
 
 interface Props {
   subtotal: number
-  vatPct: number
-  vatAmt: number
+  totalTax: number
   discount: number
   grand: number
   words: string
@@ -12,7 +11,7 @@ interface Props {
   children?: ReactNode
 }
 
-export function QuotationSummary({ subtotal, vatPct, vatAmt, discount, grand, words, dp, curSymbol, children }: Props) {
+export function QuotationSummary({ subtotal, totalTax, discount, grand, words, dp, curSymbol, children }: Props) {
   return (
     <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm p-5 lg:sticky lg:top-4 space-y-4">
       <h3 className="text-sm font-semibold">Total Summary</h3>
@@ -21,16 +20,16 @@ export function QuotationSummary({ subtotal, vatPct, vatAmt, discount, grand, wo
           <span className="text-[var(--color-text2)]">Subtotal</span>
           <span>{curSymbol}{subtotal.toFixed(dp)}</span>
         </div>
+        {totalTax > 0 && (
+          <div className="flex justify-between">
+            <span>Total Tax</span>
+            <span>{curSymbol}{totalTax.toFixed(dp)}</span>
+          </div>
+        )}
         {discount > 0 && (
           <div className="flex justify-between text-red">
             <span>Discount</span>
             <span>-{curSymbol}{discount.toFixed(dp)}</span>
-          </div>
-        )}
-        {vatPct > 0 && (
-          <div className="flex justify-between">
-            <span>VAT ({vatPct}%)</span>
-            <span>{curSymbol}{vatAmt.toFixed(dp)}</span>
           </div>
         )}
         <div className="border-t border-[var(--color-border)] my-2" />

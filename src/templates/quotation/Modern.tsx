@@ -88,7 +88,7 @@ export function QuotationModern(d: QuotTemplateData): string {
 
 <div class="summary">
   <div class="sum-row"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-  ${d.vp > 0 ? `<div class="sum-row"><span>VAT (${d.vp}%)</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
+  ${d.totalTax > 0 ? `<div class="sum-row"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
   ${d.disc > 0 ? `<div class="sum-row"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
   <div class="sum-row total"><span>Total</span><span>${d.cur.symbol}${d.gv}</span></div>
 </div>

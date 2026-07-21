@@ -66,7 +66,9 @@ export function ReceiptModern(d: RecTemplateData): string {
     ${d.ww ? `<div class="amount-words">${esc(d.ww)}</div>` : ''}
   </div>
   <div style="text-align:right;">
-    <div class="amount-number">${d.cur.symbol}${d.amFmt}</div>
+    ${d.totalTax > 0 ? `<div style="font-size:10px;color:#64748b;margin-bottom:2px;">Subtotal: ${d.cur.symbol}${d.amFmt}</div>
+    <div style="font-size:10px;color:#64748b;margin-bottom:2px;">Total Tax: ${d.cur.symbol}${d.tv}</div>` : ''}
+    <div class="amount-number">${d.cur.symbol}${d.totalTax > 0 ? (d.am + d.totalTax).toFixed(d.dp) : d.amFmt}</div>
     <div style="font-size:11px;color:#64748b;text-align:right;">${d.wi}.${String(d.fr).padStart(d.dp, '0')}</div>
   </div>
 </div>

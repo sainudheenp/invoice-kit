@@ -20,7 +20,6 @@ interface InvoiceFormState {
   custCr: string
   custEmail: string
   items: LineItem[]
-  vatPct: number
   discount: number
   notes: string
   payMethod: string
@@ -32,8 +31,8 @@ const emptyForm = (): InvoiceFormState => ({
   invNo: '',
   date: new Date().toISOString().slice(0, 10),
   custName: '', custAddr: '', custPhone: '', custCr: '', custEmail: '',
-  items: [{ desc: '', qty: 1, price: 0, amount: 0 }],
-  vatPct: 0, discount: 0,
+  items: [{ desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }],
+  discount: 0,
   notes: '', payMethod: 'Cash', chequeNo: '', bankName: '',
 })
 
@@ -62,8 +61,7 @@ export default function Invoice() {
       custPhone: inv.customer.phone,
       custCr: inv.customer.cr,
       custEmail: inv.customer.email,
-      items: inv.items.length > 0 ? inv.items : [{ desc: '', qty: 1, price: 0, amount: 0 }],
-      vatPct: inv.vatPct,
+      items: inv.items.length > 0 ? inv.items : [{ desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }],
       discount: inv.discount,
       notes: inv.notes,
       payMethod: inv.payMethod || 'Cash',
@@ -79,7 +77,6 @@ export default function Invoice() {
     setForm((f) => ({
       ...f,
       invNo: co.invPref + co.invNext,
-      vatPct: co.vatPct,
       notes: co.invNotes,
     }))
   }, [co?.id, isEditing])
@@ -90,8 +87,8 @@ export default function Invoice() {
   }, [markDirty])
 
   const subtotal = form.items.reduce((s, i) => s + i.amount, 0)
-  const vatAmt = form.vatPct > 0 ? subtotal * (form.vatPct / 100) : 0
-  const grand = subtotal - form.discount + vatAmt
+  const totalTax = form.items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
+  const grand = subtotal + totalTax - form.discount
   const words = grand > 0 && cur ? num2words(grand, cur) : ''
 
   const customer: Customer = {
@@ -107,7 +104,6 @@ export default function Invoice() {
     if (validItems.length === 0) { showToast('At least one line item with description, quantity, and price is required.', 'err'); return }
 
     const editingId = state.editingDoc?.type === 'inv' ? state.editingDoc.id : null
-    // preserve existing paid status when editing
     const existingInv = editingId ? state.invoices.find((i) => i.id === editingId) : null
     const isPaid = existingInv?.paid ?? false
 
@@ -123,14 +119,13 @@ export default function Invoice() {
         paid: isPaid,
         customer,
         items: form.items,
-        subtotal, vatPct: form.vatPct, vatAmt, discount: form.discount, grand,
+        subtotal, vatPct: 0, vatAmt: totalTax, discount: form.discount, grand,
         notes: form.notes,
         payMethod: form.payMethod,
         payDetails: form.chequeNo,
         bankName: form.bankName,
       })
 
-      // increment next number if new
       if (!editingId) {
         const updated = { ...co, invNext: co.invNext + 1, updatedAt: Date.now() }
         await saveCompany(updated)
@@ -167,7 +162,7 @@ export default function Invoice() {
     paid: isPaid,
     customer,
     items: form.items,
-    subtotal, vatPct: form.vatPct, vatAmt, discount: form.discount, grand,
+    subtotal, vatPct: 0, vatAmt: totalTax, discount: form.discount, grand,
     notes: form.notes,
     payMethod: form.payMethod,
     payDetails: form.chequeNo,
@@ -305,15 +300,12 @@ export default function Invoice() {
           <Card>
             <CardHeader><h2 className="text-sm font-semibold">Summary</h2></CardHeader>
             <div className="p-5 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Subtotal">
                   <Input readOnly value={subtotal.toFixed(decimals)} />
                 </Field>
-                <Field label="VAT %">
-                  <Input type="number" min="0" max="100" step="0.01" value={form.vatPct} onChange={(e) => set('vatPct', Math.max(0, parseFloat(e.target.value) || 0))} />
-                </Field>
-                <Field label="VAT Amount">
-                  <Input readOnly value={vatAmt.toFixed(decimals)} />
+                <Field label="Total Tax">
+                  <Input readOnly value={totalTax.toFixed(decimals)} />
                 </Field>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -360,8 +352,7 @@ export default function Invoice() {
         <div className="space-y-4">
           <InvoiceSummary
             subtotal={subtotal}
-            vatPct={form.vatPct}
-            vatAmt={vatAmt}
+            totalTax={totalTax}
             discount={form.discount}
             grand={grand}
             words={words}

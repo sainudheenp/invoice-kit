@@ -62,7 +62,9 @@ export function ReceiptMinimal(d: RecTemplateData): string {
     ${d.ww ? `<div class="words">${esc(d.ww)}</div>` : ''}
   </div>
   <div style="text-align:right;">
-    <div class="num">${d.cur.symbol}${d.amFmt}</div>
+    ${d.totalTax > 0 ? `<div style="font-size:8px;color:#94a3b8;margin-bottom:2px;">Subtotal: ${d.cur.symbol}${d.amFmt}</div>
+    <div style="font-size:8px;color:#94a3b8;margin-bottom:2px;">Total Tax: ${d.cur.symbol}${d.tv}</div>` : ''}
+    <div class="num">${d.cur.symbol}${d.totalTax > 0 ? (d.am + d.totalTax).toFixed(d.dp) : d.amFmt}</div>
     <div style="font-size:8px;color:#94a3b8;">${d.wi}.${String(d.fr).padStart(d.dp, '0')}</div>
   </div>
 </div>

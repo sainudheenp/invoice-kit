@@ -33,7 +33,7 @@ const emptyForm = (): ReceiptFormState => ({
   receivedFrom: '',
   mode: 'simple',
   simpleAmount: 0,
-  items: [{ desc: '', qty: 1, price: 0, amount: 0 }],
+  items: [{ desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }],
   payMethod: 'Cash',
   chequeNo: '',
   bankName: '',
@@ -65,7 +65,7 @@ export default function Receipt() {
       receivedFrom: rec.receivedFrom,
       mode: hasItems ? 'itemized' : 'simple',
       simpleAmount: hasItems ? rec.items.reduce((s, i) => s + i.amount, 0) : rec.amount,
-      items: rec.items.length > 0 ? rec.items : [{ desc: '', qty: 1, price: 0, amount: 0 }],
+      items: rec.items.length > 0 ? rec.items.map((i) => ({ ...i, taxRate: i.taxRate || 0 })) : [{ desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }],
       payMethod: rec.payMethod || 'Cash',
       chequeNo: rec.chequeNo || '',
       bankName: rec.bankName || '',
@@ -92,7 +92,9 @@ export default function Receipt() {
   }, [markDirty])
 
   const amount = form.mode === 'simple' ? form.simpleAmount : form.items.reduce((s, i) => s + i.amount, 0)
-  const words = amount > 0 && cur ? num2words(amount, cur) : ''
+  const totalTax = form.mode === 'simple' ? 0 : form.items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
+  const grand = amount + totalTax
+  const words = grand > 0 && cur ? num2words(grand, cur) : ''
 
   const showCheque = form.payMethod === 'Cheque'
   const showBank = form.payMethod === 'Cheque' || form.payMethod === 'Bank Transfer'
@@ -120,7 +122,9 @@ export default function Receipt() {
         date: form.date,
         receivedFrom: form.receivedFrom,
         items: savedItems,
-        amount,
+        amount: grand,
+        vatPct: 0,
+        vatAmt: totalTax,
         amountWords: words,
         payMethod: form.payMethod,
         chequeNo: form.chequeNo,
@@ -161,7 +165,9 @@ export default function Receipt() {
     date: form.date,
     receivedFrom: form.receivedFrom,
     items: form.mode === 'simple' ? [] : form.items.filter((i) => i.desc.trim()),
-    amount,
+    amount: grand,
+    vatPct: 0,
+    vatAmt: totalTax,
     amountWords: words,
     payMethod: form.payMethod,
     chequeNo: form.chequeNo,
@@ -334,10 +340,34 @@ export default function Receipt() {
               )}
             </div>
           </Card>
+
+          <Card>
+            <CardHeader><h2 className="text-sm font-semibold">Summary</h2></CardHeader>
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-[var(--color-text2)]">Subtotal</label>
+                  <input readOnly value={amount.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-[var(--color-text2)]">Total Tax</label>
+                  <input readOnly value={totalTax.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-[var(--color-text2)]">Grand Total</label>
+                <input readOnly value={grand.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-[var(--color-text2)]">Amount in Words</label>
+                <input readOnly value={words} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
+              </div>
+            </div>
+          </Card>
         </div>
 
         <div className="space-y-4">
-          <ReceiptSummary amount={amount} words={words} dp={decimals} curSymbol={cur?.symbol || ''}>
+          <ReceiptSummary amount={amount} totalTax={totalTax} words={words} dp={decimals} curSymbol={cur?.symbol || ''}>
             <div className="flex flex-col gap-2">
               <Button onClick={handleSave} className="justify-center w-full">
                 {isEditing ? 'Update Receipt' : 'Save Receipt'}

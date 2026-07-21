@@ -154,7 +154,9 @@ interface AppContextValue {
   }) => Promise<Invoice>
   createReceipt: (company: Company, form: {
     recNo: string; date: string
-    receivedFrom: string; items: LineItem[]; amount: number; amountWords: string
+    receivedFrom: string; items: LineItem[]; amount: number
+    vatPct: number; vatAmt: number
+    amountWords: string
     payMethod: string; chequeNo: string; bankName: string; transDate: string
     being: string; receiver: string; signatory: string
   }) => Promise<Receipt>
@@ -351,7 +353,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const createReceipt = async (company: Company, form: {
     recNo: string; date: string
-    receivedFrom: string; items: LineItem[]; amount: number; amountWords: string
+    receivedFrom: string; items: LineItem[]; amount: number
+    vatPct: number; vatAmt: number
+    amountWords: string
     payMethod: string; chequeNo: string; bankName: string; transDate: string
     being: string; receiver: string; signatory: string
   }): Promise<Receipt> => {
@@ -365,6 +369,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       receivedFrom: form.receivedFrom,
       items: form.items,
       amount: form.amount,
+      vatPct: form.vatPct,
+      vatAmt: form.vatAmt,
       amountWords: form.amountWords,
       payMethod: form.payMethod,
       chequeNo: form.chequeNo,
