@@ -4,16 +4,21 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceProfessional(d: InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#1e3a5f'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:32px;width:auto;" alt="logo"/>` : ''
+  const hasTax = d.hasTax
 
-  const rows = d.items.map((item, i) => `
+  const taxCol = hasTax ? `<th>Tax%</th><th>Tax</th>` : ''
+  const rows = d.items.map((item, i) => {
+    const taxAmt = item.amount * ((item.taxRate || 0) / 100)
+    return `
     <tr>
       <td style="padding:4px 6px;border:1px solid #cbd5e1;font-size:9px;text-align:center;">${i + 1}</td>
       <td style="padding:4px 6px;border:1px solid #cbd5e1;font-size:9px;">${esc(item.desc)}</td>
       <td style="padding:4px 6px;border:1px solid #cbd5e1;font-size:9px;text-align:right;">${item.qty}</td>
       <td style="padding:4px 6px;border:1px solid #cbd5e1;font-size:9px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
       <td style="padding:4px 6px;border:1px solid #cbd5e1;font-size:9px;text-align:right;">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
-    </tr>
-  `).join('')
+      ${hasTax ? `<td style="padding:4px 6px;border:1px solid #cbd5e1;font-size:9px;text-align:right;">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td><td style="padding:4px 6px;border:1px solid #cbd5e1;font-size:9px;text-align:right;">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>` : ''}
+    </tr>`}
+  ).join('')
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
@@ -39,7 +44,7 @@ export function InvoiceProfessional(d: InvTemplateData): string {
   table { width:100%; border-collapse:collapse; }
   th { background:#f1f5f9; color:#475569; font-size:8px; padding:4px 6px; text-align:left; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px; border:1px solid #cbd5e1; }
   th:nth-child(1){ width:24px; text-align:center; }
-  th:nth-child(3), th:nth-child(4), th:nth-child(5){ text-align:right; }
+  th:nth-child(3), th:nth-child(4), th:nth-child(5)${hasTax ? ', th:nth-child(7)' : ''}{ text-align:right; }
   .total-section { margin-top:12px; border:1px solid ${p}; }
   .total-section .tr { display:flex; justify-content:space-between; padding:4px 12px; font-size:9px; border-bottom:1px solid #e2e8f0; }
   .total-section .tr:last-child { border-bottom:none; background:${p}; color:#fff; font-weight:bold; font-size:12px; padding:7px 12px; }
@@ -89,14 +94,14 @@ export function InvoiceProfessional(d: InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th>${taxCol}</tr>
   </thead>
   ${rows}
 </table>
 
 <div class="total-section">
   <div class="tr"><span>SUBTOTAL</span><span>${d.cur.symbol}${d.sv}</span></div>
-  ${d.vp > 0 ? `<div class="tr"><span>VAT (${d.vp}%)</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
+  ${d.totalTax > 0 ? `<div class="tr"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
   ${d.disc > 0 ? `<div class="tr"><span>DISCOUNT</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
   <div class="tr"><span>GRAND TOTAL</span><span>${d.cur.symbol}${d.gv}</span></div>
 </div>

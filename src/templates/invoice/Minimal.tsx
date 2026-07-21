@@ -3,16 +3,21 @@ import type { InvTemplateData } from '@/types/template'
 
 export function InvoiceMinimal(d: InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#94a3b8'
+  const hasTax = d.hasTax
 
-  const rows = d.items.map((item, i) => `
+  const taxCol = hasTax ? `<th>Tax%</th><th>Tax</th>` : ''
+  const rows = d.items.map((item, i) => {
+    const taxAmt = item.amount * ((item.taxRate || 0) / 100)
+    return `
     <tr>
       <td style="padding:3px 0;font-size:9px;color:#475569;text-align:center;">${i + 1}</td>
       <td style="padding:3px 0;font-size:9px;color:#334155;">${esc(item.desc)}</td>
       <td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${item.qty}</td>
       <td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
       <td style="padding:3px 0;font-size:9px;color:#334155;text-align:right;font-weight:500;">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
-    </tr>
-  `).join('')
+      ${hasTax ? `<td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td><td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>` : ''}
+    </tr>`}
+  ).join('')
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
@@ -32,7 +37,7 @@ export function InvoiceMinimal(d: InvTemplateData): string {
   table { width:100%; border-collapse:collapse; }
   th { font-size:7px; color:#94a3b8; font-weight:500; padding:3px 0; border-bottom:1px solid #e2e8f0; text-align:left; text-transform:uppercase; letter-spacing:0.8px; }
   th:nth-child(1){ width:20px; text-align:center; }
-  th:nth-child(3), th:nth-child(4), th:nth-child(5){ text-align:right; }
+  th:nth-child(3), th:nth-child(4), th:nth-child(5)${hasTax ? ', th:nth-child(7)' : ''}{ text-align:right; }
   .spacer { height:8px; }
   .total-line { display:flex; justify-content:space-between; padding:2px 0; font-size:9px; color:#64748b; }
   .total-line.final { font-size:12px; font-weight:600; color:#0f172a; border-top:1px solid #e2e8f0; padding-top:5px; margin-top:2px; }
@@ -74,14 +79,14 @@ export function InvoiceMinimal(d: InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th>${taxCol}</tr>
   </thead>
   ${rows}
 </table>
 
 <div class="spacer"></div>
 <div class="total-line"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-${d.vp > 0 ? `<div class="total-line"><span>VAT (${d.vp}%)</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
+${d.totalTax > 0 ? `<div class="total-line"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
 ${d.disc > 0 ? `<div class="total-line"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
 <div class="total-line final"><span>Grand Total</span><span>${d.cur.symbol}${d.gv}</span></div>
 

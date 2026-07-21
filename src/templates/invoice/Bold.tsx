@@ -4,16 +4,21 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceBold(d: InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#dc2626'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:36px;width:auto;" alt="logo"/>` : ''
+  const hasTax = d.hasTax
 
-  const rows = d.items.map((item, i) => `
+  const taxCol = hasTax ? `<th>Tax%</th><th>Tax</th>` : ''
+  const rows = d.items.map((item, i) => {
+    const taxAmt = item.amount * ((item.taxRate || 0) / 100)
+    return `
     <tr${i % 2 === 1 ? ' style="background:#fef2f2;"' : ''}>
       <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${i + 1}</td>
       <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${esc(item.desc)}</td>
       <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${item.qty}</td>
       <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
       <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
-    </tr>
-  `).join('')
+      ${hasTax ? `<td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td><td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>` : ''}
+    </tr>`}
+  ).join('')
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
@@ -78,14 +83,14 @@ export function InvoiceBold(d: InvTemplateData): string {
 
   <table>
     <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th>${taxCol}</tr>
   </thead>
     ${rows}
   </table>
 
   <div class="total">
     <div class="t"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-    ${d.vp > 0 ? `<div class="t"><span>VAT (${d.vp}%)</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
+    ${d.totalTax > 0 ? `<div class="t"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
     ${d.disc > 0 ? `<div class="t"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
     <div class="t gr"><span>Grand Total</span><span>${d.cur.symbol}${d.gv}</span></div>
   </div>

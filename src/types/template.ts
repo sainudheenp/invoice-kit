@@ -18,17 +18,17 @@ export interface InvTemplateData {
   bk: string
   disc: number
   sub: number
-  vp: number
-  va: number
+  totalTax: number
   grand: number
   items: LineItem[]
   dp: number
   sv: string
-  vv: string
+  tv: string
   dv: string
   gv: string
   gw: string
   pd: string
+  hasTax: boolean
 }
 
 export interface RecTemplateData {
@@ -41,6 +41,7 @@ export interface RecTemplateData {
   rf: string
   items: LineItem[]
   am: number
+  totalTax: number
   ww: string
   pm: string
   ch: string
@@ -53,6 +54,7 @@ export interface RecTemplateData {
   wi: number
   fr: number
   amFmt: string
+  tv: string
   chqHtml: string
 }
 
@@ -71,13 +73,12 @@ export interface QuotTemplateData {
   terms: string
   disc: number
   sub: number
-  vp: number
-  va: number
+  totalTax: number
   grand: number
   items: LineItem[]
   dp: number
   sv: string
-  vv: string
+  tv: string
   dv: string
   gv: string
   gw: string

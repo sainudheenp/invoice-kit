@@ -70,18 +70,17 @@ function transformInvData(savedInv: Invoice | null, comp?: Company | null): InvT
   const dec = dp(cur.subPer)
   const items: LineItem[] = d.items && d.items.length > 0 ? d.items : []
   const sub = d.subtotal || items.reduce((s, i) => s + i.amount, 0)
-  const vp = d.vatPct || 0
-  const va = d.vatAmt || (vp > 0 ? sub * vp / 100 : 0)
+  const totalTax = items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
   const disc = d.discount || 0
-  const grand = d.grand || sub + va - disc
+  const grand = d.grand || sub + totalTax - disc
   return {
     comp, cur, no: d.invNo || '', dt: d.date || '',
     cust: d.customer?.name || '', addr: d.customer?.address || '',
     ph: d.customer?.phone || '', cr: d.customer?.cr || '', em: d.customer?.email || '',
     notes: d.notes || '', pm: d.payMethod || '', ch: d.payDetails || '',
-    bk: d.bankName || '', disc, sub, vp, va, grand,
-    items, dp: dec,
-    sv: fmtAmount(sub, dec), vv: fmtAmount(va, dec),
+    bk: d.bankName || '',     disc, sub, totalTax, grand,
+    items, dp: dec, hasTax: items.some(i => (i.taxRate || 0) > 0),
+    sv: fmtAmount(sub, dec), tv: fmtAmount(totalTax, dec),
     dv: fmtAmount(disc, dec), gv: fmtAmount(grand, dec),
     gw: grand > 0 ? num2words(grand, cur) + ' only' : '',
     pd: [d.payMethod, d.payDetails].filter(Boolean).join(' - '),
@@ -95,15 +94,17 @@ function transformRecData(savedRec: Receipt | null, comp?: Company | null): RecT
   const dec = dp(cur.subPer)
   const items: LineItem[] = d.items && d.items.length > 0 ? d.items : []
   const amount = d.amount || items.reduce((s, i) => s + i.amount, 0)
+  const totalTax = items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
   const wi = Math.floor(amount)
   const fr = Math.round((amount - wi) * Math.pow(10, dec))
   return {
     comp, cur, pc: comp.pcolor || '#D97706', ac: comp.acolor || '#1e293b',
     no: d.recNo || '', dt: d.date || '', rf: d.receivedFrom || '',
-    items, am: amount, ww: d.amountWords || (amount > 0 ? num2words(amount, cur) + ' only' : ''),
+    items, am: amount, totalTax, ww: d.amountWords || (amount > 0 ? num2words(amount, cur) + ' only' : ''),
     pm: d.payMethod || '', ch: d.chequeNo || '', bk: d.bankName || '',
     td: d.transDate || '', bg: d.being || '', rv: d.receiver || '', sg: d.signatory || '',
     dp: dec, wi, fr, amFmt: fmtAmount(amount, dec),
+    tv: fmtAmount(totalTax, dec),
     chqHtml: d.chequeNo ? `<strong>Cheque:</strong> ${esc(d.chequeNo)}` : '',
   }
 }
@@ -115,17 +116,16 @@ function transformQuotData(savedQuot: Quotation | null, comp?: Company | null): 
   const dec = dp(cur.subPer)
   const items: LineItem[] = d.items && d.items.length > 0 ? d.items : []
   const sub = d.subtotal || items.reduce((s, i) => s + i.amount, 0)
-  const vp = d.vatPct || 0
-  const va = d.vatAmt || (vp > 0 ? sub * vp / 100 : 0)
+  const totalTax = items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
   const disc = d.discount || 0
-  const grand = d.grand || sub + va - disc
+  const grand = d.grand || sub + totalTax - disc
   return {
     comp, cur, no: d.quotNo || '', dt: d.date || '', validDt: d.validUntil || '',
     cust: d.customer?.name || '', addr: d.customer?.address || '',
     ph: d.customer?.phone || '', cr: d.customer?.cr || '', em: d.customer?.email || '',
-    notes: d.notes || '', terms: d.terms || '', disc, sub, vp, va, grand,
+    notes: d.notes || '', terms: d.terms || '', disc, sub, totalTax, grand,
     items, dp: dec,
-    sv: fmtAmount(sub, dec), vv: fmtAmount(va, dec),
+    sv: fmtAmount(sub, dec), tv: fmtAmount(totalTax, dec),
     dv: fmtAmount(disc, dec), gv: fmtAmount(grand, dec),
     gw: grand > 0 ? num2words(grand, cur) + ' only' : '',
   }
@@ -163,19 +163,19 @@ export function sampleInvData(comp: Company): InvTemplateData | null {
   const cur = comp.currency
   const dec = dp(cur.subPer)
   const items = [
-    { desc: 'Consulting Services', qty: 10, price: 150, amount: 1500 },
-    { desc: 'Software License', qty: 2, price: 500, amount: 1000 },
+    { desc: 'Consulting Services', qty: 10, price: 150, amount: 1500, taxRate: 5 },
+    { desc: 'Software License', qty: 2, price: 500, amount: 1000, taxRate: 0 },
   ]
   const sub = items.reduce((s, i) => s + i.amount, 0)
-  const vp = 5; const va = sub * vp / 100
-  const grand = sub + va
+  const totalTax = items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
+  const grand = sub + totalTax
   return {
     comp, cur, no: 'INV-001', dt: new Date().toISOString().slice(0, 10),
     cust: 'Sample Customer', addr: '123 Main St', ph: '+968 1234 5678',
     cr: 'CR-12345', em: 'customer@example.com',
     notes: 'Payment due within 30 days.', pm: 'Bank Transfer', ch: '', bk: '',
-    disc: 0, sub, vp, va, grand, items, dp: dec,
-    sv: fmtAmount(sub, dec), vv: fmtAmount(va, dec),
+    disc: 0, sub, totalTax, grand, items, dp: dec, hasTax: items.some(i => (i.taxRate || 0) > 0),
+    sv: fmtAmount(sub, dec), tv: fmtAmount(totalTax, dec),
     dv: fmtAmount(0, dec), gv: fmtAmount(grand, dec),
     gw: num2words(grand, cur) + ' only',
     pd: 'Bank Transfer',
@@ -195,7 +195,7 @@ export function sampleRecData(comp: Company): RecTemplateData | null {
     ww: num2words(amount, cur) + ' only',
     pm: 'Cash', ch: '', bk: 'Bank Muscat', td: new Date().toISOString().slice(0, 10),
     bg: 'Invoice payment', rv: 'John Doe', sg: 'Jane Smith',
-    dp: dec, wi, fr, amFmt: fmtAmount(amount, dec), chqHtml: '',
+    dp: dec, wi, fr, amFmt: fmtAmount(amount, dec), totalTax: 0, tv: fmtAmount(0, dec), chqHtml: '',
   }
 }
 
@@ -203,11 +203,11 @@ export function sampleQuotData(comp: Company): QuotTemplateData | null {
   const cur = comp.currency
   const dec = dp(cur.subPer)
   const items = [
-    { desc: 'Web Development', qty: 1, price: 3000, amount: 3000 },
-    { desc: 'Hosting Setup', qty: 1, price: 500, amount: 500 },
+    { desc: 'Web Development', qty: 1, price: 3000, amount: 3000, taxRate: 0 },
+    { desc: 'Hosting Setup', qty: 1, price: 500, amount: 500, taxRate: 0 },
   ]
   const sub = items.reduce((s, i) => s + i.amount, 0)
-  const vp = 0; const va = 0
+  const totalTax = 0
   const grand = sub
   const dt = new Date()
   const valid = new Date(dt); valid.setDate(valid.getDate() + 30)
@@ -217,8 +217,8 @@ export function sampleQuotData(comp: Company): QuotTemplateData | null {
     cust: 'Sample Prospect', addr: '456 Business Ave', ph: '+968 9876 5432',
     cr: 'CR-67890', em: 'prospect@example.com', notes: 'Valid for 30 days.',
     terms: '50% upfront, 50% on completion.',
-    disc: 0, sub, vp, va, grand, items, dp: dec,
-    sv: fmtAmount(sub, dec), vv: fmtAmount(0, dec),
+    disc: 0, sub, totalTax, grand, items, dp: dec,
+    sv: fmtAmount(sub, dec), tv: fmtAmount(0, dec),
     dv: fmtAmount(0, dec), gv: fmtAmount(grand, dec),
     gw: num2words(grand, cur) + ' only',
   }

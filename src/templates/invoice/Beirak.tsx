@@ -4,16 +4,21 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceBeirak(d: InvTemplateData): string {
   const c = d.comp; const DB = '#1e3a5f'; const LB = '#e8edf3'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:32px;width:auto;" alt="logo"/>` : ''
+  const hasTax = d.hasTax
 
-  const rows = d.items.map((item, i) => `
+  const taxCol = hasTax ? `<th>Tax%</th><th>Tax</th>` : ''
+  const rows = d.items.map((item, i) => {
+    const taxAmt = item.amount * ((item.taxRate || 0) / 100)
+    return `
     <tr${i % 2 === 1 ? ` style="background:${LB};"` : ''}>
       <td style="padding:5px 8px;border:1px solid #c5ced9;font-size:10px;">${i + 1}</td>
       <td style="padding:5px 8px;border:1px solid #c5ced9;font-size:10px;">${esc(item.desc)}</td>
       <td style="padding:5px 8px;border:1px solid #c5ced9;font-size:10px;text-align:right;">${item.qty}</td>
       <td style="padding:5px 8px;border:1px solid #c5ced9;font-size:10px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
       <td style="padding:5px 8px;border:1px solid #c5ced9;font-size:10px;text-align:right;">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
-    </tr>
-  `).join('')
+      ${hasTax ? `<td style="padding:5px 8px;border:1px solid #c5ced9;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td><td style="padding:5px 8px;border:1px solid #c5ced9;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>` : ''}
+    </tr>`}
+  ).join('')
 
   const contact = [c.loc, c.tel, c.email].filter(Boolean).map(esc).join(' | ')
 
@@ -77,14 +82,14 @@ export function InvoiceBeirak(d: InvTemplateData): string {
 
 <table class="items">
   <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th>${taxCol}</tr>
   </thead>
   ${rows}
 </table>
 
 <div class="sum-box">
   <div class="sum-row"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-  ${d.vp > 0 ? `<div class="sum-row"><span>VAT (${d.vp}%)</span><span>${d.cur.symbol}${d.vv}</span></div>` : ''}
+  ${d.totalTax > 0 ? `<div class="sum-row"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
   ${d.disc > 0 ? `<div class="sum-row"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
   <div class="sum-row"><span>Grand Total</span><span>${d.cur.symbol}${d.gv}</span></div>
 </div>
