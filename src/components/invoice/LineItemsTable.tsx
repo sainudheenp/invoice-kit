@@ -42,11 +42,11 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
           <thead>
             <tr className="border-b border-[var(--color-border)] text-[var(--color-text2)] text-xs">
               <th className="py-2 px-2 text-left w-8">#</th>
-              <th className="py-2 px-2 text-left min-w-[200px]">Description</th>
-              <th className="py-2 px-2 text-right w-16">Qty</th>
-              <th className="py-2 px-2 text-right w-24">Price</th>
+              <th className="py-2 px-2 text-left">Description</th>
+              <th className="py-2 px-2 text-right w-20">Qty</th>
+              <th className="py-2 px-2 text-right w-28">Price</th>
               <th className="py-2 px-2 text-right w-20">Tax%</th>
-              <th className="py-2 px-2 text-right w-28">Tax</th>
+              <th className="py-2 px-2 text-right w-24">Tax</th>
               <th className="py-2 px-2 text-right w-28">Total</th>
             </tr>
           </thead>
@@ -56,7 +56,7 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
               return (
                 <tr key={idx} className="border-b border-[var(--color-border)]/50">
                   <td className="py-1.5 px-2 text-[var(--color-text3)] text-xs">{idx + 1}</td>
-                  <td className="py-1.5 px-2 min-w-[200px]">
+                  <td className="py-1.5 px-2">
                     <input
                       value={item.desc}
                       onChange={(e) => updateItem(idx, 'desc', e.target.value)}
