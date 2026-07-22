@@ -10,12 +10,11 @@ export function InvoiceMinimal(d: InvTemplateData): string {
     const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
     <tr>
-      <td style="padding:3px 0;font-size:9px;color:#475569;text-align:center;">${i + 1}</td>
-      <td style="padding:3px 0;font-size:9px;color:#334155;">${esc(item.desc)}</td>
-      <td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${item.qty}</td>
-      <td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:3px 0;font-size:9px;color:#475569;text-align:right;">${taxDisplay}</td>
-      <td style="padding:3px 0;font-size:9px;color:#334155;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
+      <td style="padding:6px 0;font-size:10px;color:#334155;">${esc(item.desc)}</td>
+      <td style="padding:6px 0;font-size:10px;color:#475569;text-align:right;">${item.qty}</td>
+      <td style="padding:6px 0;font-size:10px;color:#475569;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:6px 0;font-size:10px;color:#94a3b8;text-align:right;">${taxDisplay}</td>
+      <td style="padding:6px 0;font-size:10px;color:#334155;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -35,9 +34,8 @@ export function InvoiceMinimal(d: InvTemplateData): string {
   .rules .val { font-size:10px; color:#0f172a; font-weight:600; }
   .rules .sub { font-size:8px; color:#64748b; margin-top:1px; }
   table { width:100%; border-collapse:collapse; }
-  th { font-size:7px; color:#94a3b8; font-weight:500; padding:3px 0; border-bottom:1px solid #e2e8f0; text-align:left; text-transform:uppercase; letter-spacing:0.8px; }
-  th:nth-child(1){ width:20px; text-align:center; }
-  th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6){ text-align:right; }
+  th { font-size:7px; color:#94a3b8; font-weight:500; padding:4px 0; border-bottom:1px solid #e2e8f0; text-align:left; text-transform:uppercase; letter-spacing:0.8px; }
+  th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) { text-align:right; }
   .spacer { height:8px; }
   .total-line { display:flex; justify-content:space-between; padding:2px 0; font-size:9px; color:#64748b; }
   .total-line.final { font-size:12px; font-weight:600; color:#0f172a; border-top:1px solid #e2e8f0; padding-top:5px; margin-top:2px; }
@@ -79,14 +77,14 @@ export function InvoiceMinimal(d: InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax</th><th>Total</th></tr>
+    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>
 
 <div class="spacer"></div>
 <div class="total-line"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-${d.totalTax > 0 ? `<div class="total-line"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
+${d.totalTax > 0 ? `<div class="total-line"><span>Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
 ${d.disc > 0 ? `<div class="total-line"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
 <div class="total-line final"><span>Grand Total</span><span>${d.cur.symbol}${d.gv}</span></div>
 

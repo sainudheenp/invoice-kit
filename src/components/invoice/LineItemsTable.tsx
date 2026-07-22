@@ -30,79 +30,89 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
     onChange([...items, { desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }])
   }
 
-  const removeRow = () => {
-    if (items.length <= 1) return
-    onChange(items.slice(0, -1))
-  }
-
   return (
     <div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full">
           <thead>
-            <tr className="border-b border-[var(--color-border)] text-[var(--color-text2)] text-xs">
-              <th className="py-2 px-2 text-left w-8">#</th>
-              <th className="py-2 px-2 text-left">Description</th>
-              <th className="py-2 px-2 text-right w-20">Qty</th>
-              <th className="py-2 px-2 text-right w-28">Price</th>
-              <th className="py-2 px-2 text-right w-32">Tax</th>
-              <th className="py-2 px-2 text-right w-28">Total</th>
+            <tr className="border-b-2 border-[var(--color-border)]">
+              <th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[40%]">Description</th>
+              <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[10%]">Qty</th>
+              <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[15%]">Rate</th>
+              <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[18%]">Tax</th>
+              <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[17%]">Total</th>
+              <th className="pb-2 w-[5%]"></th>
             </tr>
           </thead>
           <tbody>
             {items.map((item, idx) => {
               const taxAmt = item.amount * ((item.taxRate || 0) / 100)
+              const lineTotal = item.amount + taxAmt
+              const hasTax = (item.taxRate || 0) > 0
               return (
-                <tr key={idx} className="border-b border-[var(--color-border)]/50">
-                  <td className="py-1.5 px-2 text-[var(--color-text3)] text-xs">{idx + 1}</td>
-                  <td className="py-1.5 px-2">
+                <tr key={idx} className="border-b border-[var(--color-border)]/40 group">
+                  <td className="py-2 pr-3">
                     <input
                       value={item.desc}
                       onChange={(e) => updateItem(idx, 'desc', e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                      className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--color-text3)]/50"
                       placeholder="Item description"
                     />
                   </td>
-                  <td className="py-1.5 px-2">
+                  <td className="py-2 px-2">
                     <input
                       type="number"
                       min="0"
                       step="1"
-                      value={item.qty}
+                      value={item.qty || ''}
                       onChange={(e) => updateItem(idx, 'qty', e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                      className="w-full bg-transparent text-sm text-right tabular-nums outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </td>
-                  <td className="py-1.5 px-2">
+                  <td className="py-2 px-2">
                     <input
                       type="number"
                       min="0"
                       step={1 / Math.pow(10, dp)}
-                      value={item.price}
+                      value={item.price || ''}
                       onChange={(e) => updateItem(idx, 'price', e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                      className="w-full bg-transparent text-sm text-right tabular-nums outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </td>
-                  <td className="py-1.5 px-2">
-                    <div className="flex items-center gap-1">
+                  <td className="py-2 px-2">
+                    <div className="flex items-center justify-end gap-1">
                       <input
                         type="number"
                         min="0"
                         max="100"
                         step="0.01"
-                        value={item.taxRate || 0}
+                        value={item.taxRate || ''}
                         onChange={(e) => updateItem(idx, 'taxRate', e.target.value)}
-                        className="w-16 px-2 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                        className="w-12 bg-transparent text-sm text-right tabular-nums outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        placeholder="0"
                       />
-                      {(item.taxRate || 0) > 0 && (
-                        <span className="text-xs text-[var(--color-text2)] whitespace-nowrap">
-                          ({taxAmt.toFixed(dp)})
+                      {hasTax && (
+                        <span className="text-[11px] text-[var(--color-text3)] tabular-nums whitespace-nowrap">
+                          % ({taxAmt.toFixed(dp)})
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="py-1.5 px-2 text-right font-medium">
-                    {(item.amount + taxAmt).toFixed(dp)}
+                  <td className="py-2 pl-2 text-right text-sm font-medium tabular-nums">
+                    {lineTotal.toFixed(dp)}
+                  </td>
+                  <td className="py-2 pl-1">
+                    {items.length > 1 && (
+                      <button
+                        onClick={() => {
+                          const next = items.filter((_, i) => i !== idx)
+                          onChange(next)
+                        }}
+                        className="w-6 h-6 flex items-center justify-center rounded text-[var(--color-text3)] opacity-0 group-hover:opacity-100 hover:text-red hover:bg-red/10 transition-all cursor-pointer"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
+                    )}
                   </td>
                 </tr>
               )
@@ -110,15 +120,13 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
           </tbody>
         </table>
       </div>
-      <div className="flex flex-wrap gap-2 mt-2">
-        <button onClick={addRow} className="text-xs px-3 py-1.5 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-input-bg)] cursor-pointer transition-colors">
+      <div className="flex gap-2 mt-3">
+        <button
+          onClick={addRow}
+          className="flex-1 py-2 rounded-lg border border-dashed border-[var(--color-border)] text-xs text-[var(--color-text3)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-colors cursor-pointer"
+        >
           + Add Row
         </button>
-        {items.length > 1 && (
-          <button onClick={removeRow} className="text-xs px-3 py-1.5 rounded-full border border-red/30 text-red hover:bg-red-bg cursor-pointer transition-colors">
-            - Remove
-          </button>
-        )}
         {activeProducts.length > 0 && (
           <select
             onChange={(e) => {
@@ -147,9 +155,9 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
               }
               e.target.value = ''
             }}
-            className="text-xs px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] outline-none focus:ring-1 focus:ring-[var(--color-primary)] cursor-pointer"
+            className="px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] text-xs text-[var(--color-text)] outline-none cursor-pointer"
           >
-            <option value="">+ Add Saved Product</option>
+            <option value="">+ Saved Product</option>
             {activeProducts.map((p) => (
               <option key={p.id} value={p.id}>{p.name} ({p.price.toFixed(dp)})</option>
             ))}

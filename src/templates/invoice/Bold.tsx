@@ -11,12 +11,11 @@ export function InvoiceBold(d: InvTemplateData): string {
     const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
     <tr${i % 2 === 1 ? ' style="background:#fef2f2;"' : ''}>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${i + 1}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${esc(item.desc)}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${item.qty}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${taxDisplay}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:bold;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
+      <td style="padding:8px 12px;border-bottom:2px solid #000;font-size:11px;">${esc(item.desc)}</td>
+      <td style="padding:8px 12px;border-bottom:2px solid #000;font-size:11px;text-align:right;">${item.qty}</td>
+      <td style="padding:8px 12px;border-bottom:2px solid #000;font-size:11px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:8px 12px;border-bottom:2px solid #000;font-size:11px;text-align:right;color:#666;">${taxDisplay}</td>
+      <td style="padding:8px 12px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:bold;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -37,9 +36,8 @@ export function InvoiceBold(d: InvTemplateData): string {
   .info .val { font-size:12px; color:#000; font-weight:bold; margin-top:2px; }
   .info .sub { font-size:9px; color:#444; }
   table { width:100%; border-collapse:collapse; }
-  th { background:#000; color:#fff; font-size:9px; padding:8px; text-align:left; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px; }
-  th:not(:first-child){ text-align:right; }
-  th:nth-child(2){ text-align:left; }
+  th { background:#000; color:#fff; font-size:9px; padding:8px 12px; text-align:left; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px; }
+  th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) { text-align:right; }
   .total { margin-top:16px; margin-left:auto; width:300px; }
   .t { display:flex; justify-content:space-between; padding:5px 0; font-size:11px; font-weight:bold; border-bottom:1px solid #ddd; }
   .t.gr { font-size:16px; color:${p}; border-bottom:3px solid #000; padding:8px 0; margin-top:4px; }
@@ -83,14 +81,14 @@ export function InvoiceBold(d: InvTemplateData): string {
 
   <table>
     <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax</th><th>Total</th></tr>
+    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax</th><th>Total</th></tr>
   </thead>
     ${rows}
   </table>
 
   <div class="total">
     <div class="t"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-    ${d.totalTax > 0 ? `<div class="t"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
+    ${d.totalTax > 0 ? `<div class="t"><span>Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
     ${d.disc > 0 ? `<div class="t"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
     <div class="t gr"><span>Grand Total</span><span>${d.cur.symbol}${d.gv}</span></div>
   </div>

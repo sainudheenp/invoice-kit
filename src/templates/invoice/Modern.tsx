@@ -10,13 +10,12 @@ export function InvoiceModern(d: InvTemplateData): string {
     const total = item.amount + taxAmt
     const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
-    <tr${i % 2 === 1 ? ' style="background:#f1f5f9;"' : ''}>
-      <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;">${i + 1}</td>
-      <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;">${esc(item.desc)}</td>
-      <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;">${item.qty}</td>
-      <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;">${taxDisplay}</td>
-      <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
+    <tr${i % 2 === 1 ? ' style="background:#f8fafc;"' : ''}>
+      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:11px;">${esc(item.desc)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:11px;text-align:right;">${item.qty}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:11px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:11px;text-align:right;color:#64748b;">${taxDisplay}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:11px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -31,21 +30,17 @@ export function InvoiceModern(d: InvTemplateData): string {
   .header { display:flex; justify-content:space-between; align-items:flex-start; padding:16px 20px; background:#f8fafc; border-radius:8px; margin-bottom:20px; }
   .brand { display:flex; gap:10px; align-items:center; }
   .doc-label { font-size:10px; color:${p}; font-weight:bold; letter-spacing:2px; border-left:3px solid ${p}; padding-left:8px; }
-  .title { font-size:13px; color:#1f2937; font-weight:bold; margin-top:2px; }
   .info-grid { display:flex; gap:24px; margin-bottom:20px; }
   .card { padding:12px 16px; background:#f8fafc; border-radius:8px; flex:1; }
   .card-label { font-size:9px; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
   .card-value { font-size:11px; font-weight:bold; color:#1f2937; }
   .card-sub { font-size:9px; color:#4b5563; margin-top:2px; }
-  table { width:100%; border-collapse:separate; border-spacing:0 2px; margin-top:8px; }
-  th { background:${p}; color:#fff; font-size:9px; padding:6px 8px; text-align:left; font-weight:600; }
-  th:not(:first-child) { text-align:right; }
-  th:nth-child(2) { text-align:left; }
-  th:first-child { border-radius:4px 0 0 4px; }
-  th:last-child { border-radius:0 4px 4px 0; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:#f1f5f9; color:#64748b; font-size:9px; padding:8px 12px; text-align:left; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+  th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) { text-align:right; }
   .summary { margin-top:12px; margin-left:auto; width:300px; }
   .sum-row { display:flex; justify-content:space-between; padding:4px 12px; font-size:10px; }
-  .sum-row.total { font-weight:bold; font-size:14px; color:${p}; border-top:2px dashed #cbd5e1; margin-top:4px; padding-top:8px; }
+  .sum-row.total { font-weight:bold; font-size:14px; color:${p}; border-top:2px solid #cbd5e1; margin-top:4px; padding-top:8px; }
   .words { font-size:10px; color:#64748b; font-style:italic; text-align:right; margin-top:8px; }
   .notes { margin-top:16px; padding:12px 16px; background:#f8fafc; border-radius:8px; font-size:10px; color:#4b5563; }
   .footer { position:absolute; bottom:24px; left:40px; right:40px; padding-top:12px; border-top:1px solid #e2e8f0; font-size:9px; color:#64748b; text-align:center; }
@@ -85,14 +80,14 @@ export function InvoiceModern(d: InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax</th><th>Total</th></tr>
+    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>
 
 <div class="summary">
   <div class="sum-row"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-  ${d.totalTax > 0 ? `<div class="sum-row"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
+  ${d.totalTax > 0 ? `<div class="sum-row"><span>Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
   ${d.disc > 0 ? `<div class="sum-row"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
   <div class="sum-row total"><span>Total</span><span>${d.cur.symbol}${d.gv}</span></div>
 </div>

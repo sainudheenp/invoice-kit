@@ -12,13 +12,12 @@ export function InvoiceClassic(d: InvTemplateData): string {
     const total = item.amount + taxAmt
     const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
-    <tr${i % 2 === 1 ? ' style="background:#f3f4f6;"' : ''}>
-      <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:center;">${i + 1}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;">${esc(item.desc)}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;">${item.qty}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;">${taxDisplay}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d1d5db;font-size:10px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
+    <tr${i % 2 === 1 ? ' style="background:#f9fafb;"' : ''}>
+      <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:11px;">${esc(item.desc)}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:11px;text-align:right;">${item.qty}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:11px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:11px;text-align:right;color:#6b7280;">${taxDisplay}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:11px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -43,9 +42,8 @@ export function InvoiceClassic(d: InvTemplateData): string {
   .rules .val { font-size:11px; font-weight:bold; color:#111827; margin-top:1px; }
   .rules .sub { font-size:9px; color:#4b5563; margin-top:1px; }
   table { width:100%; border-collapse:collapse; }
-  th { background:${p}; color:#fff; font-size:9px; padding:6px 8px; text-align:left; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
-  th:nth-child(1){ text-align:center; width:30px; }
-  th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6){ text-align:right; }
+  th { background:${p}; color:#fff; font-size:9px; padding:8px 12px; text-align:left; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+  th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) { text-align:right; }
   .totals { margin-top:16px; margin-left:auto; width:280px; }
   .t { display:flex; justify-content:space-between; padding:3px 0; font-size:10px; color:#4b5563; }
   .t.b { border-top:2px solid ${p}; padding-top:5px; margin-top:3px; font-weight:bold; font-size:13px; color:#111827; }
@@ -91,14 +89,14 @@ export function InvoiceClassic(d: InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax</th><th>Total</th></tr>
+    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>
 
 <div class="totals">
   <div class="t"><span>Subtotal</span><span>${d.cur.symbol}${d.sv}</span></div>
-  ${d.totalTax > 0 ? `<div class="t"><span>Total Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
+  ${d.totalTax > 0 ? `<div class="t"><span>Tax</span><span>${d.cur.symbol}${d.tv}</span></div>` : ''}
   ${d.disc > 0 ? `<div class="t"><span>Discount</span><span>-${d.cur.symbol}${d.dv}</span></div>` : ''}
   <div class="t b"><span>Grand Total</span><span>${d.cur.symbol}${d.gv}</span></div>
 </div>
