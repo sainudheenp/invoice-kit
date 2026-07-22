@@ -3,6 +3,7 @@ import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useUndoRedo } from '@/hooks/useUndoRedo'
 import { Card, CardHeader, Button, Field, Input, Textarea, Select } from '@/components/ui'
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { InvoiceSummary } from '@/components/invoice/InvoiceSummary'
@@ -41,7 +42,7 @@ export default function Invoice() {
   const { markDirty, markClean, showToast, showPreview, showPdfOverlay, hidePdfOverlay } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()
   const co = getCo()
-  const [form, setForm] = useState<InvoiceFormState>(emptyForm)
+  const { state: form, set: setForm, undo, redo, canUndo, canRedo } = useUndoRedo<InvoiceFormState>(emptyForm())
   const [isEditing, setIsEditing] = useState(false)
 
   const cur = co?.currency
@@ -74,17 +75,17 @@ export default function Invoice() {
   // set defaults when company loads
   useEffect(() => {
     if (!co || isEditing) return
-    setForm((f) => ({
-      ...f,
+    setForm({
+      ...form,
       invNo: co.invPref + co.invNext,
       notes: co.invNotes,
-    }))
+    })
   }, [co?.id, isEditing])
 
-  const set = useCallback((field: keyof InvoiceFormState, value: string | number | LineItem[]) => {
-    setForm((f) => ({ ...f, [field]: value }))
+  const setField = useCallback((field: keyof InvoiceFormState, value: string | number | LineItem[]) => {
+    setForm({ ...form, [field]: value })
     markDirty()
-  }, [markDirty])
+  }, [form, setForm, markDirty])
 
   const subtotal = form.items.reduce((s, i) => s + i.amount, 0)
   const totalTax = form.items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
@@ -226,10 +227,10 @@ export default function Invoice() {
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Invoice No." required>
-                  <Input value={form.invNo} onChange={(e) => set('invNo', e.target.value)} />
+                  <Input value={form.invNo} onChange={(e) => setField('invNo', e.target.value)} />
                 </Field>
                 <Field label="Date">
-                  <Input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
+                  <Input type="date" value={form.date} onChange={(e) => setField('date', e.target.value)} />
                 </Field>
               </div>
             </div>
@@ -243,14 +244,14 @@ export default function Invoice() {
                   onChange={(e) => {
                     const found = state.customers.find((c) => c.id === e.target.value)
                     if (found) {
-                      setForm((f) => ({
-                        ...f,
+                      setForm({
+                        ...form,
                         custName: found.name,
                         custAddr: found.address,
                         custPhone: found.phone,
                         custCr: found.cr,
                         custEmail: found.email,
-                      }))
+                      })
                       markDirty()
                     }
                     e.target.value = ''
@@ -266,25 +267,25 @@ export default function Invoice() {
             </CardHeader>
             <div className="p-5 space-y-3">
               <Field label="Customer Name" required>
-                <Input value={form.custName} onChange={(e) => set('custName', e.target.value)} list="custNameList" />
+                <Input value={form.custName} onChange={(e) => setField('custName', e.target.value)} list="custNameList" />
                 <datalist id="custNameList">
                   {customers.map((c) => <option key={c} value={c} />)}
                 </datalist>
               </Field>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Address">
-                  <Input value={form.custAddr} onChange={(e) => set('custAddr', e.target.value)} />
+                  <Input value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} />
                 </Field>
                 <Field label="Phone">
-                  <Input value={form.custPhone} onChange={(e) => set('custPhone', e.target.value)} />
+                  <Input value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} />
                 </Field>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="C.R.">
-                  <Input value={form.custCr} onChange={(e) => set('custCr', e.target.value)} />
+                  <Input value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} />
                 </Field>
                 <Field label="Email">
-                  <Input value={form.custEmail} onChange={(e) => set('custEmail', e.target.value)} />
+                  <Input value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} />
                 </Field>
               </div>
             </div>
@@ -293,7 +294,7 @@ export default function Invoice() {
           <Card>
             <CardHeader><h2 className="text-sm font-semibold">Line Items</h2></CardHeader>
             <div className="p-5">
-              <LineItemsTable items={form.items} onChange={(items) => set('items', items)} dp={decimals} />
+              <LineItemsTable items={form.items} onChange={(items) => setField('items', items)} dp={decimals} />
             </div>
           </Card>
 
@@ -310,7 +311,7 @@ export default function Invoice() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Discount">
-                  <Input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => set('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
+                  <Input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => setField('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
                 </Field>
                 <Field label="Grand Total">
                   <Input readOnly value={grand.toFixed(decimals)} />
@@ -326,7 +327,7 @@ export default function Invoice() {
             <CardHeader><h2 className="text-sm font-semibold">Additional</h2></CardHeader>
             <div className="p-5 space-y-4">
               <Field label="Payment Method">
-                <Select value={form.payMethod} onChange={(e) => set('payMethod', e.target.value)}>
+                <Select value={form.payMethod} onChange={(e) => setField('payMethod', e.target.value)}>
                   <option>Cash</option>
                   <option>Cheque</option>
                   <option>Bank Transfer</option>
@@ -334,16 +335,16 @@ export default function Invoice() {
               </Field>
               {showCheque && (
                 <Field label="Cheque No.">
-                  <Input value={form.chequeNo} onChange={(e) => set('chequeNo', e.target.value)} />
+                  <Input value={form.chequeNo} onChange={(e) => setField('chequeNo', e.target.value)} />
                 </Field>
               )}
               {showBank && (
                 <Field label="Bank Name">
-                  <Input value={form.bankName} onChange={(e) => set('bankName', e.target.value)} />
+                  <Input value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} />
                 </Field>
               )}
               <Field label="Notes">
-                <Textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} />
+                <Textarea value={form.notes} onChange={(e) => setField('notes', e.target.value)} rows={2} />
               </Field>
             </div>
           </Card>
