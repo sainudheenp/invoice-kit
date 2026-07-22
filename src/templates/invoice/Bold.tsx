@@ -81,7 +81,7 @@ export function InvoiceBold(d: InvTemplateData): string {
 
   <table>
     <thead>
-    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax</th><th>Total</th></tr>
+    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
   </thead>
     ${rows}
   </table>

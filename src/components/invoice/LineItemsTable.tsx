@@ -39,7 +39,7 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
               <th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[40%]">Description</th>
               <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[10%]">Qty</th>
               <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[15%]">Rate</th>
-              <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[18%]">Tax</th>
+              <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[18%]">Tax %</th>
               <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[17%]">Total</th>
               <th className="pb-2 w-[5%]"></th>
             </tr>

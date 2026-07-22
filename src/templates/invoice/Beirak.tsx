@@ -80,7 +80,7 @@ export function InvoiceBeirak(d: InvTemplateData): string {
 
 <table class="items">
   <thead>
-    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax</th><th>Total</th></tr>
+    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>
