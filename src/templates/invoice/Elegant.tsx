@@ -8,14 +8,14 @@ export function InvoiceElegant(d: InvTemplateData): string {
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
     const total = item.amount + taxAmt
+    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
     <tr${i % 2 === 1 ? ' style="background:#faf6ee;"' : ''}>
       <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:center;">${i + 1}</td>
       <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;">${esc(item.desc)}</td>
       <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:right;">${item.qty}</td>
       <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:right;">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>
+      <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:right;">${taxDisplay}</td>
       <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
@@ -43,7 +43,7 @@ export function InvoiceElegant(d: InvTemplateData): string {
   table { width:100%; border-collapse:collapse; }
   th { font-family:'Helvetica','Arial',sans-serif; font-size:8px; color:#8b7d62; font-weight:bold; padding:5px 8px; border-bottom:2px solid ${p}; text-align:left; text-transform:uppercase; letter-spacing:0.8px; }
   th:nth-child(1){ width:30px; text-align:center; }
-  th:nth-child(3), th:nth-child(4), th:nth-child(6), th:nth-child(7){ text-align:right; }
+  th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6){ text-align:right; }
   .total-box { margin-top:14px; margin-left:auto; width:280px; border:1px solid #d4c5a9; background:#faf6ee; padding:10px 14px; }
   .total-box .r { display:flex; justify-content:space-between; padding:2px 0; font-size:10px; color:#4a3f30; }
   .total-box .r.gr { font-weight:bold; font-size:13px; color:${p}; border-top:1px solid ${p}66; padding-top:5px; margin-top:3px; }
@@ -92,7 +92,7 @@ export function InvoiceElegant(d: InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax%</th><th>Tax</th><th>Total</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>

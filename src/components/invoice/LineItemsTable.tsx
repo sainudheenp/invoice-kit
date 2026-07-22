@@ -45,8 +45,7 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
               <th className="py-2 px-2 text-left">Description</th>
               <th className="py-2 px-2 text-right w-20">Qty</th>
               <th className="py-2 px-2 text-right w-28">Price</th>
-              <th className="py-2 px-2 text-right w-20">Tax%</th>
-              <th className="py-2 px-2 text-right w-24">Tax</th>
+              <th className="py-2 px-2 text-right w-32">Tax</th>
               <th className="py-2 px-2 text-right w-28">Total</th>
             </tr>
           </thead>
@@ -85,18 +84,22 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
                     />
                   </td>
                   <td className="py-1.5 px-2">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      value={item.taxRate || 0}
-                      onChange={(e) => updateItem(idx, 'taxRate', e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
-                    />
-                  </td>
-                  <td className="py-1.5 px-2 text-right font-medium">
-                    {(item.taxRate || 0) > 0 ? taxAmt.toFixed(dp) : '-'}
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={item.taxRate || 0}
+                        onChange={(e) => updateItem(idx, 'taxRate', e.target.value)}
+                        className="w-16 px-2 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                      />
+                      {(item.taxRate || 0) > 0 && (
+                        <span className="text-xs text-[var(--color-text2)] whitespace-nowrap">
+                          ({taxAmt.toFixed(dp)})
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-1.5 px-2 text-right font-medium">
                     {(item.amount + taxAmt).toFixed(dp)}

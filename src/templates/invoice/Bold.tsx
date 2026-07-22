@@ -8,14 +8,14 @@ export function InvoiceBold(d: InvTemplateData): string {
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
     const total = item.amount + taxAmt
+    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
     <tr${i % 2 === 1 ? ' style="background:#fef2f2;"' : ''}>
       <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${i + 1}</td>
       <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${esc(item.desc)}</td>
       <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${item.qty}</td>
       <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${(item.taxRate || 0) > 0 ? item.taxRate + '%' : '-'}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${(item.taxRate || 0) > 0 ? d.cur.symbol + taxAmt.toFixed(d.dp) : '-'}</td>
+      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${taxDisplay}</td>
       <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:bold;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
@@ -83,7 +83,7 @@ export function InvoiceBold(d: InvTemplateData): string {
 
   <table>
     <thead>
-    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax%</th><th>Tax</th><th>Total</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Price</th><th>Tax</th><th>Total</th></tr>
   </thead>
     ${rows}
   </table>

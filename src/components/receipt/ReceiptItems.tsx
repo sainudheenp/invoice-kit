@@ -70,18 +70,22 @@ export function ReceiptItems({ items, onChange, dp }: Props) {
               <div className="w-24 text-right text-sm font-semibold text-[var(--color-text)] tabular-nums">
                 {item.amount.toFixed(dp)}
               </div>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.01"
-                value={item.taxRate || 0}
-                onChange={(e) => updateItem(idx, 'taxRate', e.target.value)}
-                className="w-16 px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-white dark:bg-[#3a3a3a] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
-                placeholder="Tax%"
-              />
-              <div className="w-20 text-right text-xs text-[var(--color-text2)] tabular-nums">
-                {(item.taxRate || 0) > 0 ? taxAmt.toFixed(dp) : '-'}
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={item.taxRate || 0}
+                  onChange={(e) => updateItem(idx, 'taxRate', e.target.value)}
+                  className="w-16 px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-white dark:bg-[#3a3a3a] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                  placeholder="Tax%"
+                />
+                {(item.taxRate || 0) > 0 && (
+                  <span className="text-xs text-[var(--color-text2)] whitespace-nowrap tabular-nums">
+                    ({taxAmt.toFixed(dp)})
+                  </span>
+                )}
               </div>
               {items.length > 1 && (
                 <button
