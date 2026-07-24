@@ -5,7 +5,9 @@ import { Card, CardHeader, Button, Modal } from '@/components/ui'
 import { Svg } from '@/icons'
 import { CUR_PRESETS } from '@/utils/currencyPresets'
 import { defCompany } from '@/utils/defCompany'
-import { exportBackupData, validateBackupFile, type BackupPayload } from '@/utils/backup'
+import { exportBackupData, validateBackupFile, createLocalSnapshot, listLocalSnapshots, deleteLocalSnapshot, type BackupPayload } from '@/utils/backup'
+import { requestGoogleAccessToken, uploadToAppDataFolder, listAppDataBackups, downloadAppDataFile, deleteAppDataFile, type CloudBackupFile } from '@/utils/googleDrive'
+import type { LocalSnapshot } from '@/db'
 import { sampleInvData, sampleRecData, sampleQuotData, INV_TEMPLATES, REC_TEMPLATES, QUOT_TEMPLATES, applyWatermark } from '@/templates'
 import type { Company } from '@/types/company'
 
@@ -58,7 +60,120 @@ export default function Settings() {
   const [resetConfirm, setResetConfirm] = useState('')
   const [uploadField, setUploadField] = useState<'logo' | 'seal' | 'signature' | null>(null)
   const [restoreData, setRestoreData] = useState<BackupPayload | null>(null)
+  const [googleClientId, setGoogleClientId] = useState(
+    () => localStorage.getItem('ik_google_client_id') || (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || ''
+  )
+  const [googleToken, setGoogleToken] = useState<string | null>(null)
+  const [cloudBackups, setCloudBackups] = useState<CloudBackupFile[] | null>(null)
+  const [loadingCloud, setLoadingCloud] = useState(false)
+  const [localSnapshots, setLocalSnapshots] = useState<LocalSnapshot[]>([])
+  const [showDriveHelp, setShowDriveHelp] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  const refreshSnapshots = useCallback(async () => {
+    const list = await listLocalSnapshots()
+    setLocalSnapshots(list)
+  }, [])
+
+  useEffect(() => {
+    refreshSnapshots()
+  }, [refreshSnapshots])
+
+  const handleSaveGoogleClientId = (val: string) => {
+    setGoogleClientId(val)
+    localStorage.setItem('ik_google_client_id', val)
+  }
+
+  const handleConnectGoogleDrive = () => {
+    if (!googleClientId.trim()) {
+      showToast('Please enter a valid Google OAuth Client ID first.', 'err')
+      return
+    }
+    requestGoogleAccessToken(
+      googleClientId.trim(),
+      async (token) => {
+        setGoogleToken(token)
+        showToast('Connected to Google Drive!')
+        await handleFetchCloudBackups(token)
+      },
+      (err) => showToast('Google Connection failed: ' + err, 'err')
+    )
+  }
+
+  const handleUploadCloudBackup = async () => {
+    if (!googleToken) {
+      handleConnectGoogleDrive()
+      return
+    }
+    setLoadingCloud(true)
+    try {
+      const jsonStr = exportBackupData(state)
+      await uploadToAppDataFolder(googleToken, jsonStr)
+      showToast('Backup saved to Google Drive appDataFolder!')
+      await handleFetchCloudBackups(googleToken)
+    } catch (err: any) {
+      showToast('Cloud backup failed: ' + (err?.message || 'Unknown error'), 'err')
+    } finally {
+      setLoadingCloud(false)
+    }
+  }
+
+  const handleFetchCloudBackups = async (token: string) => {
+    setLoadingCloud(true)
+    try {
+      const files = await listAppDataBackups(token)
+      setCloudBackups(files)
+    } catch (err: any) {
+      showToast('Failed to list cloud backups: ' + (err?.message || 'Unknown error'), 'err')
+    } finally {
+      setLoadingCloud(false)
+    }
+  }
+
+  const handleRestoreCloudFile = async (fileId: string) => {
+    if (!googleToken) return
+    setLoadingCloud(true)
+    try {
+      const jsonStr = await downloadAppDataFile(googleToken, fileId)
+      const res = validateBackupFile(jsonStr)
+      if (!res.valid || !res.payload) {
+        showToast(res.error || 'Invalid cloud backup file.', 'err')
+        return
+      }
+      setRestoreData(res.payload)
+    } catch (err: any) {
+      showToast('Failed to download cloud backup: ' + (err?.message || 'Unknown error'), 'err')
+    } finally {
+      setLoadingCloud(false)
+    }
+  }
+
+  const handleDeleteCloudFile = async (fileId: string) => {
+    if (!googleToken) return
+    if (!confirm('Are you sure you want to delete this cloud backup?')) return
+    setLoadingCloud(true)
+    try {
+      await deleteAppDataFile(googleToken, fileId)
+      showToast('Cloud backup deleted.')
+      await handleFetchCloudBackups(googleToken)
+    } catch (err: any) {
+      showToast('Failed to delete cloud backup: ' + (err?.message || 'Unknown error'), 'err')
+    } finally {
+      setLoadingCloud(false)
+    }
+  }
+
+  const handleCreateLocalSnapshot = async () => {
+    await createLocalSnapshot(`Manual Snapshot ${new Date().toLocaleTimeString()}`, state)
+    await refreshSnapshots()
+    showToast('Local snapshot created!')
+  }
+
+  const handleDeleteLocalSnapshot = async (id: string) => {
+    await deleteLocalSnapshot(id)
+    await refreshSnapshots()
+    showToast('Snapshot deleted.')
+  }
 
   const [form, setForm] = useState(co ? parseCo(co) : null)
 
@@ -629,12 +744,169 @@ export default function Settings() {
           {/* Backup & Restore */}
           <Card id="settings-backup" data-section="backup">
             <CardHeader><h2 className="text-sm font-semibold">Backup &amp; Restore</h2></CardHeader>
-            <div className="p-5">
-              <p className="text-xs text-[var(--color-text2)] mb-4">Download all your data as a JSON file or restore from a previous backup.</p>
-              <div className="flex gap-2">
-                <Button onClick={handleExport}>Full Backup</Button>
-                <Button variant="orange" onClick={() => document.getElementById('restoreInput')?.click()}>Restore from Backup</Button>
-                <input id="restoreInput" type="file" accept=".json" className="hidden" onChange={handleImport} />
+            <div className="p-5 space-y-6">
+              {/* Local File Backup */}
+              <div>
+                <h3 className="text-xs font-semibold text-[var(--color-text1)] mb-1">Local File Backup</h3>
+                <p className="text-xs text-[var(--color-text2)] mb-3">Download all your data (companies, invoices, receipts, quotations, customers, products) as a JSON file.</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={handleExport}>Full Backup (.json)</Button>
+                  <Button variant="orange" onClick={() => document.getElementById('restoreInput')?.click()}>Restore from Backup File</Button>
+                  <input id="restoreInput" type="file" accept=".json" className="hidden" onChange={handleImport} />
+                </div>
+              </div>
+
+              <div className="h-px bg-[var(--color-border)]" />
+
+              {/* Google Drive Cloud Backup */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-xs font-semibold text-[var(--color-text1)] flex items-center gap-2">
+                    <svg className="w-4 h-4 text-blue-500" viewBox="0 0 87.3 78" fill="currentColor">
+                      <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.55z" fill="#0066da"/>
+                      <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44c-.8 1.45-1.2 3-1.2 4.55h27.5z" fill="#00ac47"/>
+                      <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l3.85-6.65c.8-1.45 1.2-3 1.2-4.55h-27.5l13.75 23.8z" fill="#ea4335"/>
+                      <path d="m43.65 25 13.75-23.8c-1.4-.8-2.95-1.2-4.55-1.2h-18.4c-1.6 0-3.15.4-4.55 1.2z" fill="#00832d"/>
+                      <path d="m59.8 53h27.5c0-1.55-.4-3.1-1.2-4.55l-25.4-44c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8z" fill="#ffba00"/>
+                    </svg>
+                    Google Drive Cloud Backup (appDataFolder)
+                  </h3>
+                  <button onClick={() => setShowDriveHelp(!showDriveHelp)} className="text-[11px] text-[var(--color-primary)] hover:underline cursor-pointer">
+                    {showDriveHelp ? 'Hide Setup Help' : 'How to Setup?'}
+                  </button>
+                </div>
+
+                <p className="text-xs text-[var(--color-text2)] mb-3">
+                  Safely store hidden application backups in your private Google Drive <code className="bg-[var(--color-input-bg)] px-1 py-0.5 rounded border border-[var(--color-border)] font-mono text-[11px]">appDataFolder</code> scope.
+                </p>
+
+                {showDriveHelp && (
+                  <div className="bg-[var(--color-input-bg)] p-3 rounded-lg border border-[var(--color-border)] mb-3 text-xs text-[var(--color-text2)] space-y-1.5">
+                    <p className="font-semibold text-[var(--color-text1)]">Setup Google Drive OAuth Client ID:</p>
+                    <ol className="list-decimal list-inside space-y-1 text-[11px]">
+                      <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] underline">Google Cloud Console Credentials</a>.</li>
+                      <li>Create a new <strong>OAuth 2.0 Client ID</strong> (Application type: <em>Web application</em>).</li>
+                      <li>Add your app origin URL under <strong>Authorized JavaScript origins</strong> (e.g., <code className="font-mono">http://localhost:5173</code>).</li>
+                      <li>Copy the Client ID and paste it into the field below, then click <strong>Connect Google Drive</strong>.</li>
+                    </ol>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-medium text-[var(--color-text2)]">Google OAuth Client ID</label>
+                    <div className="flex gap-2 mt-1">
+                      <input
+                        type="text"
+                        value={googleClientId}
+                        onChange={(e) => handleSaveGoogleClientId(e.target.value)}
+                        placeholder="e.g. 123456789-abc.apps.googleusercontent.com"
+                        className="flex-1 px-3 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-xs outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] font-mono"
+                      />
+                      <Button
+                        variant={googleToken ? 'outline' : 'default'}
+                        onClick={handleConnectGoogleDrive}
+                        className="shrink-0 text-xs py-1.5"
+                      >
+                        {googleToken ? 'Connected ✓' : 'Connect Google Drive'}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Button
+                      onClick={handleUploadCloudBackup}
+                      disabled={loadingCloud}
+                      className="text-xs py-2"
+                    >
+                      {loadingCloud ? 'Processing...' : 'Backup to Google Drive (appDataFolder)'}
+                    </Button>
+
+                    {googleToken && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleFetchCloudBackups(googleToken)}
+                        disabled={loadingCloud}
+                        className="text-xs py-2"
+                      >
+                        Refresh Cloud List
+                      </Button>
+                    )}
+                  </div>
+
+                  {cloudBackups && cloudBackups.length > 0 && (
+                    <div className="mt-3 border border-[var(--color-border)] rounded-lg overflow-hidden">
+                      <div className="bg-[var(--color-input-bg)] px-3 py-2 text-xs font-semibold border-b border-[var(--color-border)] text-[var(--color-text1)]">
+                        Cloud Backups in appDataFolder ({cloudBackups.length})
+                      </div>
+                      <div className="divide-y divide-[var(--color-border)] max-h-48 overflow-y-auto">
+                        {cloudBackups.map((cb) => (
+                          <div key={cb.id} className="p-2.5 flex items-center justify-between text-xs hover:bg-[var(--color-input-bg)] transition-colors">
+                            <div>
+                              <div className="font-medium text-[var(--color-text1)]">{cb.name}</div>
+                              <div className="text-[10px] text-[var(--color-text3)]">
+                                {new Date(cb.createdTime).toLocaleString()} &middot; {(cb.size / 1024).toFixed(1)} KB
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="orange" size="sm" onClick={() => handleRestoreCloudFile(cb.id)} className="text-[11px] px-2 py-1">Restore</Button>
+                              <Button variant="danger" size="sm" onClick={() => handleDeleteCloudFile(cb.id)} className="text-[11px] px-2 py-1">Delete</Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="h-px bg-[var(--color-border)]" />
+
+              {/* Local Snapshots Vault */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-xs font-semibold text-[var(--color-text1)]">Local Automatic Snapshots Vault</h3>
+                  <Button size="sm" variant="outline" onClick={handleCreateLocalSnapshot} className="text-xs py-1">
+                    + Create Snapshot Now
+                  </Button>
+                </div>
+                <p className="text-xs text-[var(--color-text2)] mb-3">Automatic local backups stored in IndexedDB for quick 1-click rollback.</p>
+
+                {localSnapshots.length === 0 ? (
+                  <p className="text-xs text-[var(--color-text3)] italic">No local snapshots created yet.</p>
+                ) : (
+                  <div className="border border-[var(--color-border)] rounded-lg overflow-hidden divide-y divide-[var(--color-border)] max-h-44 overflow-y-auto">
+                    {localSnapshots.map((snap) => (
+                      <div key={snap.id} className="p-2.5 flex items-center justify-between text-xs hover:bg-[var(--color-input-bg)] transition-colors">
+                        <div>
+                          <div className="font-medium text-[var(--color-text1)]">{snap.name}</div>
+                          <div className="text-[10px] text-[var(--color-text3)]">{new Date(snap.createdAt).toLocaleString()}</div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="orange"
+                            size="sm"
+                            onClick={async () => {
+                              const res = validateBackupFile(snap.payloadJson)
+                              if (res.valid && res.payload) setRestoreData(res.payload)
+                            }}
+                            className="text-[11px] px-2 py-1"
+                          >
+                            Restore
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => handleDeleteLocalSnapshot(snap.id)}
+                            className="text-[11px] px-2 py-1"
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </Card>

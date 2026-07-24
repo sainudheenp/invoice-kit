@@ -1,15 +1,17 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { Card, Button, Modal } from '@/components/ui'
 import { Svg } from '@/icons'
 import { uid } from '@/utils/uid'
+import { customersToCSV, parseCustomersCsv, downloadCSV } from '@/utils/csv'
 import type { CustomerRecord } from '@/types/customer'
 
 export default function Customers() {
   const { state, saveCustomerRecord, deleteCustomerRecord } = useApp()
   const { showToast } = useUI()
   const coId = state.activeId
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const [search, setSearch] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -28,6 +30,39 @@ export default function Customers() {
     c.email.toLowerCase().includes(search.toLowerCase()) ||
     c.phone.includes(search)
   )
+
+  const handleExportCsv = () => {
+    if (activeCustomers.length === 0) {
+      showToast('No customers to export.', 'err')
+      return
+    }
+    const csv = customersToCSV(activeCustomers)
+    downloadCSV(csv, `customers_${new Date().toISOString().slice(0, 10)}.csv`)
+    showToast('Exported customers to CSV!')
+  }
+
+  const handleImportCsv = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !coId) return
+    const reader = new FileReader()
+    reader.onload = async () => {
+      try {
+        const records = parseCustomersCsv(reader.result as string, coId)
+        if (records.length === 0) {
+          showToast('No valid customer records found in CSV file.', 'err')
+          return
+        }
+        for (const r of records) {
+          await saveCustomerRecord(r)
+        }
+        showToast(`Imported ${records.length} customers!`)
+      } catch {
+        showToast('Failed to parse customer CSV.', 'err')
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
 
   const openAdd = () => {
     setEditingCust(null)

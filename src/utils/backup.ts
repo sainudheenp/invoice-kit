@@ -211,3 +211,50 @@ export async function executeRestore(
     allData: { companies, invoices, receipts, quotations, customers, products, activeId },
   }
 }
+
+/**
+ * Creates a local automatic snapshot in IndexedDB (retains max 10 recent snapshots).
+ */
+export async function createLocalSnapshot(
+  name: string,
+  state: {
+    companies: Company[]
+    invoices: Invoice[]
+    receipts: Receipt[]
+    quotations: Quotation[]
+    customers: CustomerRecord[]
+    products: ProductRecord[]
+    activeId: string | null
+  }
+): Promise<void> {
+  const jsonStr = exportBackupData(state)
+  const snapshot = {
+    id: `snap_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    name,
+    createdAt: Date.now(),
+    payloadJson: jsonStr,
+  }
+  await db.snapshots.put(snapshot)
+
+  // Enforce max 10 snapshots limit
+  const allSnaps = await db.snapshots.orderBy('createdAt').toArray()
+  if (allSnaps.length > 10) {
+    const toDelete = allSnaps.slice(0, allSnaps.length - 10)
+    await Promise.all(toDelete.map((s) => db.snapshots.delete(s.id)))
+  }
+}
+
+/**
+ * Lists all local snapshots stored in IndexedDB.
+ */
+export async function listLocalSnapshots() {
+  return await db.snapshots.orderBy('createdAt').reverse().toArray()
+}
+
+/**
+ * Deletes a local snapshot by ID.
+ */
+export async function deleteLocalSnapshot(id: string): Promise<void> {
+  await db.snapshots.delete(id)
+}
+
