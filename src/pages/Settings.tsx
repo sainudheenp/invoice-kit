@@ -5,6 +5,7 @@ import { Card, CardHeader, Button, Modal } from '@/components/ui'
 import { Svg } from '@/icons'
 import { CUR_PRESETS } from '@/utils/currencyPresets'
 import { defCompany } from '@/utils/defCompany'
+import { exportBackupData, validateBackupFile, type BackupPayload } from '@/utils/backup'
 import { sampleInvData, sampleRecData, sampleQuotData, INV_TEMPLATES, REC_TEMPLATES, QUOT_TEMPLATES, applyWatermark } from '@/templates'
 import type { Company } from '@/types/company'
 
@@ -50,12 +51,13 @@ const IMAGE_INFO = {
 } as const
 
 export default function Settings() {
-  const { state, getCo, saveCompany, deleteCompany, setActive, resetAll, saveInvoice, saveReceipt, saveQuotation } = useApp()
+  const { state, getCo, saveCompany, deleteCompany, setActive, resetAll, restoreBackup } = useApp()
   const { ui, toggleDark, showToast, showResetModal, hideResetModal, showPreview } = useUI()
   const co = getCo()
   const [activeSection, setActiveSection] = useState('profiles')
   const [resetConfirm, setResetConfirm] = useState('')
   const [uploadField, setUploadField] = useState<'logo' | 'seal' | 'signature' | null>(null)
+  const [restoreData, setRestoreData] = useState<BackupPayload | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const [form, setForm] = useState(co ? parseCo(co) : null)
@@ -201,32 +203,44 @@ export default function Settings() {
   }
 
   const handleExport = () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
+    const jsonStr = exportBackupData(state)
+    const blob = new Blob([jsonStr], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
     a.download = `open_invoice_backup_${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
+    showToast('Backup downloaded successfully!')
   }
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = async () => {
-      try {
-        const data = JSON.parse(reader.result as string)
-        if (Array.isArray(data.companies)) {
-          for (const c of data.companies) await saveCompany(c)
-          if (data.invoices) for (const i of data.invoices) await saveInvoice(i)
-          if (data.receipts) for (const r of data.receipts) await saveReceipt(r)
-          if (data.quotations) for (const q of data.quotations) await saveQuotation(q)
-          showToast('Data imported!')
-        }
-      } catch { showToast('Invalid file.', 'err') }
+    reader.onload = () => {
+      const res = validateBackupFile(reader.result as string)
+      if (!res.valid || !res.payload) {
+        showToast(res.error || 'Invalid backup file.', 'err')
+        return
+      }
+      setRestoreData(res.payload)
     }
     reader.readAsText(file)
+    e.target.value = ''
+  }
+
+  const handleConfirmRestore = async (mode: 'merge' | 'replace') => {
+    if (!restoreData) return
+    try {
+      const counts = await restoreBackup(restoreData, mode)
+      setRestoreData(null)
+      showToast(
+        `Restored: ${counts.companies} companies, ${counts.invoices} invoices, ${counts.receipts} receipts, ${counts.quotations} quotations, ${counts.customers} customers, ${counts.products} products`
+      )
+    } catch (err: any) {
+      showToast('Restore failed: ' + (err?.message || 'Unknown error'), 'err')
+    }
   }
 
   const handleReset = async () => {
@@ -702,6 +716,60 @@ export default function Settings() {
             </div>
           )
         })()}
+      </Modal>
+
+      {/* Restore Modal */}
+      <Modal open={restoreData !== null} onClose={() => setRestoreData(null)} maxW="500px">
+        {restoreData && (
+          <div>
+            <h2 className="text-lg font-bold mb-1">Restore Backup</h2>
+            <p className="text-xs text-[var(--color-text2)] mb-4">
+              {restoreData.metadata?.exportedAt
+                ? `Exported on ${new Date(restoreData.metadata.exportedAt).toLocaleString()}`
+                : 'Backup file selected'}
+            </p>
+
+            <div className="bg-[var(--color-input-bg)] p-3 rounded-lg border border-[var(--color-border)] mb-4 text-xs">
+              <div className="font-semibold text-[var(--color-text1)] mb-2">Backup Contents Overview:</div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[var(--color-text2)]">
+                <div>Companies: <strong className="text-[var(--color-text1)]">{restoreData.companies.length}</strong></div>
+                <div>Invoices: <strong className="text-[var(--color-text1)]">{restoreData.invoices.length}</strong></div>
+                <div>Receipts: <strong className="text-[var(--color-text1)]">{restoreData.receipts.length}</strong></div>
+                <div>Quotations: <strong className="text-[var(--color-text1)]">{restoreData.quotations.length}</strong></div>
+                <div>Customers: <strong className="text-[var(--color-text1)]">{restoreData.customers.length}</strong></div>
+                <div>Products: <strong className="text-[var(--color-text1)]">{restoreData.products.length}</strong></div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-xs font-medium text-[var(--color-text1)]">Choose Restore Mode:</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => handleConfirmRestore('merge')}
+                  className="justify-center py-2.5 text-xs"
+                >
+                  Merge with Existing
+                </Button>
+                <Button
+                  variant="orange"
+                  onClick={() => handleConfirmRestore('replace')}
+                  className="justify-center py-2.5 text-xs"
+                >
+                  Replace All Data
+                </Button>
+              </div>
+              <p className="text-[11px] text-[var(--color-text3)] text-center">
+                <strong>Merge</strong> adds or updates records without deleting present data.<br />
+                <strong>Replace All</strong> wipes existing local database clean before restoring.
+              </p>
+            </div>
+
+            <div className="flex justify-end mt-4">
+              <Button variant="outline" size="sm" onClick={() => setRestoreData(null)}>Cancel</Button>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* Reset Modal */}

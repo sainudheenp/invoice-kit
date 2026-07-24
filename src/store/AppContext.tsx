@@ -8,6 +8,7 @@ import type { ProductRecord } from '@/types/product'
 import type { EditingDoc } from '@/types'
 import { db } from '@/db'
 import { uid } from '@/utils/uid'
+import { executeRestore, type BackupPayload, type ImportResult } from '@/utils/backup'
 
 const STORAGE_ACTIVE_ID_KEY = 'ik_activeId'
 
@@ -166,6 +167,7 @@ interface AppContextValue {
     subtotal: number; vatPct: number; vatAmt: number; discount: number; grand: number
     notes: string; terms: string
   }) => Promise<Quotation>
+  restoreBackup: (payload: BackupPayload, mode: 'merge' | 'replace') => Promise<ImportResult>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -416,6 +418,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return quot
   }
 
+  const restoreBackup = async (payload: BackupPayload, mode: 'merge' | 'replace'): Promise<ImportResult> => {
+    const { counts, allData } = await executeRestore(payload, mode)
+    dispatch({
+      type: 'SET_ALL',
+      payload: {
+        ...allData,
+        editingDoc: null,
+        dbError: null,
+      },
+    })
+    return counts
+  }
+
   return (
     <AppContext.Provider value={{
       state, dispatch, loading,
@@ -427,6 +442,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       saveProductRecord, deleteProductRecord,
       setEditing, resetAll,
       createInvoice, createReceipt, createQuotation,
+      restoreBackup,
     }}>
       {children}
     </AppContext.Provider>
