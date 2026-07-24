@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { Card, Button, Modal } from '@/components/ui'
 import { Svg } from '@/icons'
 import { uid } from '@/utils/uid'
 import { dp as getDp } from '@/utils'
+import { productsToCSV, parseProductsCsv, downloadCSV } from '@/utils/csv'
 import type { ProductRecord } from '@/types/product'
 
 export default function Products() {
@@ -12,6 +13,7 @@ export default function Products() {
   const { showToast } = useUI()
   const co = getCo()
   const coId = co?.id
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
@@ -30,6 +32,39 @@ export default function Products() {
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     p.desc.toLowerCase().includes(search.toLowerCase())
   )
+
+  const handleExportCsv = () => {
+    if (activeProducts.length === 0) {
+      showToast('No products to export.', 'err')
+      return
+    }
+    const csv = productsToCSV(activeProducts, cur?.symbol || '')
+    downloadCSV(csv, `products_${new Date().toISOString().slice(0, 10)}.csv`)
+    showToast('Exported products to CSV!')
+  }
+
+  const handleImportCsv = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !coId) return
+    const reader = new FileReader()
+    reader.onload = async () => {
+      try {
+        const records = parseProductsCsv(reader.result as string, coId)
+        if (records.length === 0) {
+          showToast('No valid product records found in CSV file.', 'err')
+          return
+        }
+        for (const r of records) {
+          await saveProductRecord(r)
+        }
+        showToast(`Imported ${records.length} products!`)
+      } catch {
+        showToast('Failed to parse product CSV.', 'err')
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
 
   const openAdd = () => {
     setEditingProd(null)
@@ -97,9 +132,18 @@ export default function Products() {
           <h1 className="text-xl font-bold">Products & Services</h1>
           <p className="text-sm text-[var(--color-text2)]">Manage items and pricing for quickly populating line items.</p>
         </div>
-        <Button onClick={openAdd} className="sm:self-center">
-          <span className="text-lg leading-none">+</span> Add Item
-        </Button>
+        <div className="flex flex-wrap items-center gap-2 sm:self-center">
+          <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()} className="text-xs">
+            Import CSV
+          </Button>
+          <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleImportCsv} />
+          <Button variant="outline" size="sm" onClick={handleExportCsv} className="text-xs">
+            Export CSV
+          </Button>
+          <Button onClick={openAdd} size="sm" className="text-xs">
+            <span className="text-sm leading-none">+</span> Add Item
+          </Button>
+        </div>
       </div>
 
       <div className="mb-5 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] max-w-md">

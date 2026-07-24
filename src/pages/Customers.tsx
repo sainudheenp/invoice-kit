@@ -131,9 +131,18 @@ export default function Customers() {
           <h1 className="text-xl font-bold">Customers</h1>
           <p className="text-sm text-[var(--color-text2)]">Manage customer directory for auto-filling documents.</p>
         </div>
-        <Button onClick={openAdd} className="sm:self-center">
-          <span className="text-lg leading-none">+</span> Add Customer
-        </Button>
+        <div className="flex flex-wrap items-center gap-2 sm:self-center">
+          <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()} className="text-xs">
+            Import CSV
+          </Button>
+          <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleImportCsv} />
+          <Button variant="outline" size="sm" onClick={handleExportCsv} className="text-xs">
+            Export CSV
+          </Button>
+          <Button onClick={openAdd} size="sm" className="text-xs">
+            <span className="text-sm leading-none">+</span> Add Customer
+          </Button>
+        </div>
       </div>
 
       <div className="mb-5 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] max-w-md">
