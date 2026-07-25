@@ -60,14 +60,10 @@ export default function Settings() {
   const [resetConfirm, setResetConfirm] = useState('')
   const [uploadField, setUploadField] = useState<'logo' | 'seal' | 'signature' | null>(null)
   const [restoreData, setRestoreData] = useState<BackupPayload | null>(null)
-  const [googleClientId, setGoogleClientId] = useState(
-    () => localStorage.getItem('ik_google_client_id') || (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || ''
-  )
   const [googleToken, setGoogleToken] = useState<string | null>(null)
   const [cloudBackups, setCloudBackups] = useState<CloudBackupFile[] | null>(null)
   const [loadingCloud, setLoadingCloud] = useState(false)
   const [localSnapshots, setLocalSnapshots] = useState<LocalSnapshot[]>([])
-  const [showDriveHelp, setShowDriveHelp] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const refreshSnapshots = useCallback(async () => {
@@ -79,18 +75,14 @@ export default function Settings() {
     refreshSnapshots()
   }, [refreshSnapshots])
 
-  const handleSaveGoogleClientId = (val: string) => {
-    setGoogleClientId(val)
-    localStorage.setItem('ik_google_client_id', val)
-  }
-
   const handleConnectGoogleDrive = () => {
-    if (!googleClientId.trim()) {
-      showToast('Please enter a valid Google OAuth Client ID first.', 'err')
+    const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || localStorage.getItem('ik_google_client_id') || ''
+    if (!clientId.trim()) {
+      showToast('Google Client ID is not configured.', 'err')
       return
     }
     requestGoogleAccessToken(
-      googleClientId.trim(),
+      clientId.trim(),
       async (token) => {
         setGoogleToken(token)
         showToast('Connected to Google Drive!')
@@ -109,7 +101,7 @@ export default function Settings() {
     try {
       const jsonStr = exportBackupData(state)
       await uploadToAppDataFolder(googleToken, jsonStr)
-      showToast('Backup saved to Google Drive appDataFolder!')
+      showToast('Backup saved to Google Drive!')
       await handleFetchCloudBackups(googleToken)
     } catch (err: any) {
       showToast('Cloud backup failed: ' + (err?.message || 'Unknown error'), 'err')
@@ -769,85 +761,55 @@ export default function Settings() {
                       <path d="m43.65 25 13.75-23.8c-1.4-.8-2.95-1.2-4.55-1.2h-18.4c-1.6 0-3.15.4-4.55 1.2z" fill="#00832d"/>
                       <path d="m59.8 53h27.5c0-1.55-.4-3.1-1.2-4.55l-25.4-44c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8z" fill="#ffba00"/>
                     </svg>
-                    Google Drive Cloud Backup (appDataFolder)
+                    Google Drive Cloud Backup
                   </h3>
-                  <button onClick={() => setShowDriveHelp(!showDriveHelp)} className="text-[11px] text-[var(--color-primary)] hover:underline cursor-pointer">
-                    {showDriveHelp ? 'Hide Setup Help' : 'How to Setup?'}
-                  </button>
+                  {googleToken && (
+                    <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                      Connected ✓
+                    </span>
+                  )}
                 </div>
 
                 <p className="text-xs text-[var(--color-text2)] mb-3">
-                  Safely store hidden application backups in your private Google Drive <code className="bg-[var(--color-input-bg)] px-1 py-0.5 rounded border border-[var(--color-border)] font-mono text-[11px]">appDataFolder</code> scope.
+                  Safely store and restore your application backups in Google Drive.
                 </p>
 
-                {showDriveHelp && (
-                  <div className="bg-[var(--color-input-bg)] p-3 rounded-lg border border-[var(--color-border)] mb-3 text-xs text-[var(--color-text2)] space-y-1.5">
-                    <p className="font-semibold text-[var(--color-text1)]">Setup Google Drive OAuth Client ID:</p>
-                    <ol className="list-decimal list-inside space-y-1 text-[11px]">
-                      <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] underline">Google Cloud Console Credentials</a>.</li>
-                      <li>Create a new <strong>OAuth 2.0 Client ID</strong> (Application type: <em>Web application</em>).</li>
-                      <li>Add your app origin URL under <strong>Authorized JavaScript origins</strong> (e.g., <code className="font-mono">http://localhost:5173</code>).</li>
-                      <li>Copy the Client ID and paste it into the field below, then click <strong>Connect Google Drive</strong>.</li>
-                    </ol>
-                  </div>
-                )}
-
                 <div className="space-y-3">
-                  <div>
-                    <label className="text-xs font-medium text-[var(--color-text2)]">Google OAuth Client ID</label>
-                    <div className="flex gap-2 mt-1">
-                      <input
-                        type="text"
-                        value={googleClientId}
-                        onChange={(e) => handleSaveGoogleClientId(e.target.value)}
-                        placeholder="e.g. 123456789-abc.apps.googleusercontent.com"
-                        className="flex-1 px-3 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-xs outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] font-mono"
-                      />
-                      <Button
-                        variant={googleToken ? 'outline' : 'default'}
-                        onClick={handleConnectGoogleDrive}
-                        className="shrink-0 text-xs py-1.5"
-                      >
-                        {googleToken ? 'Connected ✓' : 'Connect Google Drive'}
-                      </Button>
-                    </div>
-                  </div>
-
                   <div className="flex flex-wrap gap-2 pt-1">
-                    <Button
-                      onClick={handleUploadCloudBackup}
-                      disabled={loadingCloud}
-                      className="text-xs py-2"
-                    >
-                      {loadingCloud ? 'Processing...' : 'Backup to Google Drive (appDataFolder)'}
-                    </Button>
-
-                    {googleToken && (
-                      <Button
-                        variant="outline"
-                        onClick={() => handleFetchCloudBackups(googleToken)}
-                        disabled={loadingCloud}
-                        className="text-xs py-2"
-                      >
-                        Refresh Cloud List
+                    {!googleToken ? (
+                      <Button onClick={handleConnectGoogleDrive} className="text-xs py-2">
+                        Connect Google Drive
                       </Button>
+                    ) : (
+                      <>
+                        <Button
+                          onClick={handleUploadCloudBackup}
+                          disabled={loadingCloud}
+                          className="text-xs py-2"
+                        >
+                          {loadingCloud ? 'Processing...' : 'Backup to Google Drive'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleFetchCloudBackups(googleToken)}
+                          disabled={loadingCloud}
+                          className="text-xs py-2"
+                        >
+                          Refresh Cloud List
+                        </Button>
+                      </>
                     )}
                   </div>
 
                   {cloudBackups && cloudBackups.length > 0 && (
                     <div className="mt-3 border border-[var(--color-border)] rounded-lg overflow-hidden">
                       <div className="bg-[var(--color-input-bg)] px-3 py-2 text-xs font-semibold border-b border-[var(--color-border)] text-[var(--color-text1)]">
-                        Cloud Backups in appDataFolder ({cloudBackups.length})
+                        Cloud Backups ({cloudBackups.length})
                       </div>
                       <div className="divide-y divide-[var(--color-border)] max-h-48 overflow-y-auto">
                         {cloudBackups.map((cb) => (
                           <div key={cb.id} className="p-2.5 flex items-center justify-between text-xs hover:bg-[var(--color-input-bg)] transition-colors">
-                            <div>
-                              <div className="font-medium text-[var(--color-text1)]">{cb.name}</div>
-                              <div className="text-[10px] text-[var(--color-text3)]">
-                                {new Date(cb.createdTime).toLocaleString()} &middot; {(cb.size / 1024).toFixed(1)} KB
-                              </div>
-                            </div>
+                            <div className="font-medium text-[var(--color-text1)]">{cb.name}</div>
                             <div className="flex gap-2">
                               <Button variant="orange" size="sm" onClick={() => handleRestoreCloudFile(cb.id)} className="text-[11px] px-2 py-1">Restore</Button>
                               <Button variant="danger" size="sm" onClick={() => handleDeleteCloudFile(cb.id)} className="text-[11px] px-2 py-1">Delete</Button>

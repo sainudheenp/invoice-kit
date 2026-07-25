@@ -6,11 +6,13 @@ import { CUR_PRESETS } from '@/utils/currencyPresets'
 import { validateBackupFile } from '@/utils/backup'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
+import { requestGoogleAccessToken, listAppDataBackups, downloadAppDataFile, type CloudBackupFile } from '@/utils/googleDrive'
+import { listLocalSnapshots } from '@/utils/backup'
 
 const IMAGE_INFO = {
-  logo: { dim: '200\u00D7200px', desc: 'Square, transparent background', note: 'Displays at 80\u00D780px on documents' },
-  seal: { dim: '300\u00D7300px', desc: 'Square, transparent background', note: 'Displays at 120\u00D7120px on documents' },
-  signature: { dim: '400\u00D7150px', desc: 'Wide, transparent background', note: 'Displays at 140\u00D770px on documents' },
+  logo: { dim: '200×200px', desc: 'Square, transparent background', note: 'Displays at 80×80px on documents' },
+  seal: { dim: '300×300px', desc: 'Square, transparent background', note: 'Displays at 120×120px on documents' },
+  signature: { dim: '400×150px', desc: 'Wide, transparent background', note: 'Displays at 140×70px on documents' },
 } as const
 
 const STEPS = ['Company', 'Contact', 'Branding'] as const
@@ -24,7 +26,6 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
   const [companyId, setCompanyId] = useState<string | null>(null)
   const [uploadField, setUploadField] = useState<'logo' | 'seal' | 'signature' | null>(null)
   const [dragOverField, setDragOverField] = useState<'logo' | 'seal' | 'signature' | null>(null)
-
   const [form, setForm] = useState({
     name: '', nameAr: '', sub: '', subAr: '',
     tel: '', mob: '', email: '', cr: '', loc: '',
@@ -33,6 +34,15 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
     pcolor: '#D97706', acolor: '#78716C',
   })
   const [error, setError] = useState('')
+
+  // New state for Google Drive and local restore
+  const [googleToken, setGoogleToken] = useState<string | null>(null)
+  const [cloudBackups, setCloudBackups] = useState<CloudBackupFile[] | null>(null)
+  const [loadingCloud, setLoadingCloud] = useState(false)
+  const [showCloudRestore, setShowCloudRestore] = useState(false)
+  const [showLocalRestore, setShowLocalRestore] = useState(false)
+  const [localSnapshots, setLocalSnapshots] = useState<any[]>([])
+
 
   const set = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }))
 
@@ -118,6 +128,95 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
       showToast('Invalid backup file', 'err')
     }
     if (fileRef.current) fileRef.current.value = ''
+  }
+
+  // Google Drive connection
+  const handleConnectGoogleDrive = () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
+    if (!clientId) {
+      showToast('Google Client ID not set.', 'err')
+      return
+    }
+    requestGoogleAccessToken(clientId, (token) => {
+      setGoogleToken(token)
+      showToast('Connected to Google Drive!')
+      handleFetchCloudBackups(token)
+    }, (err) => showToast('Google Connection failed: ' + err, 'err'))
+  }
+
+  const handleFetchCloudBackups = async (token: string) => {
+    setLoadingCloud(true)
+    try {
+      const files = await listAppDataBackups(token)
+      setCloudBackups(files)
+    } catch (err: any) {
+      showToast('Failed to list cloud backups: ' + (err?.message || 'Unknown error'), 'err')
+    } finally {
+      setLoadingCloud(false)
+    }
+  }
+
+  const handleRestoreCloudFile = async (fileId: string) => {
+    if (!googleToken) {
+      showToast('Not connected to Google Drive.', 'err')
+      return
+    }
+    try {
+      const text = await downloadAppDataFile(googleToken, fileId)
+      const res = validateBackupFile(text)
+      if (!res.valid || !res.payload) {
+        showToast(res.error || 'Invalid backup file', 'err')
+        return
+      }
+      await restoreBackup(res.payload, 'replace')
+      showToast('Cloud backup restored successfully!')
+      onDone()
+    } catch (err: any) {
+      showToast('Failed to restore cloud backup: ' + (err?.message || 'Unknown error'), 'err')
+    }
+  }
+
+  const handleDeleteCloudFile = async (fileId: string) => {
+    if (!googleToken) {
+      showToast('Not connected to Google Drive.', 'err')
+      return
+    }
+    try {
+      await deleteAppDataFile(googleToken, fileId)
+      showToast('Cloud backup deleted.')
+      // Refresh list
+      await handleFetchCloudBackups(googleToken)
+    } catch (err: any) {
+      showToast('Failed to delete cloud backup: ' + (err?.message || 'Unknown error'), 'err')
+    }
+  }
+
+  // Local restore
+  const loadLocalSnapshots = async () => {
+    try {
+      const snaps = await listLocalSnapshots()
+      setLocalSnapshots(snaps)
+    } catch {
+      setLocalSnapshots([])
+    }
+  }
+
+  const handleRestoreLocalSnapshot = async (payloadJson: string) => {
+    const res = validateBackupFile(payloadJson)
+    if (!res.valid || !res.payload) {
+      showToast(res.error || 'Invalid snapshot', 'err')
+      return
+    }
+    await restoreBackup(res.payload, 'replace')
+    showToast('Local snapshot restored.')
+    onDone()
+  }
+
+  // Trigger load when restore panel opened
+  const toggleShowLocalRestore = async () => {
+    const newVal = !showLocalRestore
+    setShowLocalRestore(newVal)
+    if (newVal) await loadLocalSnapshots()
   }
 
   return (
@@ -298,6 +397,57 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
           Import from File
         </Button>
         <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+
+        {/* Google Drive Restore Section */}
+        <div className="mt-6">
+          {googleToken ? (
+            <>
+              <Button variant="primary" className="w-full mb-2" onClick={() => setShowCloudRestore(!showCloudRestore)}>
+                {showCloudRestore ? 'Hide Cloud Backups' : 'Show Cloud Backups'}
+              </Button>
+              {showCloudRestore && (
+                <div className="space-y-2">
+                  {cloudBackups && cloudBackups.length > 0 ? (
+                    cloudBackups.map((cb) => (
+                      <div key={cb.id} className="p-2 flex justify-between items-center bg-[var(--color-input-bg)] rounded">
+                        <div className="font-medium text-[var(--color-text1)]">{cb.name}</div>
+                        <Button variant="orange" size="sm" onClick={() => handleRestoreCloudFile(cb.id)} className="text-[11px] px-2 py-1">Restore</Button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-[var(--color-text2)]">No cloud backups found.</div>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <Button variant="primary" className="w-full" onClick={handleConnectGoogleDrive}>Connect Google Drive</Button>
+          )}
+        </div>
+
+        {/* Local Snapshot Restore Section */}
+        <div className="mt-6">
+          <Button variant="primary" className="w-full" onClick={toggleShowLocalRestore}>
+            {showLocalRestore ? 'Hide Local Snapshots' : 'Show Local Snapshots'}
+          </Button>
+          {showLocalRestore && (
+            <div className="mt-2 space-y-2">
+              {localSnapshots.length > 0 ? (
+                localSnapshots.map((snap) => (
+                  <div key={snap.id} className="p-2 flex justify-between items-center bg-[var(--color-input-bg)] rounded">
+                    <div>
+                      <div className="font-medium text-[var(--color-text1)]">{snap.name}</div>
+                      <div className="text-[10px] text-[var(--color-text3)]">{new Date(snap.createdAt).toLocaleString()}</div>
+                    </div>
+                    <Button variant="orange" size="sm" onClick={() => handleRestoreLocalSnapshot(snap.payloadJson)} className="text-[11px] px-2 py-1">Restore</Button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-[var(--color-text2)]">No local snapshots.</div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Upload Info Modal */}
