@@ -4,7 +4,7 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceMinimal(d: InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#94a3b8'
 
-  const rows = d.items.map((item, i) => {
+  const rows = d.items.map((item) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
     const total = item.amount + taxAmt
     const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'

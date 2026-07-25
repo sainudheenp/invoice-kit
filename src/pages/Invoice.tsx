@@ -42,7 +42,7 @@ export default function Invoice() {
   const { markDirty, markClean, showToast, showPreview, showPdfOverlay, hidePdfOverlay } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()
   const co = getCo()
-  const { state: form, set: setForm, undo, redo, canUndo, canRedo } = useUndoRedo<InvoiceFormState>(emptyForm())
+  const { state: form, set: setForm } = useUndoRedo<InvoiceFormState>(emptyForm())
   const [isEditing, setIsEditing] = useState(false)
 
   const cur = co?.currency

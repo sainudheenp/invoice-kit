@@ -16,7 +16,7 @@ export function useUndoRedo<T>(initial: T, maxHistory = 50): UseUndoRedoReturn<T
   const pointerRef = useRef(0)
 
   const set = useCallback((next: T) => {
-    setState((prev) => {
+    setState(() => {
       const history = historyRef.current
       const ptr = pointerRef.current
       const newHistory = history.slice(0, ptr + 1)

@@ -1,4 +1,5 @@
 import { useApp } from '@/store/AppContext'
+import { useUI } from '@/store/UIContext'
 import { Card, CardHeader, Button } from '@/components/ui'
 
 interface Props {
@@ -7,7 +8,8 @@ interface Props {
 }
 
 export function ProfilesSection({ onExport, onImport }: Props) {
-  const { state, getCo, setActive, deleteCompany, saveCompany, showToast } = useApp()
+  const { state, getCo, setActive, saveCompany } = useApp()
+  const { showToast } = useUI()
   const co = getCo()
 
   const handleNewCompany = async () => {

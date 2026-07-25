@@ -5,7 +5,7 @@ export function InvoiceProfessional(d: InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#1e3a5f'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:32px;width:auto;" alt="logo"/>` : ''
 
-  const rows = d.items.map((item, i) => {
+  const rows = d.items.map((item) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
     const total = item.amount + taxAmt
     const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'

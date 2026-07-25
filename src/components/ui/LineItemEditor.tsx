@@ -32,8 +32,6 @@ export function LineItemEditor({ items, onChange, dp, layout = 'table', showTax 
     onChange(items.filter((_, i) => i !== idx))
   }
 
-  const cols = showTax ? 5 : 4
-
   if (layout === 'card') {
     return (
       <div>
