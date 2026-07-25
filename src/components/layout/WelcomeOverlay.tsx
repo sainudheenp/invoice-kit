@@ -38,7 +38,6 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
   // New state for Google Drive and local restore
   const [googleToken, setGoogleToken] = useState<string | null>(null)
   const [cloudBackups, setCloudBackups] = useState<CloudBackupFile[] | null>(null)
-  const [loadingCloud, setLoadingCloud] = useState(false)
   const [showCloudRestore, setShowCloudRestore] = useState(false)
   const [showLocalRestore, setShowLocalRestore] = useState(false)
   const [localSnapshots, setLocalSnapshots] = useState<any[]>([])
@@ -145,14 +144,11 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
   }
 
   const handleFetchCloudBackups = async (token: string) => {
-    setLoadingCloud(true)
     try {
       const files = await listAppDataBackups(token)
       setCloudBackups(files)
     } catch (err: any) {
       showToast('Failed to list cloud backups: ' + (err?.message || 'Unknown error'), 'err')
-    } finally {
-      setLoadingCloud(false)
     }
   }
 
@@ -173,21 +169,6 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
       onDone()
     } catch (err: any) {
       showToast('Failed to restore cloud backup: ' + (err?.message || 'Unknown error'), 'err')
-    }
-  }
-
-  const handleDeleteCloudFile = async (fileId: string) => {
-    if (!googleToken) {
-      showToast('Not connected to Google Drive.', 'err')
-      return
-    }
-    try {
-      await deleteAppDataFile(googleToken, fileId)
-      showToast('Cloud backup deleted.')
-      // Refresh list
-      await handleFetchCloudBackups(googleToken)
-    } catch (err: any) {
-      showToast('Failed to delete cloud backup: ' + (err?.message || 'Unknown error'), 'err')
     }
   }
 
