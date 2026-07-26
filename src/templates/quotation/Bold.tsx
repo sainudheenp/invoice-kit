@@ -1,17 +1,17 @@
 import { esc } from '@/utils/esc'
 import type { QuotTemplateData } from '@/types/template'
 
-export function QuotationBold(d: QuotTemplateData): string {
+export function QuotationBold(d:QuotTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#dc2626'
-  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:34px;width:auto;" alt="logo"/>` : ''
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:42.5px;width:auto;" alt="logo"/>` : ''
 
   const rows = d.items.map((item, i) => `
     <tr${i % 2 === 1 ? ' style="background:#fef2f2;"' : ''}>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${i + 1}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${esc(item.desc)}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${item.qty}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:6px 8px;border-bottom:2px solid #000;font-size:11px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
+      <td style="padding:7.5px 10px;border-bottom:2.5px solid #000;font-size:13.75px;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${i + 1}</td>
+      <td style="padding:7.5px 10px;border-bottom:2.5px solid #000;font-size:13.75px;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${esc(item.desc)}</td>
+      <td style="padding:7.5px 10px;border-bottom:2.5px solid #000;font-size:13.75px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${item.qty}</td>
+      <td style="padding:7.5px 10px;border-bottom:2.5px solid #000;font-size:13.75px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:7.5px 10px;border-bottom:2.5px solid #000;font-size:13.75px;text-align:right;font-weight:${i % 2 === 1 ? 'normal' : 'bold'};">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
     </tr>
   `).join('')
 
@@ -19,33 +19,33 @@ export function QuotationBold(d: QuotTemplateData): string {
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family: 'Helvetica','Arial',sans-serif; color:#000; background:#fff; width:794px; padding:0; }
-  .top-black { background:#000; padding:24px 48px; display:flex; justify-content:space-between; align-items:center; }
-  .top-black h1 { color:#fff; font-size:26px; font-weight:900; letter-spacing:2px; text-transform:uppercase; }
-  .top-black .no { color:#aaa; font-size:11px; font-weight:bold; margin-top:2px; }
-  .brand-area { padding:16px 48px 0; display:flex; gap:10px; align-items:center; }
-  .brand-name { font-size:16px; font-weight:900; color:#000; text-transform:uppercase; }
-  .brand-sub { font-size:9px; color:#666; font-weight:bold; text-transform:uppercase; }
-  .body { padding:16px 48px 32px; }
-  .info { display:flex; justify-content:space-between; margin-bottom:20px; padding:12px 0; border-top:3px solid #000; border-bottom:3px solid #000; }
-  .info .lbl { font-size:8px; color:#666; text-transform:uppercase; letter-spacing:1px; font-weight:bold; }
-  .info .val { font-size:12px; color:#000; font-weight:bold; margin-top:2px; }
-  .info .sub { font-size:9px; color:#444; }
+  body { font-family:'Helvetica','Arial',sans-serif; color:#000; background:#fff; width:794px; padding:0; }
+  .top-black { background:#000; padding:30px 60px; display:flex; justify-content:space-between; align-items:center; }
+  .top-black h1 { color:#fff; font-size:32.5px; font-weight:900; letter-spacing:2.5px; text-transform:uppercase; }
+  .top-black .no { color:#aaa; font-size:13.75px; font-weight:bold; margin-top:2.5px; }
+  .brand-area { padding:20px 60px 0; display:flex; gap:12.5px; align-items:center; }
+  .brand-name { font-size:20px; font-weight:900; color:#000; text-transform:uppercase; }
+  .brand-sub { font-size:11.25px; color:#666; font-weight:bold; text-transform:uppercase; }
+  .body { padding:20px 60px 40px; }
+  .info { display:flex; justify-content:space-between; margin-bottom:25px; padding:15px 0; border-top:3.75px solid #000; border-bottom:3.75px solid #000; }
+  .info .lbl { font-size:10px; color:#666; text-transform:uppercase; letter-spacing:1.25px; font-weight:bold; }
+  .info .val { font-size:15px; color:#000; font-weight:bold; margin-top:2.5px; }
+  .info .sub { font-size:11.25px; color:#444; }
   table { width:100%; border-collapse:collapse; }
-  th { background:#000; color:#fff; font-size:9px; padding:8px; text-align:left; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px; }
+  th { background:#000; color:#fff; font-size:11.25px; padding:10px; text-align:left; font-weight:bold; text-transform:uppercase; letter-spacing:0.625px; }
   th:not(:first-child){ text-align:right; }
   th:nth-child(2){ text-align:left; }
-  .total { margin-top:16px; margin-left:auto; width:300px; }
-  .t { display:flex; justify-content:space-between; padding:5px 0; font-size:11px; font-weight:bold; border-bottom:1px solid #ddd; }
-  .t.gr { font-size:16px; color:${p}; border-bottom:3px solid #000; padding:8px 0; margin-top:4px; }
-  .words { font-size:10px; color:#666; font-style:italic; text-align:right; margin-top:8px; }
-  .notes { margin-top:16px; padding:12px 16px; background:#f9f9f9; border-left:4px solid ${p}; font-size:10px; color:#333; }
-  .terms { margin-top:8px; padding:12px 16px; background:#f9f9f9; border-left:4px solid #94a3b8; font-size:10px; color:#333; }
-  .sig { margin-top:24px; display:flex; justify-content:flex-end; }
+  .total { margin-top:20px; margin-left:auto; width:375px; }
+  .t { display:flex; justify-content:space-between; padding:6.25px 0; font-size:13.75px; font-weight:bold; border-bottom:1.25px solid #ddd; }
+  .t.gr { font-size:20px; color:${p}; border-bottom:3.75px solid #000; padding:10px 0; margin-top:5px; }
+  .words { font-size:12.5px; color:#666; font-style:italic; text-align:right; margin-top:10px; }
+  .notes { margin-top:20px; padding:15px 20px; background:#f9f9f9; border-left:5px solid ${p}; font-size:12.5px; color:#333; }
+  .terms { margin-top:10px; padding:15px 20px; background:#f9f9f9; border-left:5px solid #94a3b8; font-size:12.5px; color:#333; }
+  .sig { margin-top:30px; display:flex; justify-content:flex-end; }
   .sig-b { text-align:center; }
-  .sig-line { width:140px; height:2px; background:#000; margin:4px auto; }
-  .sig-label { font-size:9px; color:#666; font-weight:bold; text-transform:uppercase; }
-  .footer { background:#000; color:#fff; padding:14px 48px; font-size:9px; text-align:center; }
+  .sig-line { width:175px; height:2.5px; background:#000; margin:5px auto; }
+  .sig-label { font-size:11.25px; color:#666; font-weight:bold; text-transform:uppercase; }
+  .footer { background:#000; color:#fff; padding:17.5px 60px; font-size:11.25px; text-align:center; }
 </style></head><body>
 <div class="top-black">
   <div>
@@ -72,7 +72,7 @@ export function QuotationBold(d: QuotTemplateData): string {
     <div style="text-align:right;">
       <div class="lbl">Date</div>
       <div class="val">${esc(d.dt)}</div>
-      <div class="lbl" style="margin-top:4px;">Valid Until</div>
+      <div class="lbl" style="margin-top:5px;">Valid Until</div>
       <div class="val">${esc(d.validDt)}</div>
       ${c.vatReg ? `<div class="sub">VAT: ${esc(c.vatReg)}</div>` : ''}
     </div>
@@ -99,7 +99,7 @@ export function QuotationBold(d: QuotTemplateData): string {
 
   <div class="sig">
     <div class="sig-b">
-      ${c.signature ? `<img src="${esc(c.signature)}" style="height:28px;width:auto;" alt="sig"/>` : ''}
+      ${c.signature ? `<img src="${esc(c.signature)}" style="height:35px;width:auto;" alt="sig"/>` : ''}
       <div class="sig-line"></div>
       <div class="sig-label">Authorized Signature</div>
     </div>
@@ -108,7 +108,7 @@ export function QuotationBold(d: QuotTemplateData): string {
 
 <div class="footer">
   <strong>${esc(c.name)}</strong>${c.loc ? ` &mdash; ${esc(c.loc)}` : ''}<br>
-  ${c.tel ? `Tel: ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}
+  ${c.tel ? `Tel:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}
   ${c.bankName ? `<br>${[c.bankName, c.bankAcc].filter(Boolean).map(esc).join(' | ')}` : ''}
 </div>
 </body></html>`

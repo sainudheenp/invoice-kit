@@ -1,17 +1,17 @@
 import { esc } from '@/utils/esc'
 import type { QuotTemplateData } from '@/types/template'
 
-export function QuotationElegant(d: QuotTemplateData): string {
+export function QuotationElegant(d:QuotTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#8b6914'
-  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:30px;width:auto;" alt="logo"/>` : ''
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:37.5px;width:auto;" alt="logo"/>` : ''
 
   const rows = d.items.map((item, i) => `
     <tr${i % 2 === 1 ? ' style="background:#faf6ee;"' : ''}>
-      <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:center;">${i + 1}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;">${esc(item.desc)}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:right;">${item.qty}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:5px 8px;border-bottom:1px solid #d4c5a9;font-size:10px;text-align:right;">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
+      <td style="padding:6.25px 10px;border-bottom:1.25px solid #d4c5a9;font-size:12.5px;text-align:center;">${i + 1}</td>
+      <td style="padding:6.25px 10px;border-bottom:1.25px solid #d4c5a9;font-size:12.5px;">${esc(item.desc)}</td>
+      <td style="padding:6.25px 10px;border-bottom:1.25px solid #d4c5a9;font-size:12.5px;text-align:right;">${item.qty}</td>
+      <td style="padding:6.25px 10px;border-bottom:1.25px solid #d4c5a9;font-size:12.5px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:6.25px 10px;border-bottom:1.25px solid #d4c5a9;font-size:12.5px;text-align:right;">${d.cur.symbol}${item.amount.toFixed(d.dp)}</td>
     </tr>
   `).join('')
 
@@ -19,43 +19,43 @@ export function QuotationElegant(d: QuotTemplateData): string {
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family: 'Georgia','Times New Roman','Palatino Linotype',serif; color:#2c2416; background:#fdfbf7; width:794px; padding:36px 44px; }
-  .vintage-border { position:absolute; top:10px; left:10px; right:10px; bottom:10px; border:2px solid ${p}55; pointer-events:none; }
-  .vintage-border-inner { position:absolute; top:14px; left:14px; right:14px; bottom:14px; border:1px solid ${p}33; pointer-events:none; }
-  .header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:14px; border-bottom:2px solid ${p}; margin-bottom:16px; }
-  .brand-name { font-size:18px; font-weight:bold; color:#1a150e; }
-  .brand-sub { font-size:10px; color:#8b7d62; font-style:italic; margin-top:1px; }
+  body { font-family:'Georgia','Times New Roman','Palatino Linotype',serif; color:#2c2416; background:#fdfbf7; width:794px; padding:45px 55px; }
+  .vintage-border { position:absolute; top:12.5px; left:12.5px; right:12.5px; bottom:12.5px; border:2.5px solid ${p}55; pointer-events:none; }
+  .vintage-border-inner { position:absolute; top:17.5px; left:17.5px; right:17.5px; bottom:17.5px; border:1.25px solid ${p}33; pointer-events:none; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:17.5px; border-bottom:2.5px solid ${p}; margin-bottom:20px; }
+  .brand-name { font-size:22.5px; font-weight:bold; color:#1a150e; }
+  .brand-sub { font-size:12.5px; color:#8b7d62; font-style:italic; margin-top:1.25px; }
   .right-panel { text-align:right; }
-  .right-panel h1 { font-size:22px; font-weight:normal; color:${p}; font-style:italic; letter-spacing:1.5px; }
-  .right-panel .no { font-size:10px; color:#8b7d62; margin-top:2px; font-style:italic; }
-  .ornament { text-align:center; font-size:16px; color:${p}; letter-spacing:10px; margin-bottom:14px; opacity:0.7; }
-  .info-row { display:flex; gap:24px; margin-bottom:16px; padding:10px 14px; background:#faf6ee; border:1px solid #d4c5a9; }
+  .right-panel h1 { font-size:27.5px; font-weight:normal; color:${p}; font-style:italic; letter-spacing:1.875px; }
+  .right-panel .no { font-size:12.5px; color:#8b7d62; margin-top:2.5px; font-style:italic; }
+  .ornament { text-align:center; font-size:20px; color:${p}; letter-spacing:12.5px; margin-bottom:17.5px; opacity:0.7; }
+  .info-row { display:flex; gap:30px; margin-bottom:20px; padding:12.5px 17.5px; background:#faf6ee; border:1.25px solid #d4c5a9; }
   .info-block { flex:1; }
-  .info-block .lbl { font-size:8px; color:#8b7d62; text-transform:uppercase; letter-spacing:1px; font-weight:bold; }
-  .info-block .val { font-size:12px; color:#2c2416; font-weight:bold; margin-top:2px; }
-  .info-block .sub { font-size:9px; color:#6b5d4a; margin-top:2px; }
+  .info-block .lbl { font-size:10px; color:#8b7d62; text-transform:uppercase; letter-spacing:1.25px; font-weight:bold; }
+  .info-block .val { font-size:15px; color:#2c2416; font-weight:bold; margin-top:2.5px; }
+  .info-block .sub { font-size:11.25px; color:#6b5d4a; margin-top:2.5px; }
   table { width:100%; border-collapse:collapse; }
-  th { font-family:'Helvetica','Arial',sans-serif; font-size:8px; color:#8b7d62; font-weight:bold; padding:5px 8px; border-bottom:2px solid ${p}; text-align:left; text-transform:uppercase; letter-spacing:0.8px; }
+  th { font-family:'Helvetica','Arial',sans-serif; font-size:10px; color:#8b7d62; font-weight:bold; padding:6.25px 10px; border-bottom:2.5px solid ${p}; text-align:left; text-transform:uppercase; letter-spacing:1px; }
   th:nth-child(1){ width:30px; text-align:center; }
   th:nth-child(3), th:nth-child(4), th:nth-child(5){ text-align:right; }
-  .total-box { margin-top:14px; margin-left:auto; width:280px; border:1px solid #d4c5a9; background:#faf6ee; padding:10px 14px; }
-  .total-box .r { display:flex; justify-content:space-between; padding:2px 0; font-size:10px; color:#4a3f30; }
-  .total-box .r.gr { font-weight:bold; font-size:13px; color:${p}; border-top:1px solid ${p}66; padding-top:5px; margin-top:3px; }
-  .words { font-size:10px; color:#8b7d62; font-style:italic; text-align:right; margin-top:8px; }
-  .notes { margin-top:14px; padding:10px 14px; border:1px solid #d4c5a9; background:#faf6ee; font-size:9px; color:#4a3f30; }
-  .terms { margin-top:8px; padding:10px 14px; border:1px solid #d4c5a9; background:#faf6ee; font-size:9px; color:#4a3f30; }
-  .sig-area { margin-top:20px; display:flex; justify-content:flex-end; }
+  .total-box { margin-top:17.5px; margin-left:auto; width:350px; border:1.25px solid #d4c5a9; background:#faf6ee; padding:12.5px 17.5px; }
+  .total-box .r { display:flex; justify-content:space-between; padding:2.5px 0; font-size:12.5px; color:#4a3f30; }
+  .total-box .r.gr { font-weight:bold; font-size:16.25px; color:${p}; border-top:1.25px solid ${p}66; padding-top:6.25px; margin-top:3.75px; }
+  .words { font-size:12.5px; color:#8b7d62; font-style:italic; text-align:right; margin-top:10px; }
+  .notes { margin-top:17.5px; padding:12.5px 17.5px; border:1.25px solid #d4c5a9; background:#faf6ee; font-size:11.25px; color:#4a3f30; }
+  .terms { margin-top:10px; padding:12.5px 17.5px; border:1.25px solid #d4c5a9; background:#faf6ee; font-size:11.25px; color:#4a3f30; }
+  .sig-area { margin-top:25px; display:flex; justify-content:flex-end; }
   .sig-box { text-align:center; }
-  .sig-line { width:150px; height:1px; background:#c4b998; margin:4px auto; }
-  .sig-lbl { font-size:8px; color:#8b7d62; font-style:italic; }
-  .sig-name { font-size:11px; font-weight:bold; color:#2c2416; margin-top:2px; }
-  .footer { margin-top:20px; padding-top:10px; border-top:1px solid #d4c5a9; font-size:8px; color:#8b7d62; text-align:center; font-style:italic; }
+  .sig-line { width:187.5px; height:1.25px; background:#c4b998; margin:5px auto; }
+  .sig-lbl { font-size:10px; color:#8b7d62; font-style:italic; }
+  .sig-name { font-size:13.75px; font-weight:bold; color:#2c2416; margin-top:2.5px; }
+  .footer { margin-top:25px; padding-top:12.5px; border-top:1.25px solid #d4c5a9; font-size:10px; color:#8b7d62; text-align:center; font-style:italic; }
 </style></head><body>
 <div class="vintage-border"></div>
 <div class="vintage-border-inner"></div>
 
 <div class="header">
-  <div style="display:flex;gap:10px;align-items:flex-start;">
+  <div style="display:flex;gap:12.5px;align-items:flex-start;">
     ${logoHtml}
     <div>
       <div class="brand-name">${esc(c.name)}</div>
@@ -104,7 +104,7 @@ ${d.terms ? `<div class="terms"><strong>Terms:</strong> ${esc(d.terms)}</div>` :
 
 <div class="sig-area">
   <div class="sig-box">
-    ${c.signature ? `<img src="${esc(c.signature)}" style="height:24px;width:auto;" alt="sig"/>` : ''}
+    ${c.signature ? `<img src="${esc(c.signature)}" style="height:30px;width:auto;" alt="sig"/>` : ''}
     <div class="sig-line"></div>
     <div class="sig-lbl">Authorized Signature</div>
     <div class="sig-name">${esc(c.name)}</div>

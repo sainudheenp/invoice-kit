@@ -1,34 +1,34 @@
 import { esc } from '@/utils/esc'
 import type { RecTemplateData } from '@/types/template'
 
-export function ReceiptMinimal(d: RecTemplateData): string {
+export function ReceiptMinimal(d:RecTemplateData): string {
   const c = d.comp
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family: 'Helvetica Neue','Helvetica','Arial',sans-serif; color:#1e293b; background:#fff; width:794px; padding:52px 60px; }
-  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; }
-  .co-name { font-size:12px; font-weight:600; color:#0f172a; letter-spacing:-0.2px; }
-  .co-sub { font-size:8px; color:#94a3b8; margin-top:1px; }
-  .doc-type { font-size:9px; color:#94a3b8; font-weight:500; letter-spacing:2px; text-transform:uppercase; }
-  .doc-no { font-size:9px; color:#94a3b8; margin-top:2px; }
-  .info-line { display:flex; gap:32px; padding-bottom:10px; border-bottom:1px solid #e2e8f0; margin-bottom:20px; }
-  .info-line .lbl { font-size:7px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:2px; }
-  .info-line .val { font-size:10px; color:#0f172a; font-weight:600; }
-  .amount { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid #e2e8f0; margin-bottom:16px; }
-  .amount .lbl { font-size:7px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; }
-  .amount .num { font-size:18px; font-weight:600; color:#0f172a; }
-  .amount .words { font-size:8px; color:#94a3b8; font-style:italic; margin-top:2px; }
-  .det { display:flex; flex-wrap:wrap; gap:4px 24px; margin-bottom:16px; }
-  .det-item .lbl { font-size:7px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; }
-  .det-item .v { font-size:9px; color:#334155; margin-top:1px; }
-  .sig { margin-top:28px; display:flex; justify-content:flex-end; }
+  body { font-family:'Helvetica Neue','Helvetica','Arial',sans-serif; color:#1e293b; background:#fff; width:794px; padding:65px 75px; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px; }
+  .co-name { font-size:15px; font-weight:600; color:#0f172a; letter-spacing:-0.2px; }
+  .co-sub { font-size:10px; color:#94a3b8; margin-top:1.25px; }
+  .doc-type { font-size:11.25px; color:#94a3b8; font-weight:500; letter-spacing:2.5px; text-transform:uppercase; }
+  .doc-no { font-size:11.25px; color:#94a3b8; margin-top:2.5px; }
+  .info-line { display:flex; gap:40px; padding-bottom:12.5px; border-bottom:1.25px solid #e2e8f0; margin-bottom:25px; }
+  .info-line .lbl { font-size:8.75px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:2.5px; }
+  .info-line .val { font-size:12.5px; color:#0f172a; font-weight:600; }
+  .amount { display:flex; justify-content:space-between; align-items:center; padding:17.5px 0; border-bottom:1.25px solid #e2e8f0; margin-bottom:20px; }
+  .amount .lbl { font-size:8.75px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; }
+  .amount .num { font-size:22.5px; font-weight:600; color:#0f172a; }
+  .amount .words { font-size:10px; color:#94a3b8; font-style:italic; margin-top:2.5px; }
+  .det { display:flex; flex-wrap:wrap; gap:5px 30px; margin-bottom:20px; }
+  .det-item .lbl { font-size:8.75px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.625px; }
+  .det-item .v { font-size:11.25px; color:#334155; margin-top:1.25px; }
+  .sig { margin-top:35px; display:flex; justify-content:flex-end; }
   .sig-box { text-align:center; }
-  .sig-line { width:120px; height:1px; background:#cbd5e1; margin:3px auto; }
-  .sig-lbl { font-size:7px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; }
-  .footer { margin-top:32px; padding-top:12px; border-top:1px solid #e2e8f0; font-size:7px; color:#94a3b8; text-align:center; letter-spacing:0.3px; }
+  .sig-line { width:150px; height:1.25px; background:#cbd5e1; margin:3.75px auto; }
+  .sig-lbl { font-size:8.75px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.625px; }
+  .footer { margin-top:40px; padding-top:15px; border-top:1.25px solid #e2e8f0; font-size:8.75px; color:#94a3b8; text-align:center; letter-spacing:0.375px; }
 </style></head><body>
 <div class="header">
   <div>
@@ -62,10 +62,10 @@ export function ReceiptMinimal(d: RecTemplateData): string {
     ${d.ww ? `<div class="words">${esc(d.ww)}</div>` : ''}
   </div>
   <div style="text-align:right;">
-    ${d.totalTax > 0 ? `<div style="font-size:8px;color:#94a3b8;margin-bottom:2px;">Subtotal: ${d.cur.symbol}${d.amFmt}</div>
-    <div style="font-size:8px;color:#94a3b8;margin-bottom:2px;">Total Tax: ${d.cur.symbol}${d.tv}</div>` : ''}
+    ${d.totalTax > 0 ? `<div style="font-size:10px;color:#94a3b8;margin-bottom:2.5px;">Subtotal:${d.cur.symbol}${d.amFmt}</div>
+    <div style="font-size:10px;color:#94a3b8;margin-bottom:2.5px;">Total Tax:${d.cur.symbol}${d.tv}</div>` : ''}
     <div class="num">${d.cur.symbol}${d.totalTax > 0 ? (d.am + d.totalTax).toFixed(d.dp) : d.amFmt}</div>
-    <div style="font-size:8px;color:#94a3b8;">${d.wi}.${String(d.fr).padStart(d.dp, '0')}</div>
+    <div style="font-size:10px;color:#94a3b8;">${d.wi}.${String(d.fr).padStart(d.dp, '0')}</div>
   </div>
 </div>
 
@@ -78,7 +78,7 @@ export function ReceiptMinimal(d: RecTemplateData): string {
 
 <div class="sig">
   <div class="sig-box">
-    ${c.signature ? `<img src="${esc(c.signature)}" style="height:20px;width:auto;" alt="sig"/>` : ''}
+    ${c.signature ? `<img src="${esc(c.signature)}" style="height:25px;width:auto;" alt="sig"/>` : ''}
     <div class="sig-line"></div>
     <div class="sig-lbl">Authorized Signature</div>
   </div>

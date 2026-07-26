@@ -1,9 +1,9 @@
 import { esc } from '@/utils/esc'
 import type { InvTemplateData } from '@/types/template'
 
-export function InvoiceModern(d: InvTemplateData): string {
+export function InvoiceModern(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#D97706'
-  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:32px;width:auto;" alt="logo"/>` : ''
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:40px;width:auto;" alt="logo"/>` : ''
 
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
@@ -11,11 +11,11 @@ export function InvoiceModern(d: InvTemplateData): string {
     const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
     <tr${i % 2 === 1 ? ' style="background:#f8fafc;"' : ''}>
-      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:11px;">${esc(item.desc)}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:11px;text-align:right;">${item.qty}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:11px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:11px;text-align:right;color:#64748b;">${taxDisplay}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:11px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
+      <td style="padding:12.5px 15px;border-bottom:1.25px solid #e2e8f0;font-size:13.75px;">${esc(item.desc)}</td>
+      <td style="padding:12.5px 15px;border-bottom:1.25px solid #e2e8f0;font-size:13.75px;text-align:right;">${item.qty}</td>
+      <td style="padding:12.5px 15px;border-bottom:1.25px solid #e2e8f0;font-size:13.75px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:12.5px 15px;border-bottom:1.25px solid #e2e8f0;font-size:13.75px;text-align:right;color:#64748b;">${taxDisplay}</td>
+      <td style="padding:12.5px 15px;border-bottom:1.25px solid #e2e8f0;font-size:13.75px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -25,29 +25,29 @@ export function InvoiceModern(d: InvTemplateData): string {
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family: 'Helvetica','Arial',sans-serif; color:#1f2937; background:#fff; width:794px; padding:32px 40px; }
-  .sidebar { position:absolute; top:0; left:0; width:4px; height:1123px; background:linear-gradient(to bottom, ${p}, ${p}88); }
-  .header { display:flex; justify-content:space-between; align-items:flex-start; padding:16px 20px; background:#f8fafc; border-radius:8px; margin-bottom:20px; }
-  .brand { display:flex; gap:10px; align-items:center; }
-  .doc-label { font-size:10px; color:${p}; font-weight:bold; letter-spacing:2px; border-left:3px solid ${p}; padding-left:8px; }
-  .info-grid { display:flex; gap:24px; margin-bottom:20px; }
-  .card { padding:12px 16px; background:#f8fafc; border-radius:8px; flex:1; }
-  .card-label { font-size:9px; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
-  .card-value { font-size:11px; font-weight:bold; color:#1f2937; }
-  .card-sub { font-size:9px; color:#4b5563; margin-top:2px; }
+  body { font-family:'Helvetica','Arial',sans-serif; color:#1f2937; background:#fff; width:794px; padding:40px 50px; }
+  .sidebar { position:absolute; top:0; left:0; width:5px; height:1403.75px; background:linear-gradient(to bottom, ${p}, ${p}88); }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; padding:20px 25px; background:#f8fafc; border-radius:10px; margin-bottom:25px; }
+  .brand { display:flex; gap:12.5px; align-items:center; }
+  .doc-label { font-size:12.5px; color:${p}; font-weight:bold; letter-spacing:2.5px; border-left:3.75px solid ${p}; padding-left:10px; }
+  .info-grid { display:flex; gap:30px; margin-bottom:25px; }
+  .card { padding:15px 20px; background:#f8fafc; border-radius:10px; flex:1; }
+  .card-label { font-size:11.25px; color:#64748b; text-transform:uppercase; letter-spacing:0.625px; margin-bottom:5px; }
+  .card-value { font-size:13.75px; font-weight:bold; color:#1f2937; }
+  .card-sub { font-size:11.25px; color:#4b5563; margin-top:2.5px; }
   table { width:100%; border-collapse:collapse; }
-  th { background:#f1f5f9; color:#64748b; font-size:9px; padding:8px 12px; text-align:left; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+  th { background:#f1f5f9; color:#64748b; font-size:11.25px; padding:10px 15px; text-align:left; font-weight:600; text-transform:uppercase; letter-spacing:0.625px; }
   th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) { text-align:right; }
-  .summary { margin-top:12px; margin-left:auto; width:300px; }
-  .sum-row { display:flex; justify-content:space-between; padding:4px 12px; font-size:10px; }
-  .sum-row.total { font-weight:bold; font-size:14px; color:${p}; border-top:2px solid #cbd5e1; margin-top:4px; padding-top:8px; }
-  .words { font-size:10px; color:#64748b; font-style:italic; text-align:right; margin-top:8px; }
-  .notes { margin-top:16px; padding:12px 16px; background:#f8fafc; border-radius:8px; font-size:10px; color:#4b5563; }
-  .footer { position:absolute; bottom:24px; left:40px; right:40px; padding-top:12px; border-top:1px solid #e2e8f0; font-size:9px; color:#64748b; text-align:center; }
-  .sig { display:flex; justify-content:flex-end; align-items:center; gap:24px; margin-top:16px; padding-right:20px; }
+  .summary { margin-top:15px; margin-left:auto; width:375px; }
+  .sum-row { display:flex; justify-content:space-between; padding:5px 15px; font-size:12.5px; }
+  .sum-row.total { font-weight:bold; font-size:17.5px; color:${p}; border-top:2.5px solid #cbd5e1; margin-top:5px; padding-top:10px; }
+  .words { font-size:12.5px; color:#64748b; font-style:italic; text-align:right; margin-top:10px; }
+  .notes { margin-top:20px; padding:15px 20px; background:#f8fafc; border-radius:10px; font-size:12.5px; color:#4b5563; }
+  .footer { position:absolute; bottom:30px; left:50px; right:50px; padding-top:15px; border-top:1.25px solid #e2e8f0; font-size:11.25px; color:#64748b; text-align:center; }
+  .sig { display:flex; justify-content:flex-end; align-items:center; gap:30px; margin-top:20px; padding-right:25px; }
   .sig-block { text-align:center; }
-  .sig-line { width:100px; height:1px; background:#94a3b8; margin:4px auto; }
-  .sig-label { font-size:9px; color:#64748b; }
+  .sig-line { width:125px; height:1.25px; background:#94a3b8; margin:5px auto; }
+  .sig-label { font-size:11.25px; color:#64748b; }
 </style></head><body>
 <div class="sidebar"></div>
 
@@ -55,13 +55,13 @@ export function InvoiceModern(d: InvTemplateData): string {
   <div class="brand">
     ${logoHtml}
     <div>
-      <div style="font-size:13px;font-weight:bold;">${esc(c.name)}</div>
-      ${c.sub ? `<div style="font-size:9px;color:#4b5563;">${esc(c.sub)}</div>` : ''}
+      <div style="font-size:16.25px;font-weight:bold;">${esc(c.name)}</div>
+      ${c.sub ? `<div style="font-size:11.25px;color:#4b5563;">${esc(c.sub)}</div>` : ''}
     </div>
   </div>
   <div style="text-align:right;">
     <div class="doc-label">INVOICE</div>
-    <div style="font-size:10px;color:#4b5563;margin-top:2px;">${esc(d.no)}</div>
+    <div style="font-size:12.5px;color:#4b5563;margin-top:2.5px;">${esc(d.no)}</div>
   </div>
 </div>
 
@@ -95,13 +95,13 @@ export function InvoiceModern(d: InvTemplateData): string {
 ${d.gw ? `<div class="words">${esc(d.gw)}</div>` : ''}
 
 ${d.pd || d.notes || c.invTerms ? `<div class="notes">
-  ${d.pd ? `<div style="margin-bottom:4px;"><strong>Payment:</strong> ${esc(d.pd)}</div>` : ''}
+  ${d.pd ? `<div style="margin-bottom:5px;"><strong>Payment:</strong> ${esc(d.pd)}</div>` : ''}
   ${d.notes ? `<div>${esc(d.notes)}</div>` : ''}
-  ${c.invTerms ? `<div style="margin-top:4px;">${esc(c.invTerms)}</div>` : ''}
+  ${c.invTerms ? `<div style="margin-top:5px;">${esc(c.invTerms)}</div>` : ''}
 </div>` : ''}
 
 <div class="sig">
-  ${c.signature ? `<div class="sig-block">${c.signature ? `<img src="${esc(c.signature)}" style="height:28px;width:auto;" alt="sig"/>` : ''}<div class="sig-line"></div><div class="sig-label">Authorized Signature</div></div>` : ''}
+  ${c.signature ? `<div class="sig-block">${c.signature ? `<img src="${esc(c.signature)}" style="height:35px;width:auto;" alt="sig"/>` : ''}<div class="sig-line"></div><div class="sig-label">Authorized Signature</div></div>` : ''}
   <div class="sig-block" style="text-align:right;">
     <div class="sig-label">${esc(c.name)}</div>
     ${contactLine ? `<div class="sig-label">${esc(contactLine)}</div>` : ''}
