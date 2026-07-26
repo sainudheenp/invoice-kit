@@ -37,7 +37,7 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
           <thead>
             <tr className="border-b-2 border-[var(--color-border)]">
               <th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[40%]">Description</th>
-              <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[10%]">Qty</th>
+              <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[12%]">Qty</th>
               <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[15%]">Rate</th>
               <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[18%]">Tax %</th>
               <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text2)] w-[17%]">Total</th>
@@ -60,13 +60,13 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
                     />
                   </td>
                   <td className="py-2 px-2">
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={item.qty || ''}
-                      onChange={(e) => updateItem(idx, 'qty', e.target.value)}
-                      className="w-full bg-transparent text-sm text-right tabular-nums outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                     <input
+                       type="number"
+                       min="0"
+                       step="any"
+                       value={item.qty || ''}
+                       onChange={(e) => updateItem(idx, 'qty', e.target.value)}
+                       className="w-full bg-transparent text-sm text-right tabular-nums outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </td>
                   <td className="py-2 px-2">
