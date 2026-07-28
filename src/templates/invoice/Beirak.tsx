@@ -62,7 +62,7 @@ export function InvoiceBeirak(d:InvTemplateData): string {
       ${contact ? `<div class="contact">${contact}</div>` : ''}
     </div>
   </div>
-  <div class="title-badge">TAX INVOICE</div>
+  <div class="title-badge">INVOICE</div>
 </div>
 
 <table class="info-table">

@@ -69,7 +69,7 @@ export function InvoiceClassic(d:InvTemplateData): string {
     </div>
   </div>
   <div class="right-col">
-    <div class="doc-title">TAX INVOICE</div>
+    <div class="doc-title">INVOICE</div>
     <div class="doc-no">${esc(d.no)}</div>
   </div>
 </div>

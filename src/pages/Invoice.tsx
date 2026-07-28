@@ -34,7 +34,7 @@ const emptyForm = (): InvoiceFormState => ({
   custName: '', custAddr: '', custPhone: '', custCr: '', custEmail: '',
   items: [{ desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }],
   discount: 0,
-  notes: '', payMethod: 'Cash', chequeNo: '', bankName: '',
+  notes: '', payMethod: '', chequeNo: '', bankName: '',
 })
 
 export default function Invoice() {
@@ -65,7 +65,7 @@ export default function Invoice() {
       items: inv.items.length > 0 ? inv.items : [{ desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }],
       discount: inv.discount,
       notes: inv.notes,
-      payMethod: inv.payMethod || 'Cash',
+      payMethod: inv.payMethod || '',
       chequeNo: inv.payDetails || '',
       bankName: inv.bankName || '',
     })
