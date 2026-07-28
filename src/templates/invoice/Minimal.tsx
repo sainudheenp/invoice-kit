@@ -22,7 +22,7 @@ export function InvoiceMinimal(d:InvTemplateData): string {
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family:'Helvetica Neue','Helvetica','Arial',sans-serif; color:#1e293b; background:#fff; width:794px; padding:65px 75px; }
+  body { font-family:'Helvetica Neue','Helvetica','Arial',sans-serif; color:#1e293b; background:#fff; width:794px; padding:65px 75px 100px; }
   .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:45px; }
   .co-name { font-size:16.25px; font-weight:600; color:#0f172a; letter-spacing:-0.2px; }
   .co-sub { font-size:10px; color:#94a3b8; margin-top:1.25px; }
@@ -47,7 +47,7 @@ export function InvoiceMinimal(d:InvTemplateData): string {
   .sig-box { text-align:center; }
   .sig-line { width:150px; height:1.25px; background:#cbd5e1; margin:3.75px auto; }
   .sig-lbl { font-size:8.75px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.625px; }
-  .footer { margin-top:40px; padding-top:15px; border-top:1.25px solid #e2e8f0; font-size:8.75px; color:#94a3b8; text-align:center; letter-spacing:0.375px; }
+  .footer { position:fixed; bottom:0; left:75px; right:75px; padding-top:15px; border-top:1.25px solid #e2e8f0; font-size:8.75px; color:#94a3b8; text-align:center; letter-spacing:0.375px; z-index:100; }
 </style></head><body>
 <div class="header">
   <div>
@@ -105,7 +105,8 @@ ${d.pd || d.notes || c.invTerms ? `<div class="section">
 </div>
 
 <div class="footer">
-  ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}
+  ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
+  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}
 </div>
 </body></html>`
 }

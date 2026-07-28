@@ -20,7 +20,7 @@ export function QuotationClassic(d:QuotTemplateData): string {
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family:'Helvetica','Arial',sans-serif; color:#1f2937; background:#fff; width:794px; padding:45px 55px; }
+  body { font-family:'Helvetica','Arial',sans-serif; color:#1f2937; background:#fff; width:794px; padding:45px 55px 100px; }
   .top-border { height:3.75px; background:${p}; margin:-36px -44px 0 -44px; }
   .header { display:flex; justify-content:space-between; align-items:flex-start; margin-top:25px; margin-bottom:25px; }
   .left-col { display:flex; gap:15px; align-items:center; }
@@ -46,7 +46,7 @@ export function QuotationClassic(d:QuotTemplateData): string {
   .sig-box { text-align:center; }
   .sig-line { width:175px; height:1.25px; background:#9ca3af; margin:5px auto; }
   .sig-lbl { font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:0.625px; }
-  .footer { margin-top:25px; padding-top:12.5px; border-top:1.25px solid #e5e7eb; font-size:10px; color:#6b7280; text-align:center; }
+  .footer { position:fixed; bottom:0; left:55px; right:55px; padding-top:12.5px; border-top:1.25px solid #e5e7eb; font-size:10px; color:#6b7280; text-align:center; z-index:100; }
 </style></head><body>
 <div class="top-border"></div>
 
@@ -107,8 +107,8 @@ ${d.terms ? `<div class="terms"><strong>Terms:</strong> ${esc(d.terms)}</div>` :
 </div>
 
 <div class="footer">
-  ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | Tel:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}
-  ${c.bankName ? `<br>${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).map(esc).join(' | ')}` : ''}
+  ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | Tel:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
+  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).map(esc).join(' | ')}` : ''}
 </div>
 </body></html>`
 }

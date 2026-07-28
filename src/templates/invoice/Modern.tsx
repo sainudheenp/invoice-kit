@@ -25,7 +25,7 @@ export function InvoiceModern(d:InvTemplateData): string {
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family:'Helvetica','Arial',sans-serif; color:#1f2937; background:#fff; width:794px; padding:40px 50px; }
+  body { font-family:'Helvetica','Arial',sans-serif; color:#1f2937; background:#fff; width:794px; padding:40px 50px 100px; }
   .sidebar { position:absolute; top:0; left:0; width:5px; height:1403.75px; background:linear-gradient(to bottom, ${p}, ${p}88); }
   .header { display:flex; justify-content:space-between; align-items:flex-start; padding:20px 25px; background:#f8fafc; border-radius:10px; margin-bottom:25px; }
   .brand { display:flex; gap:12.5px; align-items:center; }
@@ -43,7 +43,7 @@ export function InvoiceModern(d:InvTemplateData): string {
   .sum-row.total { font-weight:bold; font-size:17.5px; color:${p}; border-top:2.5px solid #cbd5e1; margin-top:5px; padding-top:10px; }
   .words { font-size:12.5px; color:#64748b; font-style:italic; text-align:right; margin-top:10px; }
   .notes { margin-top:20px; padding:15px 20px; background:#f8fafc; border-radius:10px; font-size:12.5px; color:#4b5563; }
-  .footer { position:absolute; bottom:30px; left:50px; right:50px; padding-top:15px; border-top:1.25px solid #e2e8f0; font-size:11.25px; color:#64748b; text-align:center; }
+  .footer { position:fixed; bottom:0; left:50px; right:50px; padding-top:15px; border-top:1.25px solid #e2e8f0; font-size:11.25px; color:#64748b; text-align:center; z-index:100; }
   .sig { display:flex; justify-content:flex-end; align-items:center; gap:30px; margin-top:20px; padding-right:25px; }
   .sig-block { text-align:center; }
   .sig-line { width:125px; height:1.25px; background:#94a3b8; margin:5px auto; }
@@ -109,8 +109,8 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 </div>
 
 <div class="footer">
-  ${esc(c.name)}${c.loc ? ` - ${esc(c.loc)}` : ''}${contactLine ? ` | ${esc(contactLine)}` : ''}
-  ${c.bankName ? `<br>${c.bankName}${c.bankAcc ? ` - ${c.bankAcc}` : ''}${c.bankIban ? ` (${c.bankIban})` : ''}` : ''}
+  ${esc(c.name)}${c.loc ? ` - ${esc(c.loc)}` : ''}${contactLine ? ` | ${esc(contactLine)}` : ''}<br>
+  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${c.bankName}${c.bankAcc ? ` - ${c.bankAcc}` : ''}${c.bankIban ? ` (${c.bankIban})` : ''}` : ''}
 </div>
 </body></html>`
 }

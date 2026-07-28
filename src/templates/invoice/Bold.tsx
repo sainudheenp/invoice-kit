@@ -23,7 +23,7 @@ export function InvoiceBold(d:InvTemplateData): string {
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family:'Helvetica','Arial',sans-serif; color:#000; background:#fff; width:794px; padding:0; }
+  body { font-family:'Helvetica','Arial',sans-serif; color:#000; background:#fff; width:794px; padding:0 0 100px; }
   .top-black { background:#000; padding:30px 60px; display:flex; justify-content:space-between; align-items:center; }
   .top-black h1 { color:#fff; font-size:35px; font-weight:900; letter-spacing:2.5px; text-transform:uppercase; }
   .top-black .no { color:#aaa; font-size:15px; font-weight:bold; margin-top:2.5px; }
@@ -47,7 +47,7 @@ export function InvoiceBold(d:InvTemplateData): string {
   .sig-b { text-align:center; flex:1; }
   .sig-line { width:175px; height:2.5px; background:#000; margin:5px auto; }
   .sig-label { font-size:11.25px; color:#666; font-weight:bold; text-transform:uppercase; }
-  .footer { background:#000; color:#fff; padding:17.5px 60px; font-size:11.25px; text-align:center; }
+  .footer { position:fixed; bottom:0; left:0; right:0; background:#000; color:#fff; padding:17.5px 60px; font-size:11.25px; text-align:center; z-index:100; }
   .footer a { color:#aaa; text-decoration:none; }
 </style></head><body>
 <div class="top-black">
@@ -117,8 +117,8 @@ export function InvoiceBold(d:InvTemplateData): string {
 
 <div class="footer">
   <strong>${esc(c.name)}</strong>${c.loc ? ` &mdash; ${esc(c.loc)}` : ''}<br>
-  ${c.tel ? `Tel:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}
-  ${c.bankName ? `<br>${esc(c.bankName)}${c.bankAcc ? ` &bullet; ${esc(c.bankAcc)}` : ''}` : ''}
+  ${c.tel ? `Tel:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
+  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${esc(c.bankName)}${c.bankAcc ? ` &bullet; ${esc(c.bankAcc)}` : ''}` : ''}
 </div>
 </body></html>`
 }

@@ -8,7 +8,7 @@ export function ReceiptProfessional(d:RecTemplateData): string {
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family:'Courier New','Courier',monospace; color:#1e293b; background:#fff; width:794px; padding:40px 50px; }
+  body { font-family:'Courier New','Courier',monospace; color:#1e293b; background:#fff; width:794px; padding:40px 50px 100px; }
   .top-db { border-top:10px solid ${p}; margin:-32px -40px 0 -40px; padding-top:30px; padding-left:50px; padding-right:50px; }
   .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
   .brand-name { font-size:16.25px; font-weight:bold; color:#0f172a; text-transform:uppercase; letter-spacing:1.25px; }
@@ -35,7 +35,7 @@ export function ReceiptProfessional(d:RecTemplateData): string {
   .sig-item { text-align:center; }
   .sig-line { width:162.5px; height:1.25px; background:#94a3b8; margin:5px auto; }
   .sig-lbl { font-size:8.75px; color:#64748b; text-transform:uppercase; letter-spacing:0.625px; }
-  .footer { margin-top:20px; padding-top:10px; border-top:1.25px solid #cbd5e1; font-size:8.75px; color:#64748b; text-align:center; text-transform:uppercase; }
+  .footer { position:fixed; bottom:0; left:50px; right:50px; padding-top:10px; border-top:1.25px solid #e2e8f0; font-size:8.75px; color:#64748b; text-align:center; text-transform:uppercase; letter-spacing:0.375px; z-index:100; }
 </style></head><body>
 <div class="top-db"></div>
 
@@ -104,8 +104,8 @@ export function ReceiptProfessional(d:RecTemplateData): string {
 </div>
 
 <div class="footer">
-  ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | T:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}
-  ${c.bankName ? `<br>${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).map(esc).join(' | ')}` : ''}
+  ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | T:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
+  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).map(esc).join(' | ')}` : ''}
 </div>
 </body></html>`
 }

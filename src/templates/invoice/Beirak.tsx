@@ -25,7 +25,7 @@ export function InvoiceBeirak(d:InvTemplateData): string {
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family:'Helvetica','Arial',sans-serif; color:#1e293b; background:#fff; width:794px; padding:50px; }
+  body { font-family:'Helvetica','Arial',sans-serif; color:#1e293b; background:#fff; width:794px; padding:50px 50px 100px; }
   .border-frame { position:absolute; top:10px; left:10px; right:10px; bottom:10px; border:3.75px solid ${DB}; pointer-events:none; }
   .header { text-align:center; padding-bottom:20px; border-bottom:2.5px solid ${DB}; margin-bottom:20px; }
   .header .brand { display:flex; align-items:center; justify-content:center; gap:12.5px; }
@@ -49,7 +49,7 @@ export function InvoiceBeirak(d:InvTemplateData): string {
   .sig-line { width:150px; height:2.5px; background:${DB}; margin:5px auto; }
   .sig-label { font-size:11.25px; color:#64748b; }
   .sig-name { font-size:12.5px; font-weight:bold; color:${DB}; }
-  .footer { margin-top:20px; padding-top:12.5px; border-top:1.25px solid ${DB}; text-align:center; font-size:11.25px; color:#64748b; }
+  .footer { position:fixed; bottom:0; left:50px; right:50px; padding-top:12.5px; border-top:1.25px solid ${DB}; text-align:center; font-size:11.25px; color:#64748b; z-index:100; }
 </style></head><body>
 <div class="border-frame"></div>
 
@@ -119,8 +119,8 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 </div>
 
 <div class="footer">
-  ${esc(c.name)} &mdash; ${contact}
-  ${c.bankName ? `<br>${esc(c.bankName)}${c.bankAcc ? ` - ${esc(c.bankAcc)}` : ''}` : ''}
+  ${esc(c.name)} &mdash; ${contact}<br>
+  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${esc(c.bankName)}${c.bankAcc ? ` - ${esc(c.bankAcc)}` : ''}` : ''}
 </div>
 </body></html>`
 }

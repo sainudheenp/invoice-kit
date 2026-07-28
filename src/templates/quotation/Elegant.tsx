@@ -19,7 +19,7 @@ export function QuotationElegant(d:QuotTemplateData): string {
 <html><head><meta charset="utf-8"><style>
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family:'Georgia','Times New Roman','Palatino Linotype',serif; color:#2c2416; background:#fdfbf7; width:794px; padding:45px 55px; }
+  body { font-family:'Georgia','Times New Roman','Palatino Linotype',serif; color:#2c2416; background:#fdfbf7; width:794px; padding:45px 55px 100px; }
   .vintage-border { position:absolute; top:12.5px; left:12.5px; right:12.5px; bottom:12.5px; border:2.5px solid ${p}55; pointer-events:none; }
   .vintage-border-inner { position:absolute; top:17.5px; left:17.5px; right:17.5px; bottom:17.5px; border:1.25px solid ${p}33; pointer-events:none; }
   .header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:17.5px; border-bottom:2.5px solid ${p}; margin-bottom:20px; }
@@ -49,7 +49,7 @@ export function QuotationElegant(d:QuotTemplateData): string {
   .sig-line { width:187.5px; height:1.25px; background:#c4b998; margin:5px auto; }
   .sig-lbl { font-size:10px; color:#8b7d62; font-style:italic; }
   .sig-name { font-size:13.75px; font-weight:bold; color:#2c2416; margin-top:2.5px; }
-  .footer { margin-top:25px; padding-top:12.5px; border-top:1.25px solid #d4c5a9; font-size:10px; color:#8b7d62; text-align:center; font-style:italic; }
+  .footer { position:fixed; bottom:0; left:55px; right:55px; padding-top:12.5px; border-top:1.25px solid #d4c5a9; font-size:10px; color:#8b7d62; text-align:center; font-style:italic; z-index:100; }
 </style></head><body>
 <div class="vintage-border"></div>
 <div class="vintage-border-inner"></div>
@@ -112,8 +112,8 @@ ${d.terms ? `<div class="terms"><strong>Terms:</strong> ${esc(d.terms)}</div>` :
 </div>
 
 <div class="footer">
-  ${esc(c.name)} &mdash; ${[c.loc, c.tel, c.email].filter(Boolean).map(esc).join(' | ')}
-  ${c.bankName ? `<br>${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).map(esc).join(' | ')}` : ''}
+  ${esc(c.name)} &mdash; ${[c.loc, c.tel, c.email].filter(Boolean).map(esc).join(' | ')}<br>
+  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).map(esc).join(' | ')}` : ''}
 </div>
 </body></html>`
 }
