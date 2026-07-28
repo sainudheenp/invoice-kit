@@ -328,6 +328,7 @@ export default function Invoice() {
             <div className="p-5 space-y-4">
               <Field label="Payment Method">
                 <Select value={form.payMethod} onChange={(e) => setField('payMethod', e.target.value)}>
+                  <option value="">-- Select --</option>
                   <option>Cash</option>
                   <option>Cheque</option>
                   <option>Bank Transfer</option>

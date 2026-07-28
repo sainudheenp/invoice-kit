@@ -60,17 +60,17 @@ export function ReceiptClassic(d:RecTemplateData): string {
     <div class="lbl">Date</div>
     <div class="val">${esc(d.dt)}</div>
   </div>
-  <div>
+  ${d.pm ? `<div>
     <div class="lbl">Payment</div>
     <div class="val">${esc(d.pm)}</div>
-  </div>
+  </div>` : ''}
 </div>
 
 <div class="amount-box">
   <div>
     <div class="amount-lbl">Amount Received</div>
     ${d.ww ? `<div class="words">${esc(d.ww)}</div>` : ''}
-    ${d.bg ? `<div style="font-size:11.25px;color:#4b5563;margin-top:5px;"><strong>Purpose:</strong> ${esc(d.bg)}</div>` : ''}
+    <div style="font-size:11.25px;color:#4b5563;margin-top:5px;"><strong>Purpose:</strong> ${d.bg ? esc(d.bg) : '—'}</div>
   </div>
   <div style="text-align:right;">
     ${d.totalTax > 0 ? `<div style="font-size:12.5px;color:#6b7280;margin-bottom:2.5px;">Subtotal:${d.cur.symbol}${d.amFmt}</div>

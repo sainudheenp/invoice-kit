@@ -61,17 +61,17 @@ export function ReceiptBold(d:RecTemplateData): string {
       <div class="lbl">Date</div>
       <div class="val">${esc(d.dt)}</div>
     </div>
-    <div class="info-cell">
+    ${d.pm ? `<div class="info-cell">
       <div class="lbl">Payment</div>
       <div class="val">${esc(d.pm)}</div>
-    </div>
+    </div>` : ''}
   </div>
 
   <div class="amount-block">
     <div>
       <div class="lbl">Amount Received</div>
       ${d.ww ? `<div class="words">${esc(d.ww)}</div>` : ''}
-      ${d.bg ? `<div style="font-size:11.25px;color:#666;margin-top:5px;"><strong>PURPOSE:</strong> ${esc(d.bg)}</div>` : ''}
+      <div style="font-size:11.25px;color:#666;margin-top:5px;"><strong>PURPOSE:</strong> ${d.bg ? esc(d.bg) : '—'}</div>
     </div>
     <div style="text-align:right;">
       ${d.totalTax > 0 ? `<div style="font-size:11.25px;color:#666;margin-bottom:2.5px;">Subtotal:${d.cur.symbol}${d.amFmt}</div>

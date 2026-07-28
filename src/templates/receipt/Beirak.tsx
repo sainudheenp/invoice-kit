@@ -75,14 +75,14 @@ export function ReceiptBeirak(d:RecTemplateData): string {
 </div>
 
 <div class="details">
-  <div class="det">
+  ${d.pm ? `<div class="det">
     <div class="lbl">Payment</div>
     <div class="v">${esc(d.pm)}</div>
-  </div>
+  </div>` : ''}
   ${d.ch ? `<div class="det"><div class="lbl">Cheque</div><div class="v">${esc(d.ch)}</div></div>` : ''}
   ${d.bk ? `<div class="det"><div class="lbl">Bank</div><div class="v">${esc(d.bk)}</div></div>` : ''}
   ${d.td ? `<div class="det"><div class="lbl">Date</div><div class="v">${esc(d.td)}</div></div>` : ''}
-  ${d.bg ? `<div class="det"><div class="lbl">Purpose</div><div class="v">${esc(d.bg)}</div></div>` : ''}
+  <div class="det"><div class="lbl">Purpose</div><div class="v">${d.bg ? esc(d.bg) : '—'}</div></div>
 </div>
 
 <div class="sig-section">

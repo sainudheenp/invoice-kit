@@ -265,6 +265,7 @@ export default function Receipt() {
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Payment Method</label>
                 <select value={form.payMethod} onChange={(e) => set('payMethod', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]">
+                  <option value="">-- Select --</option>
                   <option>Cash</option>
                   <option>Cheque</option>
                   <option>Bank Transfer</option>

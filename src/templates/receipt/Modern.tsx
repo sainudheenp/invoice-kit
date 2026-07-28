@@ -74,14 +74,14 @@ export function ReceiptModern(d:RecTemplateData): string {
 </div>
 
 <div class="details-grid">
-  <div class="detail-card">
+  ${d.pm ? `<div class="detail-card">
     <div class="detail-lbl">Payment Method</div>
     <div class="detail-val">${esc(d.pm)}</div>
-  </div>
+  </div>` : ''}
   ${d.ch ? `<div class="detail-card"><div class="detail-lbl">Cheque No</div><div class="detail-val">${esc(d.ch)}</div></div>` : ''}
   ${d.bk ? `<div class="detail-card"><div class="detail-lbl">Bank</div><div class="detail-val">${esc(d.bk)}</div></div>` : ''}
   ${d.td ? `<div class="detail-card"><div class="detail-lbl">Date</div><div class="detail-val">${esc(d.td)}</div></div>` : ''}
-  ${d.bg ? `<div class="detail-card"><div class="detail-lbl">Purpose</div><div class="detail-val">${esc(d.bg)}</div></div>` : ''}
+  <div class="detail-card"><div class="detail-lbl">Purpose</div><div class="detail-val">${d.bg ? esc(d.bg) : '—'}</div></div>
 </div>
 
 <div class="sig-section">
