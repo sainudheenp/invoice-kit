@@ -61,14 +61,30 @@ const FONT_FACES: ReadonlyArray<{ family: string; file: string; weight: number; 
 // The unique set of font files that must exist in public/fonts/.
 export const REQUIRED_FONT_FILES: readonly string[] = Array.from(new Set(FONT_FACES.map((f) => f.file)))
 
-const PDF_FONT_FACES = `\n<style>\n${FONT_FACES.map(
-  (f) => `@font-face { font-family:'${f.family}'; src:url('${FONTS_DIR}/${f.file}') format('woff2'); font-weight:${f.weight}; font-style:${f.style}; }`,
-).join('\n')}\n</style>\n`
+function usedFontFaces(html: string) {
+  const families = new Set<string>()
+  const re = /font-family\s*:\s*([^;}]+)/gi
+  let m: RegExpExecArray | null
+  while ((m = re.exec(html)) !== null) {
+    for (const name of m[1].split(',')) {
+      const t = name.trim().replace(/['"]/g, '')
+      if (!['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'math', 'system-ui', 'initial', 'inherit', 'unset'].includes(t)) {
+        families.add(t)
+      }
+    }
+  }
+  const hasArabic = /[\u0600-\u06FF]/.test(html)
+  return FONT_FACES.filter(f => families.has(f.family) || (f.family === 'Noto Sans Arabic' && hasArabic))
+}
 
 function withPdfFonts(html: string): string {
+  const faces = usedFontFaces(html)
+  if (!faces.length) return html
+  const css = `\n<style>\n${faces.map(
+    (f) => `@font-face { font-family:'${f.family}'; src:url('${FONTS_DIR}/${f.file}') format('woff2'); font-weight:${f.weight}; font-style:${f.style}; }`,
+  ).join('\n')}\n</style>\n`
   const i = html.indexOf('<head>')
-  if (i !== -1) return html.slice(0, i + 6) + PDF_FONT_FACES + html.slice(i + 6)
-  return PDF_FONT_FACES + html
+  return i !== -1 ? html.slice(0, i + 6) + css + html.slice(i + 6) : css + html
 }
 
 /**

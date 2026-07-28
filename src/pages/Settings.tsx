@@ -9,6 +9,7 @@ import { exportBackupData, validateBackupFile, createLocalSnapshot, listLocalSna
 import { requestGoogleAccessToken, uploadToAppDataFolder, listAppDataBackups, downloadAppDataFile, deleteAppDataFile, type CloudBackupFile } from '@/utils/googleDrive'
 import type { LocalSnapshot } from '@/db'
 import { sampleInvData, sampleRecData, sampleQuotData, INV_TEMPLATES, REC_TEMPLATES, QUOT_TEMPLATES, applyWatermark } from '@/templates'
+import { resizeImage, IMAGE_MAX_SIZES } from '@/utils/image'
 import type { Company } from '@/types/company'
 
 const SECTIONS = [
@@ -278,9 +279,11 @@ export default function Settings() {
       const reader = new FileReader()
       reader.onload = async () => {
         const dataUrl = reader.result as string
-        set(field, dataUrl)
+        const { w, h } = IMAGE_MAX_SIZES[field]
+        const resized = await resizeImage(dataUrl, w, h)
+        set(field, resized)
         if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-        formRef.current = { ...formRef.current, [field]: dataUrl }
+        formRef.current = { ...formRef.current, [field]: resized }
         setSaving(true)
         await doAutoSave()
       }
@@ -492,7 +495,7 @@ export default function Settings() {
                     onClick={() => setUploadField(field)}
                     onDragOver={(e) => { e.preventDefault(); setDragOverField(field) }}
                     onDragLeave={() => setDragOverField(null)}
-                    onDrop={(e) => {
+                    onDrop={async (e) => {
                       e.preventDefault()
                       setDragOverField(null)
                       const file = e.dataTransfer.files?.[0]
@@ -501,9 +504,11 @@ export default function Settings() {
                       const reader = new FileReader()
                       reader.onload = async () => {
                         const dataUrl = reader.result as string
-                        set(field, dataUrl)
+                        const { w, h } = IMAGE_MAX_SIZES[field]
+                        const resized = await resizeImage(dataUrl, w, h)
+                        set(field, resized)
                         if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-                        formRef.current = { ...formRef.current, [field]: dataUrl }
+                        formRef.current = { ...formRef.current, [field]: resized }
                         setSaving(true)
                         await doAutoSave()
                       }
