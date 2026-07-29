@@ -59,7 +59,7 @@ export function Sidebar() {
             <span className="truncate">{co?.name || 'No company'}</span>
           </div>
           <div className="px-3 pt-0.5 text-[10px] text-[var(--color-side-text)]/50">
-            v{import.meta.env.VITE_APP_VERSION || '1.00'} &middot; Powered by <a href="http://sainudheen.tech/" target="_blank" rel="noopener noreferrer" class="hover:text-white/70">Zain Labs</a>
+            v{import.meta.env.VITE_APP_VERSION || '1.00'} &middot; Powered by <a href="http://sainudheen.tech/" target="_blank" rel="noopener noreferrer" className="hover:text-white/70">Zain Labs</a>
           </div>
         </div>
       </aside>
