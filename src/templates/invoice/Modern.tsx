@@ -112,7 +112,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
     ${contactLine ? `<div class="sig-label">${esc(contactLine)}</div>` : ''}
   </div>
 </div>
-${qrHtml ? `<div style="text-align:left;margin-top:10px;">${qrHtml}</div>` : ''}
+${qrHtml ? `<div style="position:fixed;bottom:10%;left:50px;z-index:9998;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` - ${esc(c.loc)}` : ''}${contactLine ? ` | ${esc(contactLine)}` : ''}<br>

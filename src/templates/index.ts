@@ -79,8 +79,9 @@ function transformInvData(savedInv: Invoice | null, comp?: Company | null): InvT
     comp.vatReg ? `VAT: ${comp.vatReg}` : '',
     `Invoice: ${d.invNo || ''}`,
     `Date: ${d.date || ''}`,
-    `Total: ${cur.symbol}${fmtAmount(grand, dec)}`,
-    comp.vatReg && totalTax > 0 ? `VAT: ${cur.symbol}${fmtAmount(totalTax, dec)}` : '',
+    `Customer: ${d.customer?.name || ''}`,
+    `Total: ${cur.symbol} ${fmtAmount(grand, dec)}`,
+    comp.vatReg && totalTax > 0 ? `VAT Amt: ${cur.symbol} ${fmtAmount(totalTax, dec)}` : '',
   ].filter(Boolean).join('\n')
   const qr = generateQrDataURL(qrText)
   return {
@@ -185,8 +186,9 @@ export function sampleInvData(comp: Company): InvTemplateData | null {
     comp.vatReg ? `VAT: ${comp.vatReg}` : '',
     'Invoice: INV-001',
     `Date: ${new Date().toISOString().slice(0, 10)}`,
-    `Total: ${cur.symbol}${fmtAmount(grand, dec)}`,
-    totalTax > 0 ? `VAT: ${cur.symbol}${fmtAmount(totalTax, dec)}` : '',
+    'Customer: Sample Customer',
+    `Total: ${cur.symbol} ${fmtAmount(grand, dec)}`,
+    totalTax > 0 ? `VAT Amt: ${cur.symbol} ${fmtAmount(totalTax, dec)}` : '',
   ].filter(Boolean).join('\n')
   return {
     comp, cur, no: 'INV-001', dt: new Date().toISOString().slice(0, 10),

@@ -119,7 +119,7 @@ export function InvoiceBold(d:InvTemplateData): string {
     </div>
   </div>
 </div>
-${qrHtml ? `<div style="text-align:left;margin-top:10px;">${qrHtml}</div>` : ''}
+${qrHtml ? `<div style="position:fixed;bottom:10%;left:60px;z-index:9998;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   <strong>${esc(c.name)}</strong>${c.loc ? ` &mdash; ${esc(c.loc)}` : ''}<br>

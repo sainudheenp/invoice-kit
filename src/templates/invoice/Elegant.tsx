@@ -120,7 +120,7 @@ ${c.invTerms ? `<div class="terms"><strong>Terms:</strong> ${esc(c.invTerms)}</d
     <div class="sig-name">${esc(c.name)}</div>
   </div>
 </div>
-${qrHtml ? `<div style="text-align:left;margin-top:10px;">${qrHtml}</div>` : ''}
+${qrHtml ? `<div style="position:fixed;bottom:10%;left:55px;z-index:9998;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   ${esc(c.name)} &mdash; ${[c.loc, c.tel, c.email].filter(Boolean).map(esc).join(' | ')}<br>
