@@ -6,7 +6,10 @@ export function generateQrDataURL(text: string, cellSize = 4, margin = 0): strin
     const qr = qrcode(0, 'L')
     qr.addData(text)
     qr.make()
-    return qr.createTableTag(cellSize, margin)
+    const modCount = qr.getModuleCount()
+    const totalSize = modCount * cellSize + margin * 2 * cellSize
+    const table = qr.createTableTag(cellSize, margin)
+    return `<div style="width:${totalSize}px;height:${totalSize}px;overflow:hidden;line-height:0;">${table}</div>`
   } catch {
     return ''
   }
