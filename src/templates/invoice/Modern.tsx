@@ -4,6 +4,8 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceModern(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#D97706'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:40px;width:auto;" alt="logo"/>` : ''
+  const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
+  const qrHtml = d.qr ? `<img src="${esc(d.qr)}" style="width:100px;height:100px;" alt="qr"/>` : ''
 
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
@@ -101,6 +103,10 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 </div>` : ''}
 
 <div class="sig">
+  <div style="display:flex;gap:15px;align-items:center;">
+    ${sealHtml}
+    ${qrHtml}
+  </div>
   ${c.signature ? `<div class="sig-block">${c.signature ? `<img src="${esc(c.signature)}" style="height:35px;width:auto;" alt="sig"/>` : ''}<div class="sig-line"></div><div class="sig-label">Authorized Signature</div></div>` : ''}
   <div class="sig-block" style="text-align:right;">
     <div class="sig-label">${esc(c.name)}</div>

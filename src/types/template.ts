@@ -29,6 +29,7 @@ export interface InvTemplateData {
   gw: string
   pd: string
   hasTax: boolean
+  qr: string
 }
 
 export interface RecTemplateData {

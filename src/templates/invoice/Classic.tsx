@@ -4,8 +4,9 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceClassic(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#1f2937'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:45px;width:auto;" alt="logo"/>` : ''
-  const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:60px;width:auto;" alt="seal"/>` : ''
+  const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
   const sigHtml = c.signature ? `<img src="${esc(c.signature)}" style="height:37.5px;width:auto;" alt="signature"/>` : ''
+  const qrHtml = d.qr ? `<img src="${esc(d.qr)}" style="width:100px;height:100px;" alt="qr"/>` : ''
 
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
@@ -110,7 +111,10 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 </div>` : ''}
 
 <div class="sig-area">
-  <div>${sealHtml}</div>
+  <div style="display:flex;gap:15px;align-items:center;">
+    ${sealHtml}
+    ${qrHtml}
+  </div>
   <div class="sig-box">
     ${sigHtml}
     <div class="sig-line"></div>

@@ -7,6 +7,7 @@ import type { LineItem } from '@/types/invoice'
 import { dp, fmtAmount } from '@/utils/format'
 import { num2words } from '@/utils/num2words'
 import { esc } from '@/utils/esc'
+import { generateQrDataURL } from '@/utils/qr'
 import {
   InvoiceClassic, InvoiceModern, InvoiceProfessional,
   InvoiceMinimal, InvoiceElegant, InvoiceBold, InvoiceBeirak,
@@ -73,6 +74,15 @@ function transformInvData(savedInv: Invoice | null, comp?: Company | null): InvT
   const totalTax = items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
   const disc = d.discount || 0
   const grand = d.grand || sub + totalTax - disc
+  const qrText = [
+    comp.name,
+    comp.vatReg ? `VAT: ${comp.vatReg}` : '',
+    `Invoice: ${d.invNo || ''}`,
+    `Date: ${d.date || ''}`,
+    `Total: ${cur.symbol}${fmtAmount(grand, dec)}`,
+    comp.vatReg && totalTax > 0 ? `VAT: ${cur.symbol}${fmtAmount(totalTax, dec)}` : '',
+  ].filter(Boolean).join('\n')
+  const qr = generateQrDataURL(qrText)
   return {
     comp, cur, no: d.invNo || '', dt: d.date || '',
     cust: d.customer?.name || '', addr: d.customer?.address || '',
@@ -84,6 +94,7 @@ function transformInvData(savedInv: Invoice | null, comp?: Company | null): InvT
     dv: fmtAmount(disc, dec), gv: fmtAmount(grand, dec),
     gw: grand > 0 ? num2words(grand, cur) + ' only' : '',
     pd: [d.payMethod, d.payDetails].filter(Boolean).join(' - '),
+    qr,
   }
 }
 
@@ -169,6 +180,14 @@ export function sampleInvData(comp: Company): InvTemplateData | null {
   const sub = items.reduce((s, i) => s + i.amount, 0)
   const totalTax = items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
   const grand = sub + totalTax
+  const sampleQrText = [
+    comp.name,
+    comp.vatReg ? `VAT: ${comp.vatReg}` : '',
+    'Invoice: INV-001',
+    `Date: ${new Date().toISOString().slice(0, 10)}`,
+    `Total: ${cur.symbol}${fmtAmount(grand, dec)}`,
+    totalTax > 0 ? `VAT: ${cur.symbol}${fmtAmount(totalTax, dec)}` : '',
+  ].filter(Boolean).join('\n')
   return {
     comp, cur, no: 'INV-001', dt: new Date().toISOString().slice(0, 10),
     cust: 'Sample Customer', addr: '123 Main St', ph: '+968 1234 5678',
@@ -179,6 +198,7 @@ export function sampleInvData(comp: Company): InvTemplateData | null {
     dv: fmtAmount(0, dec), gv: fmtAmount(grand, dec),
     gw: num2words(grand, cur) + ' only',
     pd: 'Bank Transfer',
+    qr: generateQrDataURL(sampleQrText),
   }
 }
 
