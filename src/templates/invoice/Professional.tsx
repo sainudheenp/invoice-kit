@@ -117,6 +117,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes-box">
 <div class="sig-row">
   <div style="display:flex;gap:15px;align-items:center;">
     ${sealHtml}
+    ${qrHtml}
   </div>
   <div class="sig-item" style="text-align:left;">
     <div class="sig-lbl">Prepared By</div>
@@ -131,8 +132,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes-box">
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | T:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
-  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).map(esc).join(' | ')}` : ''}
-  ${qrHtml ? `<div style="text-align:right;margin-top:5px;">${qrHtml}</div>` : ''}
+   Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).map(esc).join(' | ')}` : ''}
 </div>
 </body></html>`
 }

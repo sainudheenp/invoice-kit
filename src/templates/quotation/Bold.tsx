@@ -109,7 +109,7 @@ export function QuotationBold(d:QuotTemplateData): string {
 <div class="footer">
   <strong>${esc(c.name)}</strong>${c.loc ? ` &mdash; ${esc(c.loc)}` : ''}<br>
   ${c.tel ? `Tel:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
-  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${[c.bankName, c.bankAcc].filter(Boolean).map(esc).join(' | ')}` : ''}
+   Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${[c.bankName, c.bankAcc].filter(Boolean).map(esc).join(' | ')}` : ''}
 </div>
 </body></html>`
 }

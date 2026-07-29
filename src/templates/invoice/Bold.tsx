@@ -106,6 +106,7 @@ export function InvoiceBold(d:InvTemplateData): string {
   <div class="sig">
     <div style="display:flex;gap:15px;align-items:center;">
       ${sealHtml}
+      ${qrHtml}
     </div>
     <div></div>
     <div class="sig-b">
@@ -123,8 +124,7 @@ export function InvoiceBold(d:InvTemplateData): string {
 <div class="footer">
   <strong>${esc(c.name)}</strong>${c.loc ? ` &mdash; ${esc(c.loc)}` : ''}<br>
   ${c.tel ? `Tel:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
-  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${esc(c.bankName)}${c.bankAcc ? ` &bullet; ${esc(c.bankAcc)}` : ''}` : ''}
-  ${qrHtml ? `<div style="text-align:right;margin-top:5px;">${qrHtml}</div>` : ''}
+   Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${esc(c.bankName)}${c.bankAcc ? ` &bullet; ${esc(c.bankAcc)}` : ''}` : ''}
 </div>
 </body></html>`
 }

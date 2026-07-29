@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
+import { fmtName } from '@/utils/nameFormat'
 import { Card, CardHeader, Button, Modal } from '@/components/ui'
 import { Svg } from '@/icons'
 import { CUR_PRESETS } from '@/utils/currencyPresets'
@@ -449,7 +450,7 @@ export default function Settings() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Company Name (EN)</label>
-                  <input value={form.name} onChange={(e) => set('name', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+                  <input value={form.name} onChange={(e) => set('name', fmtName(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Company Name (AR)</label>
@@ -457,7 +458,7 @@ export default function Settings() {
                 </div>
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Subtitle (EN)</label>
-                  <input value={form.sub} onChange={(e) => set('sub', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+                  <input value={form.sub} onChange={(e) => set('sub', fmtName(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Subtitle (AR)</label>

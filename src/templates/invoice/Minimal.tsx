@@ -101,6 +101,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="section">
 <div class="sig">
   <div style="display:flex;gap:15px;align-items:center;">
     ${sealHtml}
+    ${qrHtml}
   </div>
   <div class="sig-box">
     ${c.signature ? `<img src="${esc(c.signature)}" style="height:25px;width:auto;" alt="sig"/>` : ''}
@@ -111,8 +112,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="section">
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
-  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}
-  ${qrHtml ? `<div style="text-align:right;margin-top:5px;">${qrHtml}</div>` : ''}
+   Thank you for choosing ${esc(c.name)}
 </div>
 </body></html>`
 }

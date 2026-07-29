@@ -4,6 +4,7 @@ import { useUI } from '@/store/UIContext'
 import { Card, Button, Modal } from '@/components/ui'
 import { Svg } from '@/icons'
 import { uid } from '@/utils/uid'
+import { fmtName } from '@/utils/nameFormat'
 import { customersToCSV, parseCustomersCsv, downloadCSV } from '@/utils/csv'
 import type { CustomerRecord } from '@/types/customer'
 
@@ -247,7 +248,7 @@ export default function Customers() {
                 type="text"
                 required
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(fmtName(e.target.value))}
                 placeholder="e.g. Acme Corporation"
                 className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
               />

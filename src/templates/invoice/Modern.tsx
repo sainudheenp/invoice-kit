@@ -105,6 +105,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 <div class="sig">
   <div style="display:flex;gap:15px;align-items:center;">
     ${sealHtml}
+    ${qrHtml}
   </div>
   ${c.signature ? `<div class="sig-block">${c.signature ? `<img src="${esc(c.signature)}" style="height:35px;width:auto;" alt="sig"/>` : ''}<div class="sig-line"></div><div class="sig-label">Authorized Signature</div></div>` : ''}
   <div class="sig-block" style="text-align:right;">
@@ -115,8 +116,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` - ${esc(c.loc)}` : ''}${contactLine ? ` | ${esc(contactLine)}` : ''}<br>
-  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${c.bankName}${c.bankAcc ? ` - ${c.bankAcc}` : ''}${c.bankIban ? ` (${c.bankIban})` : ''}` : ''}
-  ${qrHtml ? `<div style="text-align:right;margin-top:5px;">${qrHtml}</div>` : ''}
+   Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${c.bankName}${c.bankAcc ? ` - ${c.bankAcc}` : ''}${c.bankIban ? ` (${c.bankIban})` : ''}` : ''}
 </div>
 </body></html>`
 }

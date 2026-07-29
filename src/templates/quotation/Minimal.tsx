@@ -102,7 +102,7 @@ ${d.notes || d.terms ? `<div class="section">
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
-  ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}
+   Thank you for choosing ${esc(c.name)}
 </div>
 </body></html>`
 }

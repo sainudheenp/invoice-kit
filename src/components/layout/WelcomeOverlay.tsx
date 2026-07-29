@@ -3,6 +3,7 @@ import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { defCompany } from '@/utils/defCompany'
 import { CUR_PRESETS } from '@/utils/currencyPresets'
+import { fmtName } from '@/utils/nameFormat'
 import { validateBackupFile } from '@/utils/backup'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -247,7 +248,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Company Name *</label>
-                <input value={form.name} onChange={(e) => set('name', e.target.value)} autoFocus className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+                <input value={form.name} onChange={(e) => set('name', fmtName(e.target.value))} autoFocus className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
               </div>
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Name (Arabic)</label>
@@ -257,7 +258,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Subtitle</label>
-                <input value={form.sub} onChange={(e) => set('sub', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+                <input value={form.sub} onChange={(e) => set('sub', fmtName(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
               </div>
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Subtitle (Arabic)</label>

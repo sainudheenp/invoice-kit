@@ -9,6 +9,7 @@ import { QuotationSummary } from '@/components/quotation/QuotationSummary'
 import { num2words, dp as getDp } from '@/utils'
 import { buildQuotationHTML } from '@/templates'
 import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
+import { fmtName } from '@/utils/nameFormat'
 import type { LineItem, Customer } from '@/types/invoice'
 import type { Quotation } from '@/types/quotation'
 
@@ -258,7 +259,7 @@ export default function QuotationPage() {
             <div className="p-5 space-y-3">
               <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Customer Name <span className="text-red">*</span></label>
-                <input value={form.custName} onChange={(e) => set('custName', e.target.value)} list="quotCustNameList" className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+                <input value={form.custName} onChange={(e) => set('custName', fmtName(e.target.value))} list="quotCustNameList" className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
                 <datalist id="quotCustNameList">
                   {customers.map((c) => <option key={c} value={c} />)}
                 </datalist>

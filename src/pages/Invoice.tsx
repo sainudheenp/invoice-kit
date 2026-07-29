@@ -8,6 +8,7 @@ import { Card, CardHeader, Button, Field, Input, Textarea, Select } from '@/comp
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { InvoiceSummary } from '@/components/invoice/InvoiceSummary'
 import { num2words, dp as getDp } from '@/utils'
+import { fmtName } from '@/utils/nameFormat'
 import { buildInvoiceHTML } from '@/templates'
 import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
 import type { LineItem, Customer, Invoice } from '@/types/invoice'
@@ -267,7 +268,7 @@ export default function Invoice() {
             </CardHeader>
             <div className="p-5 space-y-3">
               <Field label="Customer Name" required>
-                <Input value={form.custName} onChange={(e) => setField('custName', e.target.value)} list="custNameList" />
+                <Input value={form.custName} onChange={(e) => setField('custName', fmtName(e.target.value))} list="custNameList" />
                 <datalist id="custNameList">
                   {customers.map((c) => <option key={c} value={c} />)}
                 </datalist>
