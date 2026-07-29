@@ -4,6 +4,8 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceProfessional(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#1e3a5f'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:40px;width:auto;" alt="logo"/>` : ''
+  const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
+  const qrHtml = d.qr ? `<img src="${esc(d.qr)}" style="width:100px;height:100px;" alt="qr"/>` : ''
 
   const rows = d.items.map((item) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
@@ -113,6 +115,10 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes-box">
 </div>` : ''}
 
 <div class="sig-row">
+  <div style="display:flex;gap:15px;align-items:center;">
+    ${sealHtml}
+    ${qrHtml}
+  </div>
   <div class="sig-item" style="text-align:left;">
     <div class="sig-lbl">Prepared By</div>
     <div style="font-size:11.25px;font-weight:bold;color:#0f172a;">${esc(c.name)}</div>
