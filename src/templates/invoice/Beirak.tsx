@@ -4,6 +4,8 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceBeirak(d:InvTemplateData): string {
   const c = d.comp; const DB = '#1e3a5f'; const LB = '#e8edf3'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:40px;width:auto;" alt="logo"/>` : ''
+  const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
+  const qrHtml = d.qr ? `<img src="${esc(d.qr)}" style="width:100px;height:100px;" alt="qr"/>` : ''
 
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
@@ -101,6 +103,10 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 </div>` : ''}
 
 <div class="sig-section">
+  <div style="display:flex;gap:15px;align-items:center;">
+    ${sealHtml}
+    ${qrHtml}
+  </div>
   <div class="sig-block" style="text-align:left;">
     <div class="sig-label">Prepared By</div>
     <div class="sig-line" style="margin:5px 0;"></div>

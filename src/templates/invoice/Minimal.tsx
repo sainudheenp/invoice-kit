@@ -3,6 +3,8 @@ import type { InvTemplateData } from '@/types/template'
 
 export function InvoiceMinimal(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#94a3b8'
+  const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
+  const qrHtml = d.qr ? `<img src="${esc(d.qr)}" style="width:100px;height:100px;" alt="qr"/>` : ''
 
   const rows = d.items.map((item) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
@@ -97,6 +99,10 @@ ${d.pd || d.notes || c.invTerms ? `<div class="section">
 </div>` : ''}
 
 <div class="sig">
+  <div style="display:flex;gap:15px;align-items:center;">
+    ${sealHtml}
+    ${qrHtml}
+  </div>
   <div class="sig-box">
     ${c.signature ? `<img src="${esc(c.signature)}" style="height:25px;width:auto;" alt="sig"/>` : ''}
     <div class="sig-line"></div>

@@ -4,6 +4,8 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceElegant(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#8b6914'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:40px;width:auto;" alt="logo"/>` : ''
+  const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
+  const qrHtml = d.qr ? `<img src="${esc(d.qr)}" style="width:100px;height:100px;" alt="qr"/>` : ''
 
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
@@ -108,6 +110,10 @@ ${d.notes ? `<div class="notes"><strong>Notes:</strong> ${esc(d.notes)}</div>` :
 ${c.invTerms ? `<div class="terms"><strong>Terms:</strong> ${esc(c.invTerms)}</div>` : ''}
 
 <div class="sig-area">
+  <div style="display:flex;gap:15px;align-items:center;">
+    ${sealHtml}
+    ${qrHtml}
+  </div>
   <div class="sig-box">
     ${c.signature ? `<img src="${esc(c.signature)}" style="height:32.5px;width:auto;" alt="sig"/>` : ''}
     <div class="sig-line"></div>

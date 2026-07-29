@@ -29,7 +29,7 @@ function scaleTemplate(html: string): string {
     return `font-size:${v}px`
   })
   out = out.replace(
-    /(<img\b[^>]*?)height:\s*([\d.]+)px([^>]*?alt="(?:logo|seal|signature)")/g,
+    /(<img\b[^>]*?)height:\s*([\d.]+)px([^>]*?alt="(?:logo|seal|signature|qr)")/g,
     (_m, pre, px, post) => {
       const v = Math.round(parseFloat(px) * SCALE)
       return `${pre}height:${v}px${post}`
