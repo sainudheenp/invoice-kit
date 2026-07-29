@@ -117,7 +117,6 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes-box">
 <div class="sig-row">
   <div style="display:flex;gap:15px;align-items:center;">
     ${sealHtml}
-    ${qrHtml}
   </div>
   <div class="sig-item" style="text-align:left;">
     <div class="sig-lbl">Prepared By</div>
@@ -129,6 +128,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes-box">
     <div class="sig-lbl">Authorized Signature</div>
   </div>
 </div>
+${qrHtml ? `<div style="position:fixed;bottom:10%;left:50px;z-index:9998;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | T:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>

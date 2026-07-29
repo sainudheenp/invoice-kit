@@ -112,7 +112,6 @@ ${c.invTerms ? `<div class="terms"><strong>Terms:</strong> ${esc(c.invTerms)}</d
 <div class="sig-area">
   <div style="display:flex;gap:15px;align-items:center;">
     ${sealHtml}
-    ${qrHtml}
   </div>
   <div class="sig-box">
     ${c.signature ? `<img src="${esc(c.signature)}" style="height:32.5px;width:auto;" alt="sig"/>` : ''}
@@ -121,6 +120,7 @@ ${c.invTerms ? `<div class="terms"><strong>Terms:</strong> ${esc(c.invTerms)}</d
     <div class="sig-name">${esc(c.name)}</div>
   </div>
 </div>
+${qrHtml ? `<div style="position:fixed;bottom:10%;left:55px;z-index:9998;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   ${esc(c.name)} &mdash; ${[c.loc, c.tel, c.email].filter(Boolean).map(esc).join(' | ')}<br>
