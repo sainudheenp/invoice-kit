@@ -4,7 +4,7 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceMinimal(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#94a3b8'
   const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
-  const qrHtml = d.qr ? `<img src="${esc(d.qr)}" style="width:100px;height:100px;" alt="qr"/>` : ''
+  const qrHtml = d.qr || ''
 
   const rows = d.items.map((item) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)

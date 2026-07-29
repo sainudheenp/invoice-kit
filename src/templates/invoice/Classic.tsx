@@ -6,7 +6,7 @@ export function InvoiceClassic(d:InvTemplateData): string {
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:45px;width:auto;" alt="logo"/>` : ''
   const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
   const sigHtml = c.signature ? `<img src="${esc(c.signature)}" style="height:37.5px;width:auto;" alt="signature"/>` : ''
-  const qrHtml = d.qr ? `<img src="${esc(d.qr)}" style="width:100px;height:100px;" alt="qr"/>` : ''
+  const qrHtml = d.qr || ''
 
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)

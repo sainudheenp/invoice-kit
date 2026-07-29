@@ -6,7 +6,7 @@ export function generateQrDataURL(text: string, cellSize = 4, margin = 0): strin
     const qr = qrcode(0, 'L')
     qr.addData(text)
     qr.make()
-    return qr.createDataURL(cellSize, margin)
+    return qr.createTableTag(cellSize, margin)
   } catch {
     return ''
   }

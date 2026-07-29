@@ -5,7 +5,7 @@ export function InvoiceBold(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#dc2626'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:45px;width:auto;" alt="logo"/>` : ''
   const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
-  const qrHtml = d.qr ? `<img src="${esc(d.qr)}" style="width:100px;height:100px;" alt="qr"/>` : ''
+  const qrHtml = d.qr || ''
 
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
