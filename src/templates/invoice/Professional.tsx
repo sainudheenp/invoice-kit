@@ -7,17 +7,18 @@ export function InvoiceProfessional(d:InvTemplateData): string {
   const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
   const qrHtml = d.qr || ''
 
-  const rows = d.items.map((item) => {
+  const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
     const total = item.amount + taxAmt
-    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
+    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
     <tr>
+      <td style="padding:7.5px 12.5px;border:1.25px solid #e2e8f0;font-size:12.5px;text-align:center;width:30px;">${i + 1}</td>
       <td style="padding:7.5px 12.5px;border:1.25px solid #e2e8f0;font-size:12.5px;">${esc(item.desc)}</td>
       <td style="padding:7.5px 12.5px;border:1.25px solid #e2e8f0;font-size:12.5px;text-align:right;">${item.qty}</td>
-      <td style="padding:7.5px 12.5px;border:1.25px solid #e2e8f0;font-size:12.5px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:7.5px 12.5px;border:1.25px solid #e2e8f0;font-size:12.5px;text-align:right;">${item.price.toFixed(d.dp)}</td>
       <td style="padding:7.5px 12.5px;border:1.25px solid #e2e8f0;font-size:12.5px;text-align:right;color:#64748b;">${taxDisplay}</td>
-      <td style="padding:7.5px 12.5px;border:1.25px solid #e2e8f0;font-size:12.5px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
+      <td style="padding:7.5px 12.5px;border:1.25px solid #e2e8f0;font-size:12.5px;text-align:right;font-weight:500;">${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -44,11 +45,12 @@ export function InvoiceProfessional(d:InvTemplateData): string {
   .info-cell .sub { font-size:10px; color:#475569; margin-top:1.25px; }
   table { width:100%; border-collapse:collapse; }
   th { background:#f1f5f9; color:#475569; font-size:10px; padding:7.5px 12.5px; text-align:left; font-weight:bold; text-transform:uppercase; letter-spacing:0.625px; border:1.25px solid #e2e8f0; }
-  th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) { text-align:right; }
+  th:first-child { text-align:center;width:30px; }
+  th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6) { text-align:right; }
   .total-section { margin-top:15px; border:1.25px solid ${p}; }
   .total-section .tr { display:flex; justify-content:space-between; padding:5px 15px; font-size:11.25px; border-bottom:1.25px solid #e2e8f0; }
   .total-section .tr:last-child { border-bottom:none; background:${p}; color:#fff; font-weight:bold; font-size:15px; padding:8.75px 15px; }
-  .words { font-size:11.25px; color:#475569; font-style:italic; text-align:right; margin-top:10px; }
+  .words { font-size:11.25px; color:#475569; font-style:italic; text-align:right; margin-top:10px;width:350px;margin-left:auto; }
   .notes-box { margin-top:15px; padding:10px 12.5px; border:1.25px solid #e2e8f0; font-size:11.25px; color:#475569; }
   .sig-row { display:flex; justify-content:space-between; margin-top:25px; padding-top:12.5px; border-top:2.5px solid ${p}; }
   .sig-item { text-align:center; }
@@ -94,7 +96,7 @@ export function InvoiceProfessional(d:InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>
@@ -128,7 +130,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes-box">
     <div class="sig-lbl">Authorized Signature</div>
   </div>
 </div>
-${qrHtml ? `<div style="position:fixed;bottom:10%;left:50px;z-index:9998;">${qrHtml}</div>` : ''}
+${qrHtml ? `<div style="margin-top:15px;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | T:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>

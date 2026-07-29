@@ -11,14 +11,15 @@ export function InvoiceClassic(d:InvTemplateData): string {
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
     const total = item.amount + taxAmt
-    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
+    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
     <tr${i % 2 === 1 ? ' style="background:#f9fafb;"' : ''}>
+      <td style="padding:10px 15px;border-bottom:1.25px solid #e5e7eb;font-size:13.75px;text-align:center;width:30px;">${i + 1}</td>
       <td style="padding:10px 15px;border-bottom:1.25px solid #e5e7eb;font-size:13.75px;">${esc(item.desc)}</td>
       <td style="padding:10px 15px;border-bottom:1.25px solid #e5e7eb;font-size:13.75px;text-align:right;">${item.qty}</td>
-      <td style="padding:10px 15px;border-bottom:1.25px solid #e5e7eb;font-size:13.75px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:10px 15px;border-bottom:1.25px solid #e5e7eb;font-size:13.75px;text-align:right;">${item.price.toFixed(d.dp)}</td>
       <td style="padding:10px 15px;border-bottom:1.25px solid #e5e7eb;font-size:13.75px;text-align:right;color:#6b7280;">${taxDisplay}</td>
-      <td style="padding:10px 15px;border-bottom:1.25px solid #e5e7eb;font-size:13.75px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
+      <td style="padding:10px 15px;border-bottom:1.25px solid #e5e7eb;font-size:13.75px;text-align:right;font-weight:500;">${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -44,12 +45,13 @@ export function InvoiceClassic(d:InvTemplateData): string {
   .rules .sub { font-size:11.25px; color:#4b5563; margin-top:1.25px; }
   table { width:100%; border-collapse:collapse; }
   th { background:${p}; color:#fff; font-size:11.25px; padding:10px 15px; text-align:left; font-weight:600; text-transform:uppercase; letter-spacing:0.625px; }
-  th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) { text-align:right; }
+  th:first-child { text-align:center;width:30px; }
+  th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6) { text-align:right; }
   .totals { margin-top:20px; margin-left:auto; width:350px; }
   .t { display:flex; justify-content:space-between; padding:3.75px 0; font-size:12.5px; color:#4b5563; }
   .t.b { border-top:2.5px solid ${p}; padding-top:6.25px; margin-top:3.75px; font-weight:bold; font-size:16.25px; color:#111827; }
   .t.b span:last-child { color:${p}; }
-  .words { font-size:12.5px; color:#6b7280; font-style:italic; text-align:right; margin-top:10px; }
+  .words { font-size:12.5px; color:#6b7280; font-style:italic; text-align:right; margin-top:10px;width:350px;margin-left:auto; }
   .notes { margin-top:20px; padding:12.5px 15px; background:#f9fafb; border:1.25px solid #e5e7eb; font-size:12.5px; color:#4b5563; }
   .sig-area { display:flex; justify-content:space-between; align-items:flex-end; margin-top:30px; padding-top:15px; border-top:1.25px solid #e5e7eb; }
   .sig-box { text-align:center; }
@@ -90,7 +92,7 @@ export function InvoiceClassic(d:InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>
@@ -124,7 +126,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
     <div style="font-size:12.5px;font-weight:bold;color:#111827;">${esc(c.name)}</div>
   </div>
 </div>
-${qrHtml ? `<div style="position:fixed;bottom:10%;left:55px;z-index:9998;">${qrHtml}</div>` : ''}
+${qrHtml ? `<div style="margin-top:15px;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | Tel:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>

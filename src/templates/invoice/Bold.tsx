@@ -10,14 +10,15 @@ export function InvoiceBold(d:InvTemplateData): string {
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
     const total = item.amount + taxAmt
-    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
+    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
     <tr${i % 2 === 1 ? ' style="background:#fef2f2;"' : ''}>
+      <td style="padding:10px 15px;border-bottom:2.5px solid #000;font-size:13.75px;text-align:center;width:30px;">${i + 1}</td>
       <td style="padding:10px 15px;border-bottom:2.5px solid #000;font-size:13.75px;">${esc(item.desc)}</td>
       <td style="padding:10px 15px;border-bottom:2.5px solid #000;font-size:13.75px;text-align:right;">${item.qty}</td>
-      <td style="padding:10px 15px;border-bottom:2.5px solid #000;font-size:13.75px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:10px 15px;border-bottom:2.5px solid #000;font-size:13.75px;text-align:right;">${item.price.toFixed(d.dp)}</td>
       <td style="padding:10px 15px;border-bottom:2.5px solid #000;font-size:13.75px;text-align:right;color:#666;">${taxDisplay}</td>
-      <td style="padding:10px 15px;border-bottom:2.5px solid #000;font-size:13.75px;text-align:right;font-weight:bold;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
+      <td style="padding:10px 15px;border-bottom:2.5px solid #000;font-size:13.75px;text-align:right;font-weight:bold;">${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -39,11 +40,12 @@ export function InvoiceBold(d:InvTemplateData): string {
   .info .sub { font-size:11.25px; color:#444; }
   table { width:100%; border-collapse:collapse; }
   th { background:#000; color:#fff; font-size:11.25px; padding:10px 15px; text-align:left; font-weight:bold; text-transform:uppercase; letter-spacing:0.625px; }
-  th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) { text-align:right; }
+  th:first-child { text-align:center;width:30px; }
+  th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6) { text-align:right; }
   .total { margin-top:20px; margin-left:auto; width:375px; }
   .t { display:flex; justify-content:space-between; padding:6.25px 0; font-size:13.75px; font-weight:bold; border-bottom:1.25px solid #ddd; }
   .t.gr { font-size:20px; color:${p}; border-bottom:3.75px solid #000; padding:10px 0; margin-top:5px; }
-  .words { font-size:12.5px; color:#666; font-style:italic; text-align:right; margin-top:10px; }
+  .words { font-size:12.5px; color:#666; font-style:italic; text-align:right; margin-top:10px;width:350px;margin-left:auto; }
   .notes { margin-top:20px; padding:15px 20px; background:#f9f9f9; border-left:5px solid ${p}; font-size:12.5px; color:#333; }
   .sig { margin-top:30px; display:flex; justify-content:space-between; align-items:flex-start; }
   .sig-b { text-align:center; flex:1; }
@@ -83,7 +85,7 @@ export function InvoiceBold(d:InvTemplateData): string {
 
   <table>
     <thead>
-    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
   </thead>
     ${rows}
   </table>
@@ -119,7 +121,7 @@ export function InvoiceBold(d:InvTemplateData): string {
     </div>
   </div>
 </div>
-${qrHtml ? `<div style="position:fixed;bottom:10%;left:60px;z-index:9998;">${qrHtml}</div>` : ''}
+${qrHtml ? `<div style="margin-top:15px;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   <strong>${esc(c.name)}</strong>${c.loc ? ` &mdash; ${esc(c.loc)}` : ''}<br>

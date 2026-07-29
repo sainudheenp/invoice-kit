@@ -6,17 +6,18 @@ export function InvoiceMinimal(d:InvTemplateData): string {
   const sealHtml = c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
   const qrHtml = d.qr || ''
 
-  const rows = d.items.map((item) => {
+  const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
     const total = item.amount + taxAmt
-    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
+    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
     <tr>
+      <td style="padding:7.5px 0;font-size:12.5px;color:#475569;text-align:center;width:25px;">${i + 1}</td>
       <td style="padding:7.5px 0;font-size:12.5px;color:#334155;">${esc(item.desc)}</td>
       <td style="padding:7.5px 0;font-size:12.5px;color:#475569;text-align:right;">${item.qty}</td>
-      <td style="padding:7.5px 0;font-size:12.5px;color:#475569;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:7.5px 0;font-size:12.5px;color:#475569;text-align:right;">${item.price.toFixed(d.dp)}</td>
       <td style="padding:7.5px 0;font-size:12.5px;color:#94a3b8;text-align:right;">${taxDisplay}</td>
-      <td style="padding:7.5px 0;font-size:12.5px;color:#334155;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
+      <td style="padding:7.5px 0;font-size:12.5px;color:#334155;text-align:right;font-weight:500;">${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -37,12 +38,13 @@ export function InvoiceMinimal(d:InvTemplateData): string {
   .rules .sub { font-size:10px; color:#64748b; margin-top:1.25px; }
   table { width:100%; border-collapse:collapse; }
   th { font-size:8.75px; color:#94a3b8; font-weight:500; padding:5px 0; border-bottom:1.25px solid #e2e8f0; text-align:left; text-transform:uppercase; letter-spacing:1px; }
-  th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) { text-align:right; }
+  th:first-child { text-align:center;width:25px; }
+  th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6) { text-align:right; }
   .spacer { height:10px; }
   .total-line { display:flex; justify-content:space-between; padding:2.5px 0; font-size:11.25px; color:#64748b; }
   .total-line.final { font-size:15px; font-weight:600; color:#0f172a; border-top:1.25px solid #e2e8f0; padding-top:6.25px; margin-top:2.5px; }
   .total-line.final span:last-child { color:${p}; }
-  .words { font-size:10px; color:#94a3b8; font-style:italic; text-align:right; margin-top:7.5px; }
+  .words { font-size:10px; color:#94a3b8; font-style:italic; text-align:right; margin-top:7.5px;width:350px;margin-left:auto; }
   .section { margin-top:25px; padding-top:15px; border-top:1.25px solid #e2e8f0; font-size:10px; color:#64748b; }
   .section-title { font-size:8.75px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px; }
   .sig { margin-top:35px; display:flex; justify-content:flex-end; }
@@ -79,7 +81,7 @@ export function InvoiceMinimal(d:InvTemplateData): string {
 
 <table>
   <thead>
-    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>
@@ -108,7 +110,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="section">
     <div class="sig-lbl">Authorized Signature</div>
   </div>
 </div>
-${qrHtml ? `<div style="position:fixed;bottom:10%;left:75px;z-index:9998;">${qrHtml}</div>` : ''}
+${qrHtml ? `<div style="margin-top:15px;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>

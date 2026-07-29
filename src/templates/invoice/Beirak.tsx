@@ -10,14 +10,15 @@ export function InvoiceBeirak(d:InvTemplateData): string {
   const rows = d.items.map((item, i) => {
     const taxAmt = item.amount * ((item.taxRate || 0) / 100)
     const total = item.amount + taxAmt
-    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + d.cur.symbol + taxAmt.toFixed(d.dp) + ')' : '-'
+    const taxDisplay = (item.taxRate || 0) > 0 ? item.taxRate + '% (' + taxAmt.toFixed(d.dp) + ')' : '-'
     return `
     <tr${i % 2 === 1 ? ` style="background:${LB};"` : ''}>
+      <td style="padding:10px 15px;border:1.25px solid #c5ced9;font-size:12.5px;text-align:center;width:30px;">${i + 1}</td>
       <td style="padding:10px 15px;border:1.25px solid #c5ced9;font-size:12.5px;">${esc(item.desc)}</td>
       <td style="padding:10px 15px;border:1.25px solid #c5ced9;font-size:12.5px;text-align:right;">${item.qty}</td>
-      <td style="padding:10px 15px;border:1.25px solid #c5ced9;font-size:12.5px;text-align:right;">${d.cur.symbol}${item.price.toFixed(d.dp)}</td>
+      <td style="padding:10px 15px;border:1.25px solid #c5ced9;font-size:12.5px;text-align:right;">${item.price.toFixed(d.dp)}</td>
       <td style="padding:10px 15px;border:1.25px solid #c5ced9;font-size:12.5px;text-align:right;color:#4b5563;">${taxDisplay}</td>
-      <td style="padding:10px 15px;border:1.25px solid #c5ced9;font-size:12.5px;text-align:right;font-weight:500;">${d.cur.symbol}${total.toFixed(d.dp)}</td>
+      <td style="padding:10px 15px;border:1.25px solid #c5ced9;font-size:12.5px;text-align:right;font-weight:500;">${total.toFixed(d.dp)}</td>
     </tr>`}
   ).join('')
 
@@ -40,11 +41,12 @@ export function InvoiceBeirak(d:InvTemplateData): string {
   .info-table td:first-child { background:${DB}; color:#fff; font-weight:bold; width:112.5px; text-align:center; }
   table.items { width:100%; border-collapse:collapse; margin-top:10px; }
   table.items th { background:${DB}; color:#fff; font-size:11.25px; padding:10px 15px; text-align:left; font-weight:bold; border:1.25px solid ${DB}; }
-  table.items th:nth-child(2), table.items th:nth-child(3), table.items th:nth-child(4), table.items th:nth-child(5) { text-align:right; }
+  table.items th:first-child { text-align:center;width:30px; }
+  table.items th:nth-child(3), table.items th:nth-child(4), table.items th:nth-child(5), table.items th:nth-child(6) { text-align:right; }
   .sum-box { margin-top:15px; border:2.5px solid ${DB}; }
   .sum-row { display:flex; justify-content:space-between; padding:6.25px 15px; font-size:12.5px; border-bottom:1.25px solid #c5ced9; }
   .sum-row:last-child { border-bottom:none; background:${DB}; color:#fff; font-weight:bold; font-size:17.5px; padding:10px 15px; }
-  .words { font-size:12.5px; color:#4b5563; font-style:italic; text-align:right; margin-top:10px; }
+  .words { font-size:12.5px; color:#4b5563; font-style:italic; text-align:right; margin-top:10px;width:350px;margin-left:auto; }
   .notes { margin-top:15px; padding:10px 15px; border:1.25px solid #c5ced9; font-size:12.5px; color:#4b5563; }
   .sig-section { display:flex; justify-content:space-between; margin-top:25px; padding-top:15px; border-top:2.5px solid ${DB}; }
   .sig-block { text-align:center; flex:1; }
@@ -82,7 +84,7 @@ export function InvoiceBeirak(d:InvTemplateData): string {
 
 <table class="items">
   <thead>
-    <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
+    <tr><th>#</th><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th>Total</th></tr>
   </thead>
   ${rows}
 </table>
@@ -122,7 +124,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
     <div class="sig-name">${esc(c.name)}</div>
   </div>
 </div>
-${qrHtml ? `<div style="position:fixed;bottom:10%;left:50px;z-index:9998;">${qrHtml}</div>` : ''}
+${qrHtml ? `<div style="margin-top:15px;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   ${esc(c.name)} &mdash; ${contact}<br>
