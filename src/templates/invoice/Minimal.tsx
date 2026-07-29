@@ -101,7 +101,6 @@ ${d.pd || d.notes || c.invTerms ? `<div class="section">
 <div class="sig">
   <div style="display:flex;gap:15px;align-items:center;">
     ${sealHtml}
-    ${qrHtml}
   </div>
   <div class="sig-box">
     ${c.signature ? `<img src="${esc(c.signature)}" style="height:25px;width:auto;" alt="sig"/>` : ''}

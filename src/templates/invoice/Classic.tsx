@@ -113,7 +113,6 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 <div class="sig-area">
   <div style="display:flex;gap:15px;align-items:center;">
     ${sealHtml}
-    ${qrHtml}
   </div>
   <div class="sig-box">
     ${sigHtml}
@@ -129,6 +128,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | Tel:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
   ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<div class="bank">${[c.bankName, c.bankAcc, c.bankIban].filter(Boolean).map(esc).join(' | ')}</div>` : ''}
+  ${qrHtml ? `<div style="text-align:right;margin-top:5px;">${qrHtml}</div>` : ''}
 </div>
 </body></html>`
 }
