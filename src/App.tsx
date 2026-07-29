@@ -59,7 +59,7 @@ function AppContent() {
       {/* Hamburger for mobile */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-3 left-3 z-50 md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm cursor-pointer"
+        className="fixed top-3 right-3 z-50 md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm cursor-pointer"
       >
         <Svg name={ui.sidebarOpen ? 'close' : 'menu'} />
       </button>

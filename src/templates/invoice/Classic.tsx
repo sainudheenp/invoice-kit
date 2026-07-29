@@ -124,7 +124,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
     <div style="font-size:12.5px;font-weight:bold;color:#111827;">${esc(c.name)}</div>
   </div>
 </div>
-${qrHtml ? `<div style="position:fixed;bottom:10%;left:55px;z-index:9998;">${qrHtml}</div>` : ''}
+${qrHtml ? `<div style="text-align:left;margin-top:10px;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | Tel:${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>

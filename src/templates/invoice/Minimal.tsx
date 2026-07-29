@@ -108,7 +108,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="section">
     <div class="sig-lbl">Authorized Signature</div>
   </div>
 </div>
-${qrHtml ? `<div style="position:fixed;bottom:10%;left:75px;z-index:9998;">${qrHtml}</div>` : ''}
+${qrHtml ? `<div style="text-align:left;margin-top:10px;">${qrHtml}</div>` : ''}
 
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
