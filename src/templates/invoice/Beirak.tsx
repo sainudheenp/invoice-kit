@@ -105,7 +105,6 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 <div class="sig-section">
   <div style="display:flex;gap:15px;align-items:center;">
     ${sealHtml}
-    ${qrHtml}
   </div>
   <div class="sig-block" style="text-align:left;">
     <div class="sig-label">Prepared By</div>
@@ -127,6 +126,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
 <div class="footer">
   ${esc(c.name)} &mdash; ${contact}<br>
   ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}${c.bankName ? `<br>${esc(c.bankName)}${c.bankAcc ? ` - ${esc(c.bankAcc)}` : ''}` : ''}
+  ${qrHtml ? `<div style="text-align:right;margin-top:5px;">${qrHtml}</div>` : ''}
 </div>
 </body></html>`
 }

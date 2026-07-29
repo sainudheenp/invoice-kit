@@ -112,6 +112,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="section">
 <div class="footer">
   ${esc(c.name)}${c.loc ? ` | ${esc(c.loc)}` : ''}${c.tel ? ` | ${esc(c.tel)}` : ''}${c.email ? ` | ${esc(c.email)}` : ''}<br>
   ${esc(d.no)} &middot; Thank you for choosing ${esc(c.name)}
+  ${qrHtml ? `<div style="text-align:right;margin-top:5px;">${qrHtml}</div>` : ''}
 </div>
 </body></html>`
 }
