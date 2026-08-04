@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useUI } from '@/store/UIContext'
 
-const MIN_VISIBLE_MS = 1800
-
 const STEPS = [
   { id: 'header', label: 'Adding header' },
   { id: 'items', label: 'Adding items' },
@@ -17,54 +15,69 @@ export function PDFOverlay() {
   const active = ui.pdfOverlay
   const [currentStep, setCurrentStep] = useState(0)
   const [visible, setVisible] = useState(false)
-  const startedAt = useRef(0)
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const activeRef = useRef(active)
+  activeRef.current = active
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const clearTimers = () => {
-    timers.current.forEach(clearTimeout)
-    timers.current = []
+  const cleanup = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
   }
 
   useEffect(() => {
     if (active) {
-      clearTimers()
+      cleanup()
       setVisible(true)
       setCurrentStep(0)
-      startedAt.current = Date.now()
 
-      // Progress through steps smoothly
-      const stepDuration = 280
-      for (let i = 1; i <= 4; i++) {
-        timers.current.push(
-          setTimeout(() => {
-            setCurrentStep(i)
-          }, i * stepDuration),
-        )
-      }
-      return
-    }
+      let step = 0
+      timerRef.current = setInterval(() => {
+        step += 1
+        if (step < 5) {
+          setCurrentStep(step)
+        } else {
+          // Reached step 4 (Punching seal)
+          if (!activeRef.current) {
+            setCurrentStep(5)
+            if (timerRef.current) {
+              clearInterval(timerRef.current)
+              timerRef.current = null
+            }
+            closeTimerRef.current = setTimeout(() => {
+              setVisible(false)
+              setCurrentStep(0)
+            }, 600)
+          } else {
+            setCurrentStep(4)
+          }
+        }
+      }, 320)
 
-    if (!visible) return
-
-    const finish = () => {
-      setCurrentStep(5) // Step 5 is "Done!"
-      timers.current.push(
-        setTimeout(() => {
+      return cleanup
+    } else {
+      // active turned false
+      if (visible && currentStep >= 4) {
+        setCurrentStep(5)
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+          timerRef.current = null
+        }
+        closeTimerRef.current = setTimeout(() => {
           setVisible(false)
           setCurrentStep(0)
-        }, 500),
-      )
+        }, 600)
+      }
     }
-
-    const elapsed = Date.now() - startedAt.current
-    const wait = Math.max(0, MIN_VISIBLE_MS - elapsed)
-    if (wait === 0) finish()
-    else timers.current.push(setTimeout(finish, wait))
-
-    return clearTimers
   }, [active])
 
-  useEffect(() => clearTimers, [])
+  useEffect(() => cleanup, [])
 
   if (!visible) return null
 
