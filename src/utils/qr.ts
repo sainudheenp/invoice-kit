@@ -8,8 +8,8 @@ export function generateQrDataURL(text: string, cellSize = 3, margin = 0): strin
     qr.make()
     const modCount = qr.getModuleCount()
     const totalSize = modCount * cellSize + margin * 2 * cellSize
-    const table = qr.createTableTag(cellSize, margin)
-    return `<div style="width:${totalSize}px;height:${totalSize}px;overflow:hidden;line-height:0;">${table}</div>`
+    const dataUrl = qr.createDataURL(cellSize, margin)
+    return `<img src="${dataUrl}" style="width:${totalSize}px;height:${totalSize}px;display:block;" alt="QR Code"/>`
   } catch {
     return ''
   }

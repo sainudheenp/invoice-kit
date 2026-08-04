@@ -1,9 +1,9 @@
 const SVG_RE = /^data:image\/svg\+xml/
 
 export const IMAGE_MAX_SIZES: Record<string, { w: number; h: number }> = {
-  logo: { w: 400, h: 400 },
-  seal: { w: 600, h: 600 },
-  signature: { w: 800, h: 300 },
+  logo: { w: 300, h: 300 },
+  seal: { w: 400, h: 400 },
+  signature: { w: 500, h: 200 },
 }
 
 export function resizeImage(dataUrl: string, maxW: number, maxH: number): Promise<string> {
@@ -12,18 +12,16 @@ export function resizeImage(dataUrl: string, maxW: number, maxH: number): Promis
     const img = new Image()
     img.onload = () => {
       let { width, height } = img
-      if (width <= maxW && height <= maxH) {
-        resolve(dataUrl)
-        return
-      }
-      const ratio = Math.min(maxW / width, maxH / height)
-      width = Math.round(width * ratio)
-      height = Math.round(height * ratio)
+      const ratio = Math.min(maxW / width, maxH / height, 1)
+      const newW = Math.max(1, Math.round(width * ratio))
+      const newH = Math.max(1, Math.round(height * ratio))
       const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
+      canvas.width = newW
+      canvas.height = newH
       const ctx = canvas.getContext('2d')!
-      ctx.drawImage(img, 0, 0, width, height)
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
+      ctx.drawImage(img, 0, 0, newW, newH)
       resolve(canvas.toDataURL('image/png'))
     }
     img.onerror = () => reject(new Error('Failed to load image'))

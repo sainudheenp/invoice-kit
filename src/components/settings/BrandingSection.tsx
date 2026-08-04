@@ -1,4 +1,6 @@
 
+import { resizeImage, IMAGE_MAX_SIZES } from '@/utils/image'
+
 interface Props {
   form: Record<string, string>
   set: (field: string, value: string) => void
@@ -22,9 +24,11 @@ export function BrandingSection({ form, set, setUploadField, dragOverField, setD
     const reader = new FileReader()
     reader.onload = async () => {
       const dataUrl = reader.result as string
-      set(field, dataUrl)
+      const { w, h } = IMAGE_MAX_SIZES[field] || { w: 400, h: 400 }
+      const resized = await resizeImage(dataUrl, w, h)
+      set(field, resized)
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-      formRef.current = { ...formRef.current, [field]: dataUrl }
+      formRef.current = { ...formRef.current, [field]: resized }
       setSaving(true)
       await doAutoSave()
     }
