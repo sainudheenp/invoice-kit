@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { useLivePreview } from '@/hooks/useLivePreview'
 import { Field, Input, Textarea, Select, CustomerPicker, ExportActions, CollapsibleSection } from '@/components/ui'
 import { DocWorkspace } from '@/components/layout/DocWorkspace'
 import { ReceiptItems } from '@/components/receipt/ReceiptItems'
@@ -182,7 +181,6 @@ export default function Receipt() {
     createdAt: Date.now(),
   })
 
-  const previewHtml = useLivePreview(() => (co ? buildReceiptHTML(buildTempReceipt(), co) : ''), form)
 
   const handlePrint = async () => {
     if (!co) { showToast('No active file.', 'err'); return }
@@ -290,7 +288,6 @@ export default function Receipt() {
       title={isEditing ? 'Edit Receipt' : 'New Receipt'}
       subtitle="Details on the left, live preview on the right."
       badge={badge}
-      previewHtml={previewHtml}
       panel={panel}
     >
       <CollapsibleSection

@@ -4,7 +4,6 @@ import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useUndoRedo } from '@/hooks/useUndoRedo'
-import { useLivePreview } from '@/hooks/useLivePreview'
 import { Field, Input, Textarea, Select, CustomerPicker, ExportActions, CollapsibleSection } from '@/components/ui'
 import { DocWorkspace } from '@/components/layout/DocWorkspace'
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
@@ -175,7 +174,6 @@ export default function Invoice() {
     }
   }
 
-  const previewHtml = useLivePreview(() => (co ? buildInvoiceHTML(buildTempInvoice(), co) : ''), form)
 
   const handlePrint = async () => {
     if (!co) { showToast('No active company.', 'err'); return }
@@ -275,7 +273,6 @@ export default function Invoice() {
       title={isEditing ? 'Edit Invoice' : 'New Invoice'}
       subtitle="Details on the left, live preview on the right."
       badge={badge}
-      previewHtml={previewHtml}
       panel={panel}
     >
       <CollapsibleSection
