@@ -1,16 +1,18 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useUndoRedo } from '@/hooks/useUndoRedo'
-import { Card, CardHeader, Button, Field, Input, Textarea, Select } from '@/components/ui'
+import { DocWizard, type WizardStep } from '@/components/ui/DocWizard'
+import { CardHeader, Field, Input, Textarea, Select, CustomerPicker, ExportActions, Button } from '@/components/ui'
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
-import { InvoiceSummary } from '@/components/invoice/InvoiceSummary'
 import { num2words, dp as getDp } from '@/utils'
 import { fmtName } from '@/utils/nameFormat'
 import { buildInvoiceHTML } from '@/templates'
 import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
+import { Svg } from '@/icons'
 import type { LineItem, Customer, Invoice } from '@/types/invoice'
 
 interface InvoiceFormState {
@@ -29,6 +31,13 @@ interface InvoiceFormState {
   bankName: string
 }
 
+const STEPS: WizardStep[] = [
+  { key: 'details', label: 'Details', icon: 'file' },
+  { key: 'customer', label: 'Customer', icon: 'users' },
+  { key: 'items', label: 'Items', icon: 'box' },
+  { key: 'review', label: 'Review', icon: 'check' },
+]
+
 const emptyForm = (): InvoiceFormState => ({
   invNo: '',
   date: new Date().toISOString().slice(0, 10),
@@ -39,12 +48,15 @@ const emptyForm = (): InvoiceFormState => ({
 })
 
 export default function Invoice() {
+  const navigate = useNavigate()
   const { state, getCo, saveCompany, createInvoice, setEditing } = useApp()
   const { markDirty, markClean, showToast, showPreview, showPdfOverlay, hidePdfOverlay } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()
   const co = getCo()
   const { state: form, set: setForm } = useUndoRedo<InvoiceFormState>(emptyForm())
   const [isEditing, setIsEditing] = useState(false)
+  const [step, setStep] = useState(0)
+  const [saving, setSaving] = useState(false)
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
@@ -55,6 +67,7 @@ export default function Invoice() {
     const inv = state.invoices.find((i) => i.id === state.editingDoc!.id)
     if (!inv) return
     setIsEditing(true)
+    setStep(3)
     setForm({
       invNo: inv.invNo,
       date: inv.date,
@@ -115,6 +128,7 @@ export default function Invoice() {
     if (dupe) { showToast('Invoice number already exists.', 'err'); return }
 
     try {
+      setSaving(true)
       const saved = await createInvoice(co, {
         invNo: form.invNo,
         date: form.date,
@@ -140,6 +154,8 @@ export default function Invoice() {
       showToast(editingId ? 'Invoice updated!' : 'Invoice saved!')
     } catch {
       showToast('Failed to save invoice.', 'err')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -147,29 +163,30 @@ export default function Invoice() {
     setForm(emptyForm())
     setIsEditing(false)
     setEditing(null)
+    setStep(0)
     markClean()
   }
 
-  useKeyboardShortcuts({ s: handleSave, enter: handleSave })
+  useKeyboardShortcuts({ s: handleSave })
 
   const buildTempInvoice = (): Invoice => {
     const editingId = state.editingDoc?.type === 'inv' ? state.editingDoc.id : null
     const existingInv = editingId ? state.invoices.find((i) => i.id === editingId) : null
     const isPaid = existingInv?.paid ?? false
     return {
-    id: '',
-    companyId: co?.id || '',
-    invNo: form.invNo,
-    date: form.date,
-    paid: isPaid,
-    customer,
-    items: form.items,
-    subtotal, vatPct: 0, vatAmt: totalTax, discount: form.discount, grand,
-    notes: form.notes,
-    payMethod: form.payMethod,
-    payDetails: form.chequeNo,
-    bankName: form.bankName,
-    createdAt: Date.now(),
+      id: '',
+      companyId: co?.id || '',
+      invNo: form.invNo,
+      date: form.date,
+      paid: isPaid,
+      customer,
+      items: form.items,
+      subtotal, vatPct: 0, vatAmt: totalTax, discount: form.discount, grand,
+      notes: form.notes,
+      payMethod: form.payMethod,
+      payDetails: form.chequeNo,
+      bankName: form.bankName,
+      createdAt: Date.now(),
     }
   }
 
@@ -211,170 +228,255 @@ export default function Invoice() {
   const showCheque = form.payMethod === 'Cheque'
   const showBank = form.payMethod === 'Cheque' || form.payMethod === 'Bank Transfer'
 
-  return (
-    <div>
-      <div className="mb-5">
-        <h1 className="text-xl font-bold">{isEditing ? 'Edit Invoice' : 'New Invoice'}</h1>
-        <p className="text-sm text-[var(--color-text2)]">Create a tax invoice.</p>
-      </div>
+  const goNext = () => {
+    if (step === 0) {
+      if (!form.invNo.trim()) { showToast('Invoice number is required.', 'err'); return }
+      setStep(1)
+      return
+    }
+    if (step === 1) {
+      if (!form.custName.trim()) { showToast('Customer name is required.', 'err'); return }
+      setStep(2)
+      return
+    }
+    if (step === 2) {
+      const validItems = form.items.filter((i) => i.desc.trim() && i.qty > 0 && i.price > 0)
+      if (validItems.length === 0) { showToast('Add at least one line item with a description, quantity, and price.', 'err'); return }
+      setStep(3)
+      return
+    }
+    handleSave()
+  }
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
-        <div className="space-y-5">
-          <Card>
+  const badge = (
+    <div className="flex items-center gap-2 flex-wrap">
+      {cur && (
+        <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] font-semibold">
+          <Svg name="save" className="w-3.5 h-3.5" /> {cur.code} {cur.symbol}
+        </span>
+      )}
+      <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-semibold ${isEditing ? 'bg-green-bg text-green-dark' : 'bg-[var(--color-input-bg)] text-[var(--color-text2)]'}`}>
+        {isEditing ? 'Editing' : 'New Document'}
+      </span>
+    </div>
+  )
+
+  const renderStep = () => {
+    switch (step) {
+      case 0:
+        return (
+          <div className="surface p-6" key="s0">
             <CardHeader>
-              <h2 className="text-sm font-semibold">Invoice Details</h2>
-              {cur && <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] font-medium">{cur.code} {cur.symbol}</span>}
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="file" className="w-4 h-4" /></span>
+                Invoice Details
+              </h2>
             </CardHeader>
-            <div className="p-5 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Invoice No." required>
-                  <Input value={form.invNo} onChange={(e) => setField('invNo', e.target.value)} />
+                  <Input value={form.invNo} onChange={(e) => setField('invNo', e.target.value)} placeholder="INV-0001" />
                 </Field>
                 <Field label="Date">
                   <Input type="date" value={form.date} onChange={(e) => setField('date', e.target.value)} />
                 </Field>
               </div>
-            </div>
-          </Card>
 
-          <Card>
-            <CardHeader>
-              <h2 className="text-sm font-semibold">Customer</h2>
-              {state.customers.filter((c) => c.companyId === co?.id).length > 0 && (
-                <select
-                  onChange={(e) => {
-                    const found = state.customers.find((c) => c.id === e.target.value)
-                    if (found) {
-                      setForm({
-                        ...form,
-                        custName: found.name,
-                        custAddr: found.address,
-                        custPhone: found.phone,
-                        custCr: found.cr,
-                        custEmail: found.email,
-                      })
-                      markDirty()
-                    }
-                    e.target.value = ''
-                  }}
-                  className="text-xs max-w-[180px] px-2 py-1 rounded border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-[var(--color-text)] outline-none focus:ring-1 focus:ring-[var(--color-primary)] cursor-pointer"
-                >
-                  <option value="">-- Load Saved Customer --</option>
-                  {state.customers.filter((c) => c.companyId === co?.id).map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              )}
+              <div>
+                <hr className="border-[var(--color-border)] my-4" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text3)] mb-3">Payment</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Payment Method">
+                    <Select value={form.payMethod} onChange={(e) => setField('payMethod', e.target.value)}>
+                      <option value="">-- Select --</option>
+                      <option>Cash</option>
+                      <option>Cheque</option>
+                      <option>Bank Transfer</option>
+                    </Select>
+                  </Field>
+                  {showCheque && (
+                    <Field label="Cheque No.">
+                      <Input value={form.chequeNo} onChange={(e) => setField('chequeNo', e.target.value)} />
+                    </Field>
+                  )}
+                  {showBank && (
+                    <Field label="Bank Name">
+                      <Input value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} />
+                    </Field>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case 1:
+        return (
+          <div className="surface" key="s1">
+            <CardHeader className="flex-col sm:flex-row sm:items-center">
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <Svg name="users" className="w-4 h-4 text-[var(--color-primary)]" />
+                Customer
+              </h2>
+              <CustomerPicker
+                companyId={co?.id || null}
+                currentName={form.custName}
+                onPick={(c) => {
+                  setForm({
+                    ...form,
+                    custName: c.name, custAddr: c.address,
+                    custPhone: c.phone, custCr: c.cr, custEmail: c.email,
+                  })
+                  markDirty()
+                }}
+              />
             </CardHeader>
-            <div className="p-5 space-y-3">
+            <div className="p-6 space-y-4">
               <Field label="Customer Name" required>
-                <Input value={form.custName} onChange={(e) => setField('custName', fmtName(e.target.value))} list="custNameList" />
+                <Input value={form.custName} onChange={(e) => setField('custName', fmtName(e.target.value))} list="custNameList" placeholder="Enter customer name" />
                 <datalist id="custNameList">
                   {customers.map((c) => <option key={c} value={c} />)}
                 </datalist>
               </Field>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Address">
-                  <Input value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} />
+                  <Input value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} placeholder="Street, city" />
                 </Field>
                 <Field label="Phone">
-                  <Input value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} />
+                  <Input value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} placeholder="+968 ..." />
                 </Field>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="C.R.">
-                  <Input value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} />
+                  <Input value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} placeholder="Commercial registration" />
                 </Field>
                 <Field label="Email">
-                  <Input value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} />
+                  <Input type="email" value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} placeholder="name@example.com" />
                 </Field>
               </div>
             </div>
-          </Card>
-
-          <Card>
-            <CardHeader><h2 className="text-sm font-semibold">Line Items</h2></CardHeader>
-            <div className="p-5">
+          </div>
+        )
+      case 2:
+        return (
+          <div className="surface" key="s2">
+            <CardHeader>
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="box" className="w-4 h-4" /></span>
+                Line Items
+              </h2>
+            </CardHeader>
+            <div className="p-6">
               <LineItemsTable items={form.items} onChange={(items) => setField('items', items)} dp={decimals} />
-            </div>
-          </Card>
-
-          <Card>
-            <CardHeader><h2 className="text-sm font-semibold">Summary</h2></CardHeader>
-            <div className="p-5 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Subtotal">
-                  <Input readOnly value={subtotal.toFixed(decimals)} />
-                </Field>
-                <Field label="Total Tax">
-                  <Input readOnly value={totalTax.toFixed(decimals)} />
-                </Field>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="mt-5 pt-5 border-t border-[var(--color-border)] grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Discount">
                   <Input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => setField('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
                 </Field>
-                <Field label="Grand Total">
-                  <Input readOnly value={grand.toFixed(decimals)} />
-                </Field>
               </div>
-              <Field label="Amount in Words">
-                <Input readOnly value={words} />
-              </Field>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <div className="flex-1 min-w-[160px] p-4 rounded-2xl bg-[var(--color-input-bg)] border border-[var(--color-border)]">
+                  <div className="text-xs text-[var(--color-text3)]">Subtotal</div>
+                  <div className="text-lg font-bold tabular-nums">{cur?.symbol}{subtotal.toFixed(decimals)}</div>
+                </div>
+                <div className="flex-1 min-w-[160px] p-4 rounded-2xl bg-[var(--color-input-bg)] border border-[var(--color-border)]">
+                  <div className="text-xs text-[var(--color-text3)]">Tax</div>
+                  <div className="text-lg font-bold tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</div>
+                </div>
+                <div className="flex-1 min-w-[160px] p-4 rounded-2xl bg-[var(--color-primary-bg)] border border-[var(--color-primary)]/30">
+                  <div className="text-xs font-medium text-[var(--color-primary)]">Grand Total</div>
+                  <div className="text-lg font-bold text-[var(--color-primary)] tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</div>
+                </div>
+              </div>
             </div>
-          </Card>
+          </div>
+        )
+      case 3:
+        return (
+          <div key="s3" className="space-y-5">
+            <div className="surface overflow-hidden">
+              <div className="px-6 py-5 border-b border-[var(--color-border)] bg-[var(--color-primary-bg)] flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <div className="text-xs font-medium text-[var(--color-primary)]">Invoice #{form.invNo || '—'}</div>
+                  <div className="text-3xl font-bold text-[var(--color-text)] tabular-nums mt-1">{cur?.symbol}{grand.toFixed(decimals)}</div>
+                  <div className="text-xs text-[var(--color-text2)] mt-1 italic">{words || 'Enter items to see amount in words'}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-[var(--color-text3)]">{form.date}</div>
+                  {form.payMethod && <div className="text-xs font-medium text-[var(--color-primary)]">{form.payMethod}</div>}
+                  <div className="text-sm font-semibold text-[var(--color-text)] mt-1 truncate max-w-[200px]">{form.custName || 'No customer'}</div>
+                </div>
+              </div>
+              <div className="p-6 grid grid-cols-1 md:grid-cols-[1fr_320px] gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold">Summary</h3>
+                  <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden">
+                    <div className="flex justify-between px-5 py-3 text-sm border-b border-[var(--color-border)]">
+                      <span className="text-[var(--color-text2)]">Subtotal</span>
+                      <span className="font-medium tabular-nums">{cur?.symbol}{subtotal.toFixed(decimals)}</span>
+                    </div>
+                    {totalTax > 0 && (
+                      <div className="flex justify-between px-5 py-3 text-sm border-b border-[var(--color-border)]">
+                        <span className="text-[var(--color-text2)]">Total Tax</span>
+                        <span className="font-medium tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</span>
+                      </div>
+                    )}
+                    {form.discount > 0 && (
+                      <div className="flex justify-between px-5 py-3 text-sm border-b border-[var(--color-border)] text-red">
+                        <span>Discount</span>
+                        <span className="font-medium tabular-nums">-{cur?.symbol}{form.discount.toFixed(decimals)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between px-5 py-3 text-base font-bold">
+                      <span>Grand Total</span>
+                      <span className="tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold mb-2">Notes</h3>
+                    <Textarea value={form.notes} onChange={(e) => setField('notes', e.target.value)} rows={3} placeholder="Invoice notes..." />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Save & Export</h3>
+                  <ExportActions
+                    saveLabel={isEditing ? 'Update Invoice' : 'Save Invoice'}
+                    onSave={handleSave}
+                    onPreview={handlePreview}
+                    onPrint={handlePrint}
+                    onDownload={handleDownloadPDF}
+                    onText={handleText}
+                    onNew={handleNew}
+                    newLabel="Start New Invoice"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
 
-          <Card>
-            <CardHeader><h2 className="text-sm font-semibold">Additional</h2></CardHeader>
-            <div className="p-5 space-y-4">
-              <Field label="Payment Method">
-                <Select value={form.payMethod} onChange={(e) => setField('payMethod', e.target.value)}>
-                  <option value="">-- Select --</option>
-                  <option>Cash</option>
-                  <option>Cheque</option>
-                  <option>Bank Transfer</option>
-                </Select>
-              </Field>
-              {showCheque && (
-                <Field label="Cheque No.">
-                  <Input value={form.chequeNo} onChange={(e) => setField('chequeNo', e.target.value)} />
-                </Field>
-              )}
-              {showBank && (
-                <Field label="Bank Name">
-                  <Input value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} />
-                </Field>
-              )}
-              <Field label="Notes">
-                <Textarea value={form.notes} onChange={(e) => setField('notes', e.target.value)} rows={2} />
-              </Field>
-            </div>
-          </Card>
-        </div>
-
-        <div className="space-y-4">
-          <InvoiceSummary
-            subtotal={subtotal}
-            totalTax={totalTax}
-            discount={form.discount}
-            grand={grand}
-            words={words}
-            dp={decimals}
-            curSymbol={cur?.symbol || ''}
-          >
-            <div className="flex flex-col gap-2">
-              <Button onClick={handleSave} className="justify-center w-full">
-                {isEditing ? 'Update Invoice' : 'Save Invoice'}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
-              <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
-              <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="justify-center w-full">Download PDF</Button>
-              <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
-              <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Invoice</Button>
-            </div>
-          </InvoiceSummary>
-        </div>
-      </div>
-    </div>
+  return (
+    <DocWizard
+      steps={STEPS}
+      current={step}
+      onStepChange={setStep}
+      canStepTo={(i) => i <= step}
+      title={isEditing ? 'Edit Invoice' : 'New Invoice'}
+      subtitle="Create a tax invoice in just four quick steps."
+      badge={badge}
+      onBack={() => navigate('/')}
+      nextLabel={step < 3 ? 'Continue' : saving ? 'Saving…' : (isEditing ? 'Update Invoice' : 'Save Invoice')}
+      nextDisabled={saving}
+      onNext={goNext}
+      footerExtra={step === 3 ? (
+        <Button variant="outline" onClick={handlePreview}>
+          Preview
+        </Button>
+      ) : undefined}
+    >
+      {renderStep()}
+    </DocWizard>
   )
 }

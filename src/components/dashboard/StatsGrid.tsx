@@ -57,7 +57,7 @@ export function StatsGrid() {
       {stats.map((s) => (
         <div
           key={s.label}
-          className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 hover:shadow-md transition-shadow"
+          className="surface surface-hover p-5"
         >
           <div className="flex items-center justify-between mb-4">
             <div className={`w-11 h-11 rounded-xl ${s.bg} ${s.text} flex items-center justify-center`}>

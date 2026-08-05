@@ -62,10 +62,10 @@ export function Stepper({ steps, current, onSelect, canGoTo }: StepperProps) {
                     step.icon ? <Svg name={step.icon} className="w-4 h-4" /> : i + 1
                   )}
                 </span>
-                <span
-                  className={`text-[11px] font-semibold whitespace-nowrap ${
-                    i === current ? 'text-[var(--color-text)]' : 'text-[var(--color-text3)]'
-                  }`}
+<span
+                  className={`hidden sm:block text-[11px] font-semibold whitespace-nowrap ${
+                  i === current ? 'text-[var(--color-text)]' : 'text-[var(--color-text3)]'
+                }`}
                 >
                   {step.label}
                 </span>

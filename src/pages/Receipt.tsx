@@ -1,13 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { Card, CardHeader, Button } from '@/components/ui'
+import { DocWizard, type WizardStep } from '@/components/ui/DocWizard'
+import { CardHeader, Field, Input, Textarea, Select, CustomerPicker, ExportActions, Button } from '@/components/ui'
 import { ReceiptItems } from '@/components/receipt/ReceiptItems'
-import { ReceiptSummary } from '@/components/receipt/ReceiptSummary'
 import { num2words, dp as getDp } from '@/utils'
+import { fmtName } from '@/utils/nameFormat'
 import { buildReceiptHTML } from '@/templates'
 import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
+import { Svg } from '@/icons'
 import type { LineItem } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
 
@@ -27,6 +30,13 @@ interface ReceiptFormState {
   signatory: string
 }
 
+const STEPS: WizardStep[] = [
+  { key: 'details', label: 'Details', icon: 'file' },
+  { key: 'from', label: 'Received From', icon: 'users' },
+  { key: 'amount', label: 'Amount', icon: 'box' },
+  { key: 'review', label: 'Review', icon: 'check' },
+]
+
 const emptyForm = (): ReceiptFormState => ({
   recNo: '',
   date: new Date().toISOString().slice(0, 10),
@@ -44,11 +54,14 @@ const emptyForm = (): ReceiptFormState => ({
 })
 
 export default function Receipt() {
+  const navigate = useNavigate()
   const { state, getCo, saveCompany, createReceipt, setEditing } = useApp()
   const { markDirty, markClean, showToast, showPreview, showPdfOverlay, hidePdfOverlay } = useUI()
   const co = getCo()
   const [form, setForm] = useState<ReceiptFormState>(emptyForm)
   const [isEditing, setIsEditing] = useState(false)
+  const [step, setStep] = useState(0)
+  const [saving, setSaving] = useState(false)
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
@@ -58,6 +71,7 @@ export default function Receipt() {
     const rec = state.receipts.find((r) => r.id === state.editingDoc!.id)
     if (!rec) return
     setIsEditing(true)
+    setStep(3)
     const hasItems = rec.items.length > 0 && rec.items.some((i) => i.desc.trim())
     setForm({
       recNo: rec.recNo,
@@ -113,6 +127,7 @@ export default function Receipt() {
     if (dupe) { showToast('Receipt number already exists.', 'err'); return }
 
     try {
+      setSaving(true)
       const savedItems = form.mode === 'simple'
         ? []
         : form.items.filter((i) => i.desc.trim()) as LineItem[]
@@ -146,6 +161,8 @@ export default function Receipt() {
       showToast(editingId ? 'Receipt updated!' : 'Receipt saved!')
     } catch {
       showToast('Failed to save receipt.', 'err')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -153,10 +170,11 @@ export default function Receipt() {
     setForm(emptyForm())
     setIsEditing(false)
     setEditing(null)
+    setStep(0)
     markClean()
   }
 
-  useKeyboardShortcuts({ s: handleSave, enter: handleSave })
+  useKeyboardShortcuts({ s: handleSave })
 
   const buildTempReceipt = (): Receipt => ({
     id: '',
@@ -180,14 +198,14 @@ export default function Receipt() {
   })
 
   const handlePrint = async () => {
-    if (!co) { showToast('No active company.', 'err'); return }
+    if (!co) { showToast('No active file.', 'err'); return }
     const html = buildReceiptHTML(buildTempReceipt(), co)
     if (!html) { showToast('Cannot print empty receipt.', 'err'); return }
     await printHTML(html)
   }
 
   const handleDownloadPDF = async () => {
-    if (!co) { showToast('No active company.', 'err'); return }
+    if (!co) { showToast('No active file.', 'err'); return }
     const html = buildReceiptHTML(buildTempReceipt(), co)
     if (!html) { showToast('Cannot generate empty receipt.', 'err'); return }
     showPdfOverlay()
@@ -201,187 +219,276 @@ export default function Receipt() {
   }
 
   const handlePreview = () => {
-    if (!co) { showToast('No active company.', 'err'); return }
+    if (!co) { showToast('No active file.', 'err'); return }
     const html = buildReceiptHTML(buildTempReceipt(), co)
     if (!html) { showToast('Nothing to preview.', 'err'); return }
     showPreview(html)
   }
 
   const handleText = () => {
-    if (!co) { showToast('No active company.', 'err'); return }
+    if (!co) { showToast('No active file.', 'err'); return }
     const html = buildReceiptHTML(buildTempReceipt(), co)
     if (!html) { showToast('Cannot export text.', 'err'); return }
     downloadText(html, form.recNo || 'receipt')
   }
 
-  return (
-    <div>
-      <div className="mb-5">
-        <h1 className="text-xl font-bold">{isEditing ? 'Edit Receipt' : 'Receipt Voucher'}</h1>
-        <p className="text-sm text-[var(--color-text2)]">Create a receipt voucher.</p>
-      </div>
+  const goNext = () => {
+    if (step === 0) {
+      if (!form.recNo.trim()) { showToast('Receipt number is required.', 'err'); return }
+      setStep(1)
+      return
+    }
+    if (step === 1) {
+      if (!form.receivedFrom.trim()) { showToast('Received from is required.', 'err'); return }
+      setStep(2)
+      return
+    }
+    if (step === 2) {
+      if (amount <= 0) { showToast('Amount must be greater than zero.', 'err'); return }
+      setStep(3)
+      return
+    }
+    handleSave()
+  }
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
-        <div className="space-y-5">
-          <Card>
+  const badge = (
+    <div className="flex items-center gap-2 flex-wrap">
+      {cur && (
+        <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] font-semibold">
+          <Svg name="receipt" className="w-3.5 h-3.5" /> {cur.code} {cur.symbol}
+        </span>
+      )}
+      <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-semibold ${isEditing ? 'bg-green-bg text-green-dark' : 'bg-[var(--color-input-bg)] text-[var(--color-text2)]'}`}>
+        {isEditing ? 'Editing' : 'New Document'}
+      </span>
+    </div>
+  )
+
+  const modeSwitch = (
+    <div className="flex rounded-xl border border-[var(--color-border)] overflow-hidden text-xs font-medium bg-[var(--color-input-bg)] p-1">
+      <button
+        onClick={() => set('mode', 'simple')}
+        className={`px-4 py-1.5 rounded-lg cursor-pointer transition-colors ${form.mode === 'simple' ? 'bg-[var(--color-primary)] text-white shadow-sm' : 'text-[var(--color-text2)] hover:text-[var(--color-text)]'}`}
+      >
+        Simple
+      </button>
+      <button
+        onClick={() => set('mode', 'itemized')}
+        className={`px-4 py-1.5 rounded-lg cursor-pointer transition-colors ${form.mode === 'itemized' ? 'bg-[var(--color-primary)] text-white shadow-sm' : 'text-[var(--color-text2)] hover:text-[var(--color-text)]'}`}
+      >
+        Itemized
+      </button>
+    </div>
+  )
+
+  const renderStep = () => {
+    switch (step) {
+      case 0:
+        return (
+          <div className="surface" key="r0">
             <CardHeader>
-              <h2 className="text-sm font-semibold">Receipt Details</h2>
-              {cur && <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] font-medium">{cur.code} {cur.symbol}</span>}
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="file" className="w-4 h-4" /></span>
+                Receipt Details
+              </h2>
             </CardHeader>
-            <div className="p-5 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Receipt No. <span className="text-red">*</span></label>
-                  <input value={form.recNo} onChange={(e) => set('recNo', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Date</label>
-                  <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="Receipt No." required>
+                  <Input value={form.recNo} onChange={(e) => set('recNo', e.target.value)} placeholder="RCT-0001" />
+                </Field>
+                <Field label="Date">
+                  <Input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
+                </Field>
               </div>
+
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Received From <span className="text-red">*</span></label>
-                  {state.customers.filter((c) => c.companyId === co?.id).length > 0 && (
-                    <select
-                      onChange={(e) => {
-                        const found = state.customers.find((c) => c.id === e.target.value)
-                        if (found) {
-                          set('receivedFrom', found.name)
-                        }
-                        e.target.value = ''
-                      }}
-                      className="text-xs max-w-[180px] px-2 py-0.5 rounded border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-[var(--color-text)] outline-none focus:ring-1 focus:ring-[var(--color-primary)] cursor-pointer"
-                    >
-                      <option value="">-- Load Saved Customer --</option>
-                      {state.customers.filter((c) => c.companyId === co?.id).map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
+                <hr className="border-[var(--color-border)] my-4" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text3)] mb-3">Payment</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Payment Method">
+                    <Select value={form.payMethod} onChange={(e) => set('payMethod', e.target.value)}>
+                      <option value="">-- Select --</option>
+                      <option>Cash</option>
+                      <option>Cheque</option>
+                      <option>Bank Transfer</option>
+                    </Select>
+                  </Field>
+                  {showCheque && (
+                    <Field label="Cheque No.">
+                      <Input value={form.chequeNo} onChange={(e) => set('chequeNo', e.target.value)} />
+                    </Field>
                   )}
-                </div>
-                <input value={form.receivedFrom} onChange={(e) => set('receivedFrom', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-[var(--color-text2)]">Payment Method</label>
-                <select value={form.payMethod} onChange={(e) => set('payMethod', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]">
-                  <option value="">-- Select --</option>
-                  <option>Cash</option>
-                  <option>Cheque</option>
-                  <option>Bank Transfer</option>
-                </select>
-              </div>
-              {showCheque && (
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Cheque No.</label>
-                  <input value={form.chequeNo} onChange={(e) => set('chequeNo', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-              )}
-              {showBank && (
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Bank Name</label>
-                  <input value={form.bankName} onChange={(e) => set('bankName', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-              )}
-              {showTransDate && (
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Transaction Date</label>
-                  <input type="date" value={form.transDate} onChange={(e) => set('transDate', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-              )}
-              <div>
-                <label className="text-xs font-medium text-[var(--color-text2)]">Being (Purpose)</label>
-                <input value={form.being} onChange={(e) => set('being', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Receiver Name</label>
-                  <input value={form.receiver} onChange={(e) => set('receiver', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Signatory</label>
-                  <input value={form.signatory} onChange={(e) => set('signatory', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
+                  {showBank && (
+                    <Field label="Bank Name">
+                      <Input value={form.bankName} onChange={(e) => set('bankName', e.target.value)} />
+                    </Field>
+                  )}
+                  {showTransDate && (
+                    <Field label="Transaction Date">
+                      <Input type="date" value={form.transDate} onChange={(e) => set('transDate', e.target.value)} />
+                    </Field>
+                  )}
                 </div>
               </div>
             </div>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <h2 className="text-sm font-semibold">Items</h2>
-              <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden text-xs font-medium">
-                <button
-                  onClick={() => set('mode', 'simple')}
-                  className={`px-3 py-1.5 cursor-pointer transition-colors ${form.mode === 'simple' ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] hover:text-[var(--color-text)]'}`}
-                >
-                  Simple
-                </button>
-                <button
-                  onClick={() => set('mode', 'itemized')}
-                  className={`px-3 py-1.5 cursor-pointer transition-colors ${form.mode === 'itemized' ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--color-input-bg)] text-[var(--color-text2)] hover:text-[var(--color-text)]'}`}
-                >
-                  Itemized
-                </button>
-              </div>
+          </div>
+        )
+      case 1:
+        return (
+          <div className="surface" key="r1">
+            <CardHeader className="flex-col sm:flex-row sm:items-center">
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <Svg name="users" className="w-4 h-4 text-[var(--color-primary)]" />
+                Received From
+              </h2>
+              <CustomerPicker
+                companyId={co?.id || null}
+                currentName={form.receivedFrom}
+                onPick={(c) => set('receivedFrom', c.name)}
+              />
             </CardHeader>
-            <div className="p-5">
+            <div className="p-6 space-y-4">
+                <Field label="Payer / Customer" required>
+                  <Input value={form.receivedFrom} onChange={(e) => set('receivedFrom', fmtName(e.target.value))} list="recvCustNameList" placeholder="Name of the payer" />
+                <datalist id="recvCustNameList">
+                  {state.customers.filter((c) => c.companyId === co?.id).map((c) => <option key={c.id} value={c.name} />)}
+                </datalist>
+              </Field>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="Receiver Name">
+                  <Input value={form.receiver} onChange={(e) => set('receiver', e.target.value)} placeholder="Who received the payment" />
+                </Field>
+                <Field label="Signatory">
+                  <Input value={form.signatory} onChange={(e) => set('signatory', e.target.value)} placeholder="Signer on the receipt" />
+                </Field>
+              </div>
+              <Field label="Being (Purpose)">
+                <Textarea value={form.being} onChange={(e) => set('being', e.target.value)} rows={2} placeholder="Reason for the payment..." />
+              </Field>
+            </div>
+          </div>
+        )
+      case 2:
+        return (
+          <div className="surface" key="r2">
+            <CardHeader>
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="box" className="w-4 h-4" /></span>
+                Amount
+              </h2>
+              {modeSwitch}
+            </CardHeader>
+            <div className="p-6">
               {form.mode === 'simple' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-medium text-[var(--color-text2)]">Amount <span className="text-red">*</span></label>
-                    <input type="number" min="0" step="0.001" value={form.simpleAmount} onChange={(e) => set('simpleAmount', Math.max(0, parseFloat(e.target.value) || 0))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-[var(--color-text2)]">Words</label>
-                    <input readOnly value={words} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Amount" required>
+                    <Input type="number" min="0" step="0.001" value={form.simpleAmount} onChange={(e) => set('simpleAmount', Math.max(0, parseFloat(e.target.value) || 0))} />
+                  </Field>
+                  <Field label="Words">
+                    <Input readOnly value={words} />
+                  </Field>
                 </div>
               ) : (
                 <ReceiptItems items={form.items} onChange={(items) => set('items', items)} dp={decimals} />
               )}
-            </div>
-          </Card>
-
-          <Card>
-            <CardHeader><h2 className="text-sm font-semibold">Summary</h2></CardHeader>
-            <div className="p-5 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Subtotal</label>
-                  <input readOnly value={amount.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
+              <div className="mt-5 flex flex-wrap gap-2">
+                <div className="flex-1 min-w-[160px] p-4 rounded-2xl bg-[var(--color-input-bg)] border border-[var(--color-border)]">
+                  <div className="text-xs text-[var(--color-text3)]">{form.mode === 'simple' ? 'Amount' : 'Subtotal'}</div>
+                  <div className="text-lg font-bold tabular-nums">{cur?.symbol}{amount.toFixed(decimals)}</div>
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Total Tax</label>
-                  <input readOnly value={totalTax.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
+                <div className="flex-1 min-w-[160px] p-4 rounded-2xl bg-[var(--color-input-bg)] border border-[var(--color-border)]">
+                  <div className="text-xs text-[var(--color-text3)]">Tax</div>
+                  <div className="text-lg font-bold tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</div>
+                </div>
+                <div className="flex-1 min-w-[160px] p-4 rounded-2xl bg-[var(--color-primary-bg)] border border-[var(--color-primary)]/30">
+                  <div className="text-xs font-medium text-[var(--color-primary)]">Total</div>
+                  <div className="text-lg font-bold text-[var(--color-primary)] tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</div>
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-medium text-[var(--color-text2)]">Grand Total</label>
-                <input readOnly value={grand.toFixed(decimals)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
+            </div>
+          </div>
+        )
+      case 3:
+        return (
+          <div key="r3" className="space-y-5">
+            <div className="surface overflow-hidden">
+              <div className="px-6 py-5 border-b border-[var(--color-border)] bg-[var(--color-primary-bg)] flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <div className="text-xs font-medium text-[var(--color-primary)]">Receipt #{form.recNo || '—'}</div>
+                  <div className="text-3xl font-bold text-[var(--color-text)] tabular-nums mt-1">{cur?.symbol}{grand.toFixed(decimals)}</div>
+                  <div className="text-xs text-[var(--color-text2)] mt-1 italic">{words || 'Set an amount to see it in words'}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-[var(--color-text3)]">{form.date}</div>
+                  {form.payMethod && <div className="text-xs font-medium text-[var(--color-primary)]">{form.payMethod}</div>}
+                  <div className="text-sm font-semibold text-[var(--color-text)] mt-1 truncate max-w-[200px]">{form.receivedFrom || 'No payer'}</div>
+                </div>
               </div>
-              <div>
-                <label className="text-xs font-medium text-[var(--color-text2)]">Amount in Words</label>
-                <input readOnly value={words} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm" />
+              <div className="p-6 grid grid-cols-1 md:grid-cols-[1fr_320px] gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold">Summary</h3>
+                  <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden">
+                    <div className="flex justify-between px-5 py-3 text-sm border-b border-[var(--color-border)]">
+                      <span className="text-[var(--color-text2)]">Subtotal</span>
+                      <span className="font-medium tabular-nums">{cur?.symbol}{amount.toFixed(decimals)}</span>
+                    </div>
+                    {totalTax > 0 && (
+                      <div className="flex justify-between px-5 py-3 text-sm border-b border-[var(--color-border)]">
+                        <span className="text-[var(--color-text2)]">Total Tax</span>
+                        <span className="font-medium tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between px-5 py-3 text-base font-bold">
+                      <span>Total</span>
+                      <span className="tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold mb-2">Being (Purpose)</h3>
+                    <Textarea value={form.being} onChange={(e) => set('being', e.target.value)} rows={3} placeholder="Purpose of this payment..." />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Save & Export</h3>
+                  <ExportActions
+                    saveLabel={isEditing ? 'Update Receipt' : 'Save Receipt'}
+                    onSave={handleSave}
+                    onPreview={handlePreview}
+                    onPrint={handlePrint}
+                    onDownload={handleDownloadPDF}
+                    onText={handleText}
+                    onNew={handleNew}
+                    newLabel="Start New Receipt"
+                  />
+                </div>
               </div>
             </div>
-          </Card>
         </div>
+        )
+      default:
+        return null
+    }
+  }
 
-        <div className="space-y-4">
-          <ReceiptSummary amount={amount} totalTax={totalTax} words={words} dp={decimals} curSymbol={cur?.symbol || ''}>
-            <div className="flex flex-col gap-2">
-              <Button onClick={handleSave} className="justify-center w-full">
-                {isEditing ? 'Update Receipt' : 'Save Receipt'}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handlePreview} className="justify-center w-full">Preview</Button>
-              <Button variant="outline" size="sm" onClick={handlePrint} className="justify-center w-full">Print</Button>
-              <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="justify-center w-full">Download PDF</Button>
-              <Button variant="outline" size="sm" onClick={handleText} className="justify-center w-full">Text</Button>
-              <Button variant="outline" onClick={handleNew} className="justify-center w-full">+ New Receipt</Button>
-            </div>
-          </ReceiptSummary>
-        </div>
-      </div>
-    </div>
+  return (
+    <DocWizard
+      steps={STEPS}
+      current={step}
+      onStepChange={setStep}
+      canStepTo={(i) => i <= step}
+      title={isEditing ? 'Edit Receipt' : 'New Receipt'}
+      subtitle="Create a receipt voucher in a few easy steps."
+      badge={badge}
+      onBack={() => navigate('/')}
+      nextLabel={step < 3 ? 'Continue' : saving ? 'Saving…' : (isEditing ? 'Update Receipt' : 'Save Receipt')}
+      nextDisabled={saving}
+      onNext={goNext}
+      footerExtra={step === 3 ? (
+        <Button variant="outline" onClick={handlePreview}>Preview</Button>
+      ) : undefined}
+    >
+      {renderStep()}
+    </DocWizard>
   )
 }
