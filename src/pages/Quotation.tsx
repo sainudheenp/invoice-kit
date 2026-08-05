@@ -3,7 +3,9 @@ import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { CardHeader, Field, Input, Textarea, CustomerPicker, ExportActions } from '@/components/ui'
+import { useLivePreview } from '@/hooks/useLivePreview'
+import { Field, Input, Textarea, CustomerPicker, ExportActions, CollapsibleSection } from '@/components/ui'
+import { DocWorkspace } from '@/components/layout/DocWorkspace'
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { num2words, dp as getDp } from '@/utils'
 import { fmtName } from '@/utils/nameFormat'
@@ -134,7 +136,6 @@ export default function QuotationPage() {
       showToast(editingId ? 'Quotation updated!' : 'Quotation saved!')
     } catch {
       showToast('Failed to save quotation.', 'err')
-    } finally {
     }
   }
 
@@ -160,6 +161,8 @@ export default function QuotationPage() {
     terms: form.terms,
     createdAt: Date.now(),
   })
+
+  const previewHtml = useLivePreview(() => (co ? buildQuotationHTML(buildTempQuotation(), co) : ''), form)
 
   const handlePrint = async () => {
     if (!co) { showToast('No active company.', 'err'); return }
@@ -209,181 +212,155 @@ export default function QuotationPage() {
     </div>
   )
 
-  return (
-    <div className="page-enter">
-      <header className="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{isEditing ? 'Edit Quotation' : 'New Quotation'}</h1>
-          <p className="text-sm text-[var(--color-text2)] mt-0.5">Fill in the details, add items, and save.</p>
+  const panel = (
+    <>
+      <div className="surface p-4">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text3)]">Total</span>
+          <span className="text-xl font-bold tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</span>
         </div>
-        {badge}
-      </header>
-
-      <div className="max-w-3xl mx-auto space-y-5">
-        <div className="surface" key="q0">
-          <CardHeader>
-            <h2 className="text-sm font-semibold flex items-center gap-2">
-              <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="file" className="w-4 h-4" /></span>
-              Quotation Details
-            </h2>
-          </CardHeader>
-          <div className="p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Field label="Quotation No." required>
-                <Input value={form.quotNo} onChange={(e) => set('quotNo', e.target.value)} placeholder="QUO-0001" />
-              </Field>
-              <Field label="Date">
-                <Input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
-              </Field>
-              <Field label="Valid Until">
-                <Input type="date" value={form.validUntil} onChange={(e) => set('validUntil', e.target.value)} />
-              </Field>
-            </div>
-            <div className="mt-4 p-4 rounded-2xl bg-[var(--color-primary-bg)] border border-[var(--color-primary)]/20 text-xs text-[var(--color-primary-dark)] flex items-center gap-2">
-              <Svg name="warning" className="w-4 h-4 shrink-0" />
-              Quotations are valid for 30 days by default — adjust the "Valid Until" date as needed.
-            </div>
-          </div>
+        <div className="flex items-center justify-between gap-3 mt-1.5">
+          <span className="text-xs text-[var(--color-text3)]">Subtotal</span>
+          <span className="text-sm tabular-nums">{cur?.symbol}{subtotal.toFixed(decimals)}</span>
         </div>
-
-        <div className="surface" key="q1">
-          <CardHeader className="flex-col sm:flex-row sm:items-center">
-            <h2 className="text-sm font-semibold flex items-center gap-2">
-              <Svg name="users" className="w-4 h-4 text-[var(--color-primary)]" />
-              Customer
-            </h2>
-            <CustomerPicker
-              companyId={co?.id || null}
-              currentName={form.custName}
-              onPick={(c) => {
-                setForm((f) => ({
-                  ...f,
-                  custName: c.name, custAddr: c.address,
-                  custPhone: c.phone, custCr: c.cr, custEmail: c.email,
-                }))
-                markDirty()
-              }}
-            />
-          </CardHeader>
-          <div className="p-6 space-y-4">
-            <Field label="Customer Name" required>
-              <Input value={form.custName} onChange={(e) => set('custName', fmtName(e.target.value))} list="quotCustNameList" placeholder="Enter customer name" />
-              <datalist id="quotCustNameList">
-                {customers.map((c) => <option key={c} value={c} />)}
-              </datalist>
-            </Field>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Address">
-                <Input value={form.custAddr} onChange={(e) => set('custAddr', e.target.value)} placeholder="Street, city" />
-              </Field>
-              <Field label="Phone">
-                <Input value={form.custPhone} onChange={(e) => set('custPhone', e.target.value)} placeholder="+968 ..." />
-              </Field>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="C.R.">
-                <Input value={form.custCr} onChange={(e) => set('custCr', e.target.value)} placeholder="Commercial registration" />
-              </Field>
-              <Field label="Email">
-                <Input type="email" value={form.custEmail} onChange={(e) => set('custEmail', e.target.value)} placeholder="name@example.com" />
-              </Field>
-            </div>
+        {totalTax > 0 && (
+          <div className="flex items-center justify-between gap-3 mt-1">
+            <span className="text-xs text-[var(--color-text3)]">Tax</span>
+            <span className="text-sm tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</span>
           </div>
-        </div>
-
-        <div className="surface" key="q2">
-          <CardHeader>
-            <h2 className="text-sm font-semibold flex items-center gap-2">
-              <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="box" className="w-4 h-4" /></span>
-              Line Items
-            </h2>
-          </CardHeader>
-          <div className="p-6">
-            <LineItemsTable items={form.items} onChange={(items) => set('items', items)} dp={decimals} />
-            <div className="mt-5 pt-5 border-t border-[var(--color-border)] grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Discount">
-                <Input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => set('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
-              </Field>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <div className="flex-1 min-w-[160px] p-4 rounded-2xl bg-[var(--color-input-bg)] border border-[var(--color-border)]">
-                <div className="text-xs text-[var(--color-text3)]">Subtotal</div>
-                <div className="text-lg font-bold tabular-nums">{cur?.symbol}{subtotal.toFixed(decimals)}</div>
-              </div>
-              <div className="flex-1 min-w-[160px] p-4 rounded-2xl bg-[var(--color-input-bg)] border border-[var(--color-border)]">
-                <div className="text-xs text-[var(--color-text3)]">Tax</div>
-                <div className="text-lg font-bold tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</div>
-              </div>
-              <div className="flex-1 min-w-[160px] p-4 rounded-2xl bg-[var(--color-primary-bg)] border border-[var(--color-primary)]/30">
-                <div className="text-xs font-medium text-[var(--color-primary)]">Grand Total</div>
-                <div className="text-lg font-bold text-[var(--color-primary)] tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</div>
-              </div>
-            </div>
+        )}
+        {form.discount > 0 && (
+          <div className="flex items-center justify-between gap-3 mt-1">
+            <span className="text-xs text-[var(--color-text3)]">Discount</span>
+            <span className="text-sm tabular-nums text-red">-{cur?.symbol}{form.discount.toFixed(decimals)}</span>
           </div>
-        </div>
-
-        <div className="surface overflow-hidden" key="q3">
-          <div className="px-6 py-5 border-b border-[var(--color-border)] bg-[var(--color-primary-bg)] flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <div className="text-xs font-medium text-[var(--color-primary)]">Quotation #{form.quotNo || '—'}</div>
-              <div className="text-3xl font-bold text-[var(--color-text)] tabular-nums mt-1">{cur?.symbol}{grand.toFixed(decimals)}</div>
-              <div className="text-xs text-[var(--color-text2)] mt-1 italic">{words || 'Add items to see amount in words'}</div>
-            </div>
-            <div className="text-right">
-              <div className="text-xs text-[var(--color-text3)]">{form.date} &rarr; {form.validUntil}</div>
-              <div className="text-sm font-semibold text-[var(--color-text)] mt-1 truncate max-w-[200px]">{form.custName || 'No customer'}</div>
-            </div>
-          </div>
-          <div className="p-6 grid grid-cols-1 md:grid-cols-[1fr_320px] gap-6">
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold">Summary</h3>
-              <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden">
-                <div className="flex justify-between px-5 py-3 text-sm border-b border-[var(--color-border)]">
-                  <span className="text-[var(--color-text2)]">Subtotal</span>
-                  <span className="font-medium tabular-nums">{cur?.symbol}{subtotal.toFixed(decimals)}</span>
-                </div>
-                {totalTax > 0 && (
-                  <div className="flex justify-between px-5 py-3 text-sm border-b border-[var(--color-border)]">
-                    <span className="text-[var(--color-text2)]">Total Tax</span>
-                    <span className="font-medium tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</span>
-                  </div>
-                )}
-                {form.discount > 0 && (
-                  <div className="flex justify-between px-5 py-3 text-sm border-b border-[var(--color-border)] text-red">
-                    <span>Discount</span>
-                    <span className="font-medium tabular-nums">-{cur?.symbol}{form.discount.toFixed(decimals)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between px-5 py-3 text-base font-bold">
-                  <span>Grand Total</span>
-                  <span className="tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</span>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold mb-2">Notes</h3>
-                <Textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} placeholder="Quotation notes..." />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold mb-2">Terms & Conditions</h3>
-                <Textarea value={form.terms} onChange={(e) => set('terms', e.target.value)} rows={2} placeholder="Payment terms, delivery, etc." />
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold mb-3">Save & Export</h3>
-              <ExportActions
-                saveLabel={isEditing ? 'Update Quotation' : 'Save Quotation'}
-                onSave={handleSave}
-                onPreview={handlePreview}
-                onPrint={handlePrint}
-                onDownload={handleDownloadPDF}
-                onText={handleText}
-                onNew={handleNew}
-                newLabel="Start New Quotation"
-              />
-            </div>
-          </div>
+        )}
+        <div className="text-[11px] italic text-[var(--color-text3)] mt-2 border-t border-[var(--color-border)] pt-2">
+          {words || 'Add items to see amount in words'}
         </div>
       </div>
-    </div>
+      <div className="surface p-4">
+        <ExportActions
+          saveLabel={isEditing ? 'Update Quotation' : 'Save Quotation'}
+          onSave={handleSave}
+          onPreview={handlePreview}
+          onPrint={handlePrint}
+          onDownload={handleDownloadPDF}
+          onText={handleText}
+          onNew={handleNew}
+          newLabel="Start New Quotation"
+        />
+      </div>
+    </>
+  )
+
+  return (
+    <DocWorkspace
+      title={isEditing ? 'Edit Quotation' : 'New Quotation'}
+      subtitle="Details on the left, live preview on the right."
+      badge={badge}
+      previewHtml={previewHtml}
+      panel={panel}
+    >
+      <CollapsibleSection
+        title={
+          <h2 className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="file" className="w-4 h-4" /></span>
+            Quotation Details
+          </h2>
+        }
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Field label="Quotation No." required>
+              <Input value={form.quotNo} onChange={(e) => set('quotNo', e.target.value)} placeholder="QUO-0001" />
+            </Field>
+            <Field label="Date">
+              <Input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
+            </Field>
+            <Field label="Valid Until">
+              <Input type="date" value={form.validUntil} onChange={(e) => set('validUntil', e.target.value)} />
+            </Field>
+          </div>
+          <div className="p-4 rounded-2xl bg-[var(--color-primary-bg)] border border-[var(--color-primary)]/20 text-xs text-[var(--color-primary-dark)] flex items-center gap-2">
+            <Svg name="warning" className="w-4 h-4 shrink-0" />
+            Quotations are valid for 30 days by default — adjust the "Valid Until" date as needed.
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection
+        title={
+          <h2 className="flex items-center gap-2">
+            <Svg name="users" className="w-4 h-4 text-[var(--color-primary)]" />
+            Customer
+          </h2>
+        }
+        right={
+          <CustomerPicker
+            companyId={co?.id || null}
+            currentName={form.custName}
+            onPick={(c) => {
+              setForm((f) => ({
+                ...f,
+                custName: c.name, custAddr: c.address,
+                custPhone: c.phone, custCr: c.cr, custEmail: c.email,
+              }))
+              markDirty()
+            }}
+          />
+        }
+      >
+        <div className="space-y-4">
+          <Field label="Customer Name" required>
+            <Input value={form.custName} onChange={(e) => set('custName', fmtName(e.target.value))} list="quotCustNameList" placeholder="Enter customer name" />
+            <datalist id="quotCustNameList">
+              {customers.map((c) => <option key={c} value={c} />)}
+            </datalist>
+          </Field>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Address">
+              <Input value={form.custAddr} onChange={(e) => set('custAddr', e.target.value)} placeholder="Street, city" />
+            </Field>
+            <Field label="Phone">
+              <Input value={form.custPhone} onChange={(e) => set('custPhone', e.target.value)} placeholder="+968 ..." />
+            </Field>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="C.R.">
+              <Input value={form.custCr} onChange={(e) => set('custCr', e.target.value)} placeholder="Commercial registration" />
+            </Field>
+            <Field label="Email">
+              <Input type="email" value={form.custEmail} onChange={(e) => set('custEmail', e.target.value)} placeholder="name@example.com" />
+            </Field>
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection
+        alwaysOpen
+        title={
+          <h2 className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="box" className="w-4 h-4" /></span>
+            Line Items
+          </h2>
+        }
+      >
+        <div className="space-y-4">
+          <LineItemsTable items={form.items} onChange={(items) => set('items', items)} dp={decimals} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[var(--color-border)]">
+            <Field label="Discount">
+              <Input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => set('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
+            </Field>
+          </div>
+          <Field label="Notes">
+            <Textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} placeholder="Quotation notes..." />
+          </Field>
+          <Field label="Terms & Conditions">
+            <Textarea value={form.terms} onChange={(e) => set('terms', e.target.value)} rows={2} placeholder="Payment terms, delivery, etc." />
+          </Field>
+        </div>
+      </CollapsibleSection>
+    </DocWorkspace>
   )
 }
