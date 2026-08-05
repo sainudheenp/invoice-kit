@@ -27,8 +27,8 @@ export function Stepper({ steps, current, onSelect, canGoTo }: StepperProps) {
       {/* Track */}
       <div className="absolute top-5 left-4 right-4 h-1 rounded-full bg-[var(--color-border)]" />
       <div
-        className="absolute top-5 left-4 h-1 rounded-full bg-[var(--color-primary)] transition-all duration-300 ease-out"
-        style={{ width: `calc(${progress}% - ${progress ? 16 : 0}px)` }}
+        className="absolute top-5 h-1 rounded-full bg-[var(--color-primary)] transition-all duration-300 ease-out"
+        style={{ left: '1rem', width: `calc((100% - 2rem) * ${progress / 100})` }}
       />
 
       <ol className="relative flex justify-between">
