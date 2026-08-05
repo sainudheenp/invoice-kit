@@ -1,6 +1,6 @@
 import { type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 
-const baseClass = 'w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]'
+const baseClass = 'w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text3)] outline-none transition-all duration-150 focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[var(--color-primary-ring)]'
 
 interface FieldProps {
   label: string
@@ -12,12 +12,12 @@ interface FieldProps {
 export function Field({ label, required, children, error }: FieldProps) {
   return (
     <div>
-      <label className="text-xs font-medium text-[var(--color-text2)]">
+      <label className="text-xs font-semibold text-[var(--color-text2)] mb-1.5 block">
         {label}
         {required && <span className="text-red"> *</span>}
       </label>
       {children}
-      {error && <p className="text-xs text-red mt-1">{error}</p>}
+      {error && <p className="text-xs text-red mt-1.5 flex items-center gap-1">⚠ {error}</p>}
     </div>
   )
 }
@@ -29,7 +29,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export function Input({ className = '', readOnly, ...props }: InputProps) {
   return (
     <input
-      className={`${baseClass} ${readOnly ? '' : ''} ${className}`}
+      className={`${baseClass} ${readOnly ? 'opacity-80 cursor-default' : ''} ${className}`}
       readOnly={readOnly}
       {...props}
     />

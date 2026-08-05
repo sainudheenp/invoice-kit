@@ -4,11 +4,12 @@ interface CardProps {
   children: ReactNode
   className?: string
   id?: string
+  hover?: boolean
 }
 
-export function Card({ children, className = '', id }: CardProps) {
+export function Card({ children, className = '', id, hover = false }: CardProps) {
   return (
-    <div id={id} className={`bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm ${className}`}>
+    <div id={id} className={`surface ${hover ? 'surface-hover' : ''} ${className}`}>
       {children}
     </div>
   )

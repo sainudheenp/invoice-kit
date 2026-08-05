@@ -25,6 +25,9 @@
   --color-side-active: rgba(255, 255, 255, 0.1);
   --color-input-bg: #FAFAF9;
   --color-input-border: #D6D3D1;
+  --color-input-focus: #1C1917;
+  --shadow-card: 0 1px 2px rgba(28, 25, 23, 0.05), 0 12px 32px -16px rgba(28, 25, 23, 0.16);
+  --shadow-pop: 0 8px 16px -4px rgba(0, 0, 0, 0.1), 0 24px 48px -12px rgba(28, 25, 23, 0.28);
 }
 
 html.dark {
@@ -36,6 +39,7 @@ html.dark {
   --color-text3: #707070;
   --color-input-bg: #333;
   --color-input-border: #444;
+  --color-input-focus: #E5E5E5;
   --color-side-bg: #111;
   --color-side-active: rgba(255, 255, 255, 0.08);
   --color-side-text: #A0A0A0;
@@ -53,6 +57,30 @@ body {
   line-height: 1.55;
   background: var(--color-page-bg);
   color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* Thin, subtle scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-text3) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-text3);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 @keyframes spin {
@@ -69,6 +97,11 @@ body {
   to { opacity: 0; transform: translateY(-8px); }
 }
 
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .spinner {
   width: 36px;
   height: 36px;
@@ -78,6 +111,25 @@ body {
   animation: spin 0.7s linear infinite;
 }
 
+/* Shared surface utilities */
+.surface {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+
+.surface-hover {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.surface-hover:hover {
+  box-shadow: var(--shadow-pop);
+  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+}
+
+.page-enter {
+  animation: fadeIn 0.25s ease;
+}
 
 @page { margin: 0; size: A4 portrait; }
 
