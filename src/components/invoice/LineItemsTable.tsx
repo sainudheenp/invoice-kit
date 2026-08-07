@@ -31,86 +31,99 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
   }
 
   return (
-    <div className="space-y-2">
-      {items.map((item, idx) => {
-        const taxAmt = item.amount * ((item.taxRate || 0) / 100)
-        const lineTotal = item.amount + taxAmt
-        const hasTax = (item.taxRate || 0) > 0
-        return (
-          <div
-            key={idx}
-            className="flex flex-wrap items-center gap-2 p-3 rounded-xl bg-[var(--color-input-bg)] border border-[var(--color-border)] hover:border-[var(--color-primary-border)] transition-colors group"
-          >
-            <div className="flex-1 min-w-[140px]">
-              <input
-                value={item.desc}
-                onChange={(e) => updateItem(idx, 'desc', e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-white dark:bg-[#3a3a3a] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
-                placeholder="Item description"
-              />
-            </div>
-            <div className="w-16">
-              <input
-                type="number"
-                min="0"
-                step="1"
-                value={item.qty || ''}
-                onChange={(e) => updateItem(idx, 'qty', e.target.value)}
-                className="w-full px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-white dark:bg-[#3a3a3a] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                placeholder="Qty"
-              />
-            </div>
-            <div className="w-24">
-              <input
-                type="number"
-                min="0"
-                step={1 / Math.pow(10, dp)}
-                value={item.price || ''}
-                onChange={(e) => updateItem(idx, 'price', e.target.value)}
-                className="w-full px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-white dark:bg-[#3a3a3a] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                placeholder="Rate"
-              />
-            </div>
-            <div className="w-20">
-              <div className="flex items-center gap-1">
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={item.taxRate || ''}
-                  onChange={(e) => updateItem(idx, 'taxRate', e.target.value)}
-                  className="w-14 px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-white dark:bg-[#3a3a3a] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  placeholder="0"
-                />
-                {hasTax && (
-                  <span className="text-[10px] text-[var(--color-text3)] tabular-nums whitespace-nowrap">
-                    {taxAmt.toFixed(dp)}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="w-20 text-right text-sm font-semibold tabular-nums text-[var(--color-text)]">
-              {lineTotal.toFixed(dp)}
-            </div>
-            {items.length > 1 && (
-              <button
-                onClick={() => {
-                  const next = items.filter((_, i) => i !== idx)
-                  onChange(next)
-                }}
-                className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-[var(--color-text3)] hover:text-red hover:bg-[var(--color-red-bg)] cursor-pointer transition-colors"
-                title="Remove item"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            )}
-          </div>
-        )
-      })}
+    <div className="space-y-3">
+      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)]">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-[var(--color-input-bg)]">
+              <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text2)] px-3 py-2.5 w-[40%]">Description</th>
+              <th className="text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text2)] px-3 py-2.5 w-[10%]">Qty</th>
+              <th className="text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text2)] px-3 py-2.5 w-[15%]">Rate</th>
+              <th className="text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text2)] px-3 py-2.5 w-[15%]">Tax %</th>
+              <th className="text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text2)] px-3 py-2.5 w-[15%]">Total</th>
+              <th className="px-2 py-2.5 w-[5%]"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, idx) => {
+              const taxAmt = item.amount * ((item.taxRate || 0) / 100)
+              const lineTotal = item.amount + taxAmt
+              const hasTax = (item.taxRate || 0) > 0
+              return (
+                <tr key={idx} className="border-t border-[var(--color-border)] hover:bg-[var(--color-input-bg)]/60 transition-colors group">
+                  <td className="px-3 py-2">
+                    <input
+                      value={item.desc}
+                      onChange={(e) => updateItem(idx, 'desc', e.target.value)}
+                      className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--color-text3)]/60"
+                      placeholder="Item description"
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={item.qty || ''}
+                      onChange={(e) => updateItem(idx, 'qty', e.target.value)}
+                      className="w-full bg-transparent text-sm text-right tabular-nums outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      min="0"
+                      step={1 / Math.pow(10, dp)}
+                      value={item.price || ''}
+                      onChange={(e) => updateItem(idx, 'price', e.target.value)}
+                      className="w-full bg-transparent text-sm text-right tabular-nums outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center justify-end gap-1">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={item.taxRate || ''}
+                        onChange={(e) => updateItem(idx, 'taxRate', e.target.value)}
+                        className="w-14 bg-transparent text-sm text-right tabular-nums outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        placeholder="0"
+                      />
+                      {hasTax && (
+                        <span className="text-[10px] text-[var(--color-text3)] tabular-nums whitespace-nowrap">
+                          {taxAmt.toFixed(dp)}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 text-right text-sm font-semibold tabular-nums">
+                    {lineTotal.toFixed(dp)}
+                  </td>
+                  <td className="px-2 py-2">
+                    {items.length > 1 && (
+                      <button
+                        onClick={() => {
+                          const next = items.filter((_, i) => i !== idx)
+                          onChange(next)
+                        }}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--color-text3)] opacity-0 group-hover:opacity-100 hover:text-red hover:bg-[var(--color-red-bg)] transition-all cursor-pointer"
+                        title="Remove item"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
       <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={addRow}

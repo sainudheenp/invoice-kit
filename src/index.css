@@ -19,10 +19,10 @@
   --color-text: #1C1917;
   --color-text2: #78716C;
   --color-text3: #A8A29E;
-  --color-side-bg: #1C1917;
-  --color-side-text: #D6D3D1;
-  --color-side-hover: rgba(255, 255, 255, 0.08);
-  --color-side-active: rgba(255, 255, 255, 0.1);
+  --color-side-bg: #FFFFFF;
+  --color-side-text: #57534E;
+  --color-side-hover: rgba(0, 0, 0, 0.04);
+  --color-side-active: rgba(0, 0, 0, 0.06);
   --color-input-bg: #FAFAF9;
   --color-input-border: #D6D3D1;
   --color-input-focus: #1C1917;

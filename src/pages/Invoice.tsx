@@ -4,7 +4,7 @@ import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useUndoRedo } from '@/hooks/useUndoRedo'
-import { Field, Input, Textarea, Select, CustomerPicker, ExportActions } from '@/components/ui'
+import { Field, Input, Select, CustomerPicker, ExportActions } from '@/components/ui'
 import { Card, CardBody, SectionTitle } from '@/components/layout'
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { num2words, dp as getDp } from '@/utils'
@@ -45,6 +45,7 @@ export default function Invoice() {
   const co = getCo()
   const { state: form, set: setForm } = useUndoRedo<InvoiceFormState>(emptyForm())
   const [isEditing, setIsEditing] = useState(false)
+  const [showMore, setShowMore] = useState(false)
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
@@ -262,6 +263,31 @@ export default function Invoice() {
               )}
             </div>
 
+            <button
+              type="button"
+              onClick={() => setShowMore((v) => !v)}
+              className="text-xs font-semibold text-[var(--color-primary)] hover:underline"
+            >
+              {showMore ? 'Less options' : 'More options'}
+            </button>
+
+            {showMore && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <Field label="Phone" dense>
+                  <Input dense value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} placeholder="+968 ..." />
+                </Field>
+                <Field label="Email" dense>
+                  <Input dense type="email" value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} placeholder="name@example.com" />
+                </Field>
+                <Field label="Address" dense>
+                  <Input dense value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} placeholder="Street, city" />
+                </Field>
+                <Field label="C.R." dense>
+                  <Input dense value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} placeholder="Commercial registration" />
+                </Field>
+              </div>
+            )}
+
             <hr className="border-[var(--color-border)]" />
 
             {/* Customer */}
@@ -303,46 +329,38 @@ export default function Invoice() {
 
             <hr className="border-[var(--color-border)]" />
 
-            {/* Notes + Totals */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-2 space-y-3">
-                <SectionTitle icon="file-text">Notes</SectionTitle>
-                <Field label="Notes" dense>
-                  <Textarea dense value={form.notes} onChange={(e) => setField('notes', e.target.value)} rows={3} placeholder="Add any notes or payment terms here..." />
-                </Field>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[var(--color-text2)]">Discount</span>
-                  <Input dense type="number" min="0" step="0.001" value={form.discount} onChange={(e) => setField('discount', Math.max(0, parseFloat(e.target.value) || 0))} className="w-24" />
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-[var(--color-text2)]">Subtotal</span>
-                    <span className="tabular-nums font-medium">{cur?.symbol}{subtotal.toFixed(decimals)}</span>
-                  </div>
-                  {totalTax > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-[var(--color-text2)]">Tax</span>
-                      <span className="tabular-nums font-medium">{cur?.symbol}{totalTax.toFixed(decimals)}</span>
-                    </div>
-                  )}
-                  <div className="border-t border-[var(--color-border)] my-1" />
-                  <div className="flex justify-between text-base font-bold">
-                    <span>Grand Total</span>
-                    <span className="tabular-nums text-[var(--color-primary)]">{cur?.symbol}{grand.toFixed(decimals)}</span>
-                  </div>
-                  {words && (
-                    <div className="text-[11px] text-[var(--color-text3)] italic leading-relaxed">{words}</div>
-                  )}
-                </div>
-              </div>
-            </div>
+            {/* Line Items */}
+            <LineItemsTable items={form.items} onChange={(items) => setField('items', items)} dp={decimals} />
 
             <hr className="border-[var(--color-border)]" />
 
-            {/* Line Items */}
-            <LineItemsTable items={form.items} onChange={(items) => setField('items', items)} dp={decimals} />
+            {/* Totals */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[var(--color-text2)]">Discount</span>
+                <Input dense type="number" min="0" step="0.001" value={form.discount} onChange={(e) => setField('discount', Math.max(0, parseFloat(e.target.value) || 0))} className="w-28" />
+              </div>
+              <div className="flex flex-wrap items-center justify-end gap-4 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[var(--color-text2)]">Subtotal</span>
+                  <span className="tabular-nums font-medium">{cur?.symbol}{subtotal.toFixed(decimals)}</span>
+                </div>
+                {totalTax > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[var(--color-text2)]">Tax</span>
+                    <span className="tabular-nums font-medium">{cur?.symbol}{totalTax.toFixed(decimals)}</span>
+                  </div>
+                )}
+                <div className="h-4 w-px bg-[var(--color-border)]" />
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">Grand Total</span>
+                  <span className="tabular-nums font-bold text-[var(--color-primary)]">{cur?.symbol}{grand.toFixed(decimals)}</span>
+                </div>
+                {words && (
+                  <span className="text-[10px] text-[var(--color-text3)] italic max-w-[200px] truncate" title={words}>{words}</span>
+                )}
+              </div>
+            </div>
           </CardBody>
         </Card>
       </div>
