@@ -5,9 +5,10 @@ interface Props {
   items: LineItem[]
   onChange: (items: LineItem[]) => void
   dp: number
+  curSymbol?: string
 }
 
-export function LineItemsTable({ items, onChange, dp }: Props) {
+export function LineItemsTable({ items, onChange, dp, curSymbol = '' }: Props) {
   const { state } = useApp()
   const coId = state.activeId
   const activeProducts = state.products.filter((p) => p.companyId === coId)
@@ -29,6 +30,10 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
   const addRow = () => {
     onChange([...items, { desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }])
   }
+
+  const subtotal = items.reduce((s, i) => s + i.amount, 0)
+  const totalTax = items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
+  const grand = subtotal + totalTax
 
   return (
     <div className="space-y-3">
@@ -77,6 +82,7 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
                       value={item.price || ''}
                       onChange={(e) => updateItem(idx, 'price', e.target.value)}
                       className="w-full bg-transparent text-sm text-right tabular-nums outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      placeholder="0"
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -124,6 +130,7 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
           </tbody>
         </table>
       </div>
+
       <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={addRow}
@@ -167,6 +174,27 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
             ))}
           </select>
         )}
+      </div>
+
+      <div className="surface p-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[var(--color-text2)]">Subtotal</span>
+              <span className="tabular-nums font-semibold">{curSymbol}{subtotal.toFixed(dp)}</span>
+            </div>
+            {totalTax > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[var(--color-text2)]">Tax</span>
+                <span className="tabular-nums font-semibold">{curSymbol}{totalTax.toFixed(dp)}</span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold">Grand Total</span>
+            <span className="tabular-nums font-bold text-[var(--color-primary)]">{curSymbol}{grand.toFixed(dp)}</span>
+          </div>
+        </div>
       </div>
     </div>
   )

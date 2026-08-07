@@ -263,34 +263,6 @@ export default function Invoice() {
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setShowMore((v) => !v)}
-              className="text-xs font-semibold text-[var(--color-primary)] hover:underline"
-            >
-              {showMore ? 'Less options' : 'More options'}
-            </button>
-
-            {showMore && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <Field label="Phone" dense>
-                  <Input dense value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} placeholder="+968 ..." />
-                </Field>
-                <Field label="Email" dense>
-                  <Input dense type="email" value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} placeholder="name@example.com" />
-                </Field>
-                <Field label="Address" dense>
-                  <Input dense value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} placeholder="Street, city" />
-                </Field>
-                <Field label="C.R." dense>
-                  <Input dense value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} placeholder="Commercial registration" />
-                </Field>
-              </div>
-            )}
-
-            <hr className="border-[var(--color-border)]" />
-
-            {/* Customer */}
             <div className="flex items-center justify-between gap-3">
               <SectionTitle icon="users">Customer</SectionTitle>
               <CustomerPicker
@@ -313,24 +285,49 @@ export default function Invoice() {
                   {customers.map((c) => <option key={c} value={c} />)}
                 </datalist>
               </Field>
-              <Field label="Phone" dense>
-                <Input dense value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} placeholder="+968 ..." />
-              </Field>
-              <Field label="Email" dense>
-                <Input dense type="email" value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} placeholder="name@example.com" />
-              </Field>
-              <Field label="Address" dense>
-                <Input dense value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} placeholder="Street, city" />
-              </Field>
-              <Field label="C.R." dense>
-                <Input dense value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} placeholder="Commercial registration" />
-              </Field>
+              {!showMore && (
+                <div className="lg:col-span-3 flex items-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowMore(true)}
+                    className="text-xs font-semibold text-[var(--color-primary)] hover:underline"
+                  >
+                    More options
+                  </button>
+                </div>
+              )}
             </div>
+
+            {showMore && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <Field label="Phone" dense>
+                  <Input dense value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} placeholder="+968 ..." />
+                </Field>
+                <Field label="Email" dense>
+                  <Input dense type="email" value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} placeholder="name@example.com" />
+                </Field>
+                <Field label="Address" dense>
+                  <Input dense value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} placeholder="Street, city" />
+                </Field>
+                <Field label="C.R." dense>
+                  <Input dense value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} placeholder="Commercial registration" />
+                </Field>
+                <div className="lg:col-span-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowMore(false)}
+                    className="text-xs font-semibold text-[var(--color-text3)] hover:text-[var(--color-primary)] hover:underline"
+                  >
+                    Less options
+                  </button>
+                </div>
+              </div>
+            )}
 
             <hr className="border-[var(--color-border)]" />
 
             {/* Line Items */}
-            <LineItemsTable items={form.items} onChange={(items) => setField('items', items)} dp={decimals} />
+            <LineItemsTable items={form.items} onChange={(items) => setField('items', items)} dp={decimals} curSymbol={cur?.symbol || ''} />
 
             <hr className="border-[var(--color-border)]" />
 
