@@ -5,13 +5,12 @@ import { useSavedCustomers } from '@/hooks/useSavedCustomers'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useUndoRedo } from '@/hooks/useUndoRedo'
 import { Field, Input, Textarea, Select, CustomerPicker, ExportActions } from '@/components/ui'
-import { DocWorkspace, SectionTitle } from '@/components/layout/DocWorkspace'
+import { Card, CardBody, SectionTitle } from '@/components/layout'
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { num2words, dp as getDp } from '@/utils'
 import { fmtName } from '@/utils/nameFormat'
 import { buildInvoiceHTML } from '@/templates'
 import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
-import { Svg } from '@/icons'
 import type { LineItem, Customer, Invoice } from '@/types/invoice'
 
 interface InvoiceFormState {
@@ -50,7 +49,6 @@ export default function Invoice() {
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
 
-  // restore editing doc
   useEffect(() => {
     if (!state.editingDoc || state.editingDoc.type !== 'inv') return
     const inv = state.invoices.find((i) => i.id === state.editingDoc!.id)
@@ -74,7 +72,6 @@ export default function Invoice() {
     markClean()
   }, [state.editingDoc])
 
-  // set defaults when company loads
   useEffect(() => {
     if (!co || isEditing) return
     setForm({
@@ -212,145 +209,143 @@ export default function Invoice() {
   const showCheque = form.payMethod === 'Cheque'
   const showBank = form.payMethod === 'Cheque' || form.payMethod === 'Bank Transfer'
 
-  const badge = (
-    <div className="flex items-center gap-2 flex-wrap">
-      {cur && (
-        <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] font-semibold">
-          <Svg name="save" className="w-3.5 h-3.5" /> {cur.code} {cur.symbol}
-        </span>
-      )}
-      <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-semibold ${isEditing ? 'bg-green-bg text-green-dark' : 'bg-[var(--color-input-bg)] text-[var(--color-text2)]'}`}>
-        {isEditing ? 'Editing' : 'New Document'}
-      </span>
-    </div>
-  )
-
-  const panel = (
-    <>
-      <div className="surface p-3 sm:p-4 sm:w-[320px] shrink-0">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text3)]">Total</span>
-          <span className="text-xl font-bold tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</span>
-        </div>
-        <div className="flex items-center gap-4 mt-1.5 text-xs text-[var(--color-text3)]">
-          <span>Subtotal <b className="text-[var(--color-text)] tabular-nums">{cur?.symbol}{subtotal.toFixed(decimals)}</b></span>
-          {totalTax > 0 && (
-            <span>Tax <b className="text-[var(--color-text)] tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</b></span>
-          )}
-          {form.discount > 0 && (
-            <span>Discount <b className="text-red tabular-nums">-{cur?.symbol}{form.discount.toFixed(decimals)}</b></span>
-          )}
-        </div>
-        <div className="text-[11px] italic text-[var(--color-text3)] mt-1.5 border-t border-[var(--color-border)] pt-1.5">
-          {words || 'Enter items to see amount in words'}
-        </div>
-      </div>
-      <div className="surface p-3 flex-1">
-        <ExportActions
-          layout="bar"
-          saveLabel={isEditing ? 'Update Invoice' : 'Save Invoice'}
-          onSave={handleSave}
-          onPreview={handlePreview}
-          onPrint={handlePrint}
-          onDownload={handleDownloadPDF}
-          onText={handleText}
-          onNew={handleNew}
-          newLabel="Start New Invoice"
-        />
-      </div>
-    </>
-  )
-
   return (
-    <DocWorkspace
-      title={isEditing ? 'Edit Invoice' : 'New Invoice'}
-      subtitle="Create a tax invoice."
-      badge={badge}
-      panel={panel}
-    >
-      <div className="surface p-4 space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <SectionTitle icon="file">Invoice Details</SectionTitle>
-          <CustomerPicker
-            companyId={co?.id || null}
-            currentName={form.custName}
-            onPick={(c) => {
-              setForm({
-                ...form,
-                custName: c.name, custAddr: c.address,
-                custPhone: c.phone, custCr: c.cr, custEmail: c.email,
-              })
-              markDirty()
-            }}
+    <div className="page-enter flex flex-col gap-4 lg:h-[calc(100dvh-2.5rem)] lg:min-h-0">
+      <header className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">{isEditing ? 'Edit Invoice' : 'New Invoice'}</h1>
+          <p className="text-xs text-[var(--color-text2)] mt-0.5">Create and manage your invoices</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <ExportActions
+            layout="bar"
+            saveLabel={isEditing ? 'Update' : 'Save'}
+            onSave={handleSave}
+            onPreview={handlePreview}
+            onPrint={handlePrint}
+            onDownload={handleDownloadPDF}
+            onText={handleText}
+            onNew={handleNew}
+            newLabel="New"
           />
         </div>
+      </header>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Field label="Invoice No." required dense>
-            <Input dense value={form.invNo} onChange={(e) => setField('invNo', e.target.value)} placeholder="INV-0001" />
-          </Field>
-          <Field label="Date" dense>
-            <Input dense type="date" value={form.date} onChange={(e) => setField('date', e.target.value)} />
-          </Field>
-          <Field label="Payment Method" dense>
-            <Select dense value={form.payMethod} onChange={(e) => setField('payMethod', e.target.value)}>
-              <option value="">-- Select --</option>
-              <option>Cash</option>
-              <option>Cheque</option>
-              <option>Bank Transfer</option>
-            </Select>
-          </Field>
-          {showCheque && (
-            <Field label="Cheque No." dense>
-              <Input dense value={form.chequeNo} onChange={(e) => setField('chequeNo', e.target.value)} />
-            </Field>
-          )}
-          {showBank && !showCheque && (
-            <Field label="Bank Name" dense>
-              <Input dense value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} />
-            </Field>
-          )}
-        </div>
+      <div className="min-h-0 flex-1 lg:overflow-y-auto lg:pr-1 space-y-4">
+        <Card>
+          <CardBody className="p-4 sm:p-5 space-y-5">
+            {/* Invoice Meta */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <Field label="Invoice No." required dense>
+                <Input dense value={form.invNo} onChange={(e) => setField('invNo', e.target.value)} placeholder="INV-0001" />
+              </Field>
+              <Field label="Date" dense>
+                <Input dense type="date" value={form.date} onChange={(e) => setField('date', e.target.value)} />
+              </Field>
+              <Field label="Payment Method" dense>
+                <Select dense value={form.payMethod} onChange={(e) => setField('payMethod', e.target.value)}>
+                  <option value="">-- Select --</option>
+                  <option>Cash</option>
+                  <option>Cheque</option>
+                  <option>Bank Transfer</option>
+                </Select>
+              </Field>
+              {showCheque && (
+                <Field label="Cheque No." dense>
+                  <Input dense value={form.chequeNo} onChange={(e) => setField('chequeNo', e.target.value)} />
+                </Field>
+              )}
+              {showBank && !showCheque && (
+                <Field label="Bank Name" dense>
+                  <Input dense value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} />
+                </Field>
+              )}
+            </div>
 
-        <div className="grid grid-cols-4 gap-3">
-          <div className="col-span-2">
-            <Field label="Customer Name" required dense>
-              <Input dense value={form.custName} onChange={(e) => setField('custName', fmtName(e.target.value))} list="custNameList" placeholder="Enter customer name" />
-              <datalist id="custNameList">
-                {customers.map((c) => <option key={c} value={c} />)}
-              </datalist>
-            </Field>
-          </div>
-          <div className="col-span-2 grid grid-cols-2 gap-3">
-            <Field label="Phone" dense>
-              <Input dense value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} placeholder="+968 ..." />
-            </Field>
-            <Field label="Email" dense>
-              <Input dense type="email" value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} placeholder="name@example.com" />
-            </Field>
-          </div>
-          <Field label="Address" dense>
-            <Input dense value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} placeholder="Street, city" />
-          </Field>
-          <Field label="C.R." dense>
-            <Input dense value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} placeholder="Commercial registration" />
-          </Field>
-        </div>
+            <hr className="border-[var(--color-border)]" />
 
-        <hr className="border-[var(--color-border)]" />
+            {/* Customer */}
+            <div className="flex items-center justify-between gap-3">
+              <SectionTitle icon="users">Customer</SectionTitle>
+              <CustomerPicker
+                companyId={co?.id || null}
+                currentName={form.custName}
+                onPick={(c) => {
+                  setForm({
+                    ...form,
+                    custName: c.name, custAddr: c.address,
+                    custPhone: c.phone, custCr: c.cr, custEmail: c.email,
+                  })
+                  markDirty()
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <Field label="Customer Name" required dense>
+                <Input dense value={form.custName} onChange={(e) => setField('custName', fmtName(e.target.value))} list="custNameList" placeholder="Enter customer name" />
+                <datalist id="custNameList">
+                  {customers.map((c) => <option key={c} value={c} />)}
+                </datalist>
+              </Field>
+              <Field label="Phone" dense>
+                <Input dense value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} placeholder="+968 ..." />
+              </Field>
+              <Field label="Email" dense>
+                <Input dense type="email" value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} placeholder="name@example.com" />
+              </Field>
+              <Field label="Address" dense>
+                <Input dense value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} placeholder="Street, city" />
+              </Field>
+              <Field label="C.R." dense>
+                <Input dense value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} placeholder="Commercial registration" />
+              </Field>
+            </div>
 
-        <SectionTitle icon="box">Line Items</SectionTitle>
-        <LineItemsTable items={form.items} onChange={(items) => setField('items', items)} dp={decimals} />
+            <hr className="border-[var(--color-border)]" />
 
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Discount" dense>
-            <Input dense type="number" min="0" step="0.001" value={form.discount} onChange={(e) => setField('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
-          </Field>
-          <Field label="Notes" dense>
-            <Textarea dense value={form.notes} onChange={(e) => setField('notes', e.target.value)} rows={2} placeholder="Invoice notes..." />
-          </Field>
-        </div>
+            {/* Notes + Totals */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2 space-y-3">
+                <SectionTitle icon="file-text">Notes</SectionTitle>
+                <Field label="Notes" dense>
+                  <Textarea dense value={form.notes} onChange={(e) => setField('notes', e.target.value)} rows={3} placeholder="Add any notes or payment terms here..." />
+                </Field>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[var(--color-text2)]">Discount</span>
+                  <Input dense type="number" min="0" step="0.001" value={form.discount} onChange={(e) => setField('discount', Math.max(0, parseFloat(e.target.value) || 0))} className="w-24" />
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[var(--color-text2)]">Subtotal</span>
+                    <span className="tabular-nums font-medium">{cur?.symbol}{subtotal.toFixed(decimals)}</span>
+                  </div>
+                  {totalTax > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-[var(--color-text2)]">Tax</span>
+                      <span className="tabular-nums font-medium">{cur?.symbol}{totalTax.toFixed(decimals)}</span>
+                    </div>
+                  )}
+                  <div className="border-t border-[var(--color-border)] my-1" />
+                  <div className="flex justify-between text-base font-bold">
+                    <span>Grand Total</span>
+                    <span className="tabular-nums text-[var(--color-primary)]">{cur?.symbol}{grand.toFixed(decimals)}</span>
+                  </div>
+                  {words && (
+                    <div className="text-[11px] text-[var(--color-text3)] italic leading-relaxed">{words}</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-[var(--color-border)]" />
+
+            {/* Line Items */}
+            <LineItemsTable items={form.items} onChange={(items) => setField('items', items)} dp={decimals} />
+          </CardBody>
+        </Card>
       </div>
-    </DocWorkspace>
+    </div>
   )
 }
