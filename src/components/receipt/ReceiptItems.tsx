@@ -37,7 +37,7 @@ export function ReceiptItems({ items, onChange, dp }: Props) {
 
   return (
     <div>
-      <div className="space-y-2">
+      <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
         {items.map((item, idx) => {
           const taxAmt = item.amount * ((item.taxRate || 0) / 100)
           return (

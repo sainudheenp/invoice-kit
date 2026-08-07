@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { Field, Input, Textarea, Select, CustomerPicker, ExportActions, CollapsibleSection } from '@/components/ui'
-import { DocWorkspace } from '@/components/layout/DocWorkspace'
+import { Field, Input, Textarea, Select, CustomerPicker, ExportActions } from '@/components/ui'
+import { DocWorkspace, SectionTitle } from '@/components/layout/DocWorkspace'
 import { ReceiptItems } from '@/components/receipt/ReceiptItems'
 import { num2words, dp as getDp } from '@/utils'
 import { fmtName } from '@/utils/nameFormat'
@@ -249,27 +249,24 @@ export default function Receipt() {
 
   const panel = (
     <>
-      <div className="surface p-4">
+      <div className="surface p-3 sm:p-4 sm:w-[320px] shrink-0">
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text3)]">Total</span>
           <span className="text-xl font-bold tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</span>
         </div>
-        <div className="flex items-center justify-between gap-3 mt-1.5">
-          <span className="text-xs text-[var(--color-text3)]">{form.mode === 'simple' ? 'Amount' : 'Subtotal'}</span>
-          <span className="text-sm tabular-nums">{cur?.symbol}{amount.toFixed(decimals)}</span>
+        <div className="flex items-center gap-4 mt-1.5 text-xs text-[var(--color-text3)]">
+          <span>{form.mode === 'simple' ? 'Amount' : 'Subtotal'} <b className="text-[var(--color-text)] tabular-nums">{cur?.symbol}{amount.toFixed(decimals)}</b></span>
+          {totalTax > 0 && (
+            <span>Tax <b className="text-[var(--color-text)] tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</b></span>
+          )}
         </div>
-        {totalTax > 0 && (
-          <div className="flex items-center justify-between gap-3 mt-1">
-            <span className="text-xs text-[var(--color-text3)]">Tax</span>
-            <span className="text-sm tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</span>
-          </div>
-        )}
-        <div className="text-[11px] italic text-[var(--color-text3)] mt-2 border-t border-[var(--color-border)] pt-2">
+        <div className="text-[11px] italic text-[var(--color-text3)] mt-1.5 border-t border-[var(--color-border)] pt-1.5">
           {words || 'Set an amount to see it in words'}
         </div>
       </div>
-      <div className="surface p-4">
+      <div className="surface p-3 flex-1">
         <ExportActions
+          layout="bar"
           saveLabel={isEditing ? 'Update Receipt' : 'Save Receipt'}
           onSave={handleSave}
           onPreview={handlePreview}
@@ -286,119 +283,94 @@ export default function Receipt() {
   return (
     <DocWorkspace
       title={isEditing ? 'Edit Receipt' : 'New Receipt'}
-      subtitle="Details on the left, live preview on the right."
+      subtitle="Create a receipt."
       badge={badge}
       panel={panel}
     >
-      <CollapsibleSection
-        title={
-          <h2 className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="file" className="w-4 h-4" /></span>
-            Receipt Details
-          </h2>
-        }
-      >
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Receipt No." required>
-              <Input value={form.recNo} onChange={(e) => set('recNo', e.target.value)} placeholder="RCT-0001" />
-            </Field>
-            <Field label="Date">
-              <Input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
-            </Field>
-          </div>
-
-          <div>
-            <hr className="border-[var(--color-border)] my-4" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text3)] mb-3">Payment</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Payment Method">
-                <Select value={form.payMethod} onChange={(e) => set('payMethod', e.target.value)}>
-                  <option value="">-- Select --</option>
-                  <option>Cash</option>
-                  <option>Cheque</option>
-                  <option>Bank Transfer</option>
-                </Select>
-              </Field>
-              {showCheque && (
-                <Field label="Cheque No.">
-                  <Input value={form.chequeNo} onChange={(e) => set('chequeNo', e.target.value)} />
-                </Field>
-              )}
-              {showBank && (
-                <Field label="Bank Name">
-                  <Input value={form.bankName} onChange={(e) => set('bankName', e.target.value)} />
-                </Field>
-              )}
-              {showTransDate && (
-                <Field label="Transaction Date">
-                  <Input type="date" value={form.transDate} onChange={(e) => set('transDate', e.target.value)} />
-                </Field>
-              )}
-            </div>
+      <div className="surface p-4 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <SectionTitle icon="file">Receipt Details</SectionTitle>
+          <div className="flex items-center gap-2">
+            {modeSwitch}
+            <CustomerPicker
+              companyId={co?.id || null}
+              currentName={form.receivedFrom}
+              onPick={(c) => set('receivedFrom', c.name)}
+            />
           </div>
         </div>
-      </CollapsibleSection>
 
-      <CollapsibleSection
-        title={
-          <h2 className="flex items-center gap-2">
-            <Svg name="users" className="w-4 h-4 text-[var(--color-primary)]" />
-            Received From
-          </h2>
-        }
-        right={
-          <CustomerPicker
-            companyId={co?.id || null}
-            currentName={form.receivedFrom}
-            onPick={(c) => set('receivedFrom', c.name)}
-          />
-        }
-      >
-        <div className="space-y-4">
-          <Field label="Payer / Customer" required>
-            <Input value={form.receivedFrom} onChange={(e) => set('receivedFrom', fmtName(e.target.value))} list="recvCustNameList" placeholder="Name of the payer" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Field label="Receipt No." required dense>
+            <Input dense value={form.recNo} onChange={(e) => set('recNo', e.target.value)} placeholder="RCT-0001" />
+          </Field>
+          <Field label="Date" dense>
+            <Input dense type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
+          </Field>
+          <Field label="Payment Method" dense>
+            <Select dense value={form.payMethod} onChange={(e) => set('payMethod', e.target.value)}>
+              <option value="">-- Select --</option>
+              <option>Cash</option>
+              <option>Cheque</option>
+              <option>Bank Transfer</option>
+            </Select>
+          </Field>
+          {showTransDate && (
+            <Field label="Transaction Date" dense>
+              <Input dense type="date" value={form.transDate} onChange={(e) => set('transDate', e.target.value)} />
+            </Field>
+          )}
+          {!showTransDate && showCheque && (
+            <Field label="Cheque No." dense>
+              <Input dense value={form.chequeNo} onChange={(e) => set('chequeNo', e.target.value)} />
+            </Field>
+          )}
+          {!showTransDate && showBank && !showCheque && (
+            <Field label="Bank Name" dense>
+              <Input dense value={form.bankName} onChange={(e) => set('bankName', e.target.value)} />
+            </Field>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Payer / Customer" required dense>
+            <Input dense value={form.receivedFrom} onChange={(e) => set('receivedFrom', fmtName(e.target.value))} list="recvCustNameList" placeholder="Name of the payer" />
             <datalist id="recvCustNameList">
               {state.customers.filter((c) => c.companyId === co?.id).map((c) => <option key={c.id} value={c.name} />)}
             </datalist>
           </Field>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Receiver Name">
-              <Input value={form.receiver} onChange={(e) => set('receiver', e.target.value)} placeholder="Who received the payment" />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Receiver Name" dense>
+              <Input dense value={form.receiver} onChange={(e) => set('receiver', e.target.value)} placeholder="Who received the payment" />
             </Field>
-            <Field label="Signatory">
-              <Input value={form.signatory} onChange={(e) => set('signatory', e.target.value)} placeholder="Signer on the receipt" />
+            <Field label="Signatory" dense>
+              <Input dense value={form.signatory} onChange={(e) => set('signatory', e.target.value)} placeholder="Signer on the receipt" />
             </Field>
           </div>
-          <Field label="Being (Purpose)">
-            <Textarea value={form.being} onChange={(e) => set('being', e.target.value)} rows={2} placeholder="Reason for the payment..." />
-          </Field>
         </div>
-      </CollapsibleSection>
 
-      <CollapsibleSection
-        alwaysOpen
-        title={
-          <h2 className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="box" className="w-4 h-4" /></span>
-            Amount
-          </h2>
-        }
-        right={modeSwitch}
-      >
         {form.mode === 'simple' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Amount" required>
-              <Input type="number" min="0" step="0.001" value={form.simpleAmount} onChange={(e) => set('simpleAmount', Math.max(0, parseFloat(e.target.value) || 0))} />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Amount" required dense>
+              <Input dense type="number" min="0" step="0.001" value={form.simpleAmount} onChange={(e) => set('simpleAmount', Math.max(0, parseFloat(e.target.value) || 0))} />
             </Field>
-            <Field label="Words">
-              <Input readOnly value={words} />
+            <Field label="Words" dense>
+              <Input dense readOnly value={words} />
             </Field>
           </div>
         ) : (
-          <ReceiptItems items={form.items} onChange={(items) => set('items', items)} dp={decimals} />
+          <div>
+            <SectionTitle icon="box">Items</SectionTitle>
+            <div className="mt-3">
+              <ReceiptItems items={form.items} onChange={(items) => set('items', items)} dp={decimals} />
+            </div>
+          </div>
         )}
-      </CollapsibleSection>
+
+        <Field label="Being (Purpose)" dense>
+          <Textarea dense value={form.being} onChange={(e) => set('being', e.target.value)} rows={2} placeholder="Reason for the payment..." />
+        </Field>
+      </div>
     </DocWorkspace>
   )
 }

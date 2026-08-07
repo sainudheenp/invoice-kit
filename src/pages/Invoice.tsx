@@ -4,8 +4,8 @@ import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useUndoRedo } from '@/hooks/useUndoRedo'
-import { Field, Input, Textarea, Select, CustomerPicker, ExportActions, CollapsibleSection } from '@/components/ui'
-import { DocWorkspace } from '@/components/layout/DocWorkspace'
+import { Field, Input, Textarea, Select, CustomerPicker, ExportActions } from '@/components/ui'
+import { DocWorkspace, SectionTitle } from '@/components/layout/DocWorkspace'
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { num2words, dp as getDp } from '@/utils'
 import { fmtName } from '@/utils/nameFormat'
@@ -174,7 +174,6 @@ export default function Invoice() {
     }
   }
 
-
   const handlePrint = async () => {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = buildInvoiceHTML(buildTempInvoice(), co)
@@ -228,33 +227,27 @@ export default function Invoice() {
 
   const panel = (
     <>
-      <div className="surface p-4">
+      <div className="surface p-3 sm:p-4 sm:w-[320px] shrink-0">
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text3)]">Total</span>
           <span className="text-xl font-bold tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</span>
         </div>
-        <div className="flex items-center justify-between gap-3 mt-1.5">
-          <span className="text-xs text-[var(--color-text3)]">Subtotal</span>
-          <span className="text-sm tabular-nums">{cur?.symbol}{subtotal.toFixed(decimals)}</span>
+        <div className="flex items-center gap-4 mt-1.5 text-xs text-[var(--color-text3)]">
+          <span>Subtotal <b className="text-[var(--color-text)] tabular-nums">{cur?.symbol}{subtotal.toFixed(decimals)}</b></span>
+          {totalTax > 0 && (
+            <span>Tax <b className="text-[var(--color-text)] tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</b></span>
+          )}
+          {form.discount > 0 && (
+            <span>Discount <b className="text-red tabular-nums">-{cur?.symbol}{form.discount.toFixed(decimals)}</b></span>
+          )}
         </div>
-        {totalTax > 0 && (
-          <div className="flex items-center justify-between gap-3 mt-1">
-            <span className="text-xs text-[var(--color-text3)]">Tax</span>
-            <span className="text-sm tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</span>
-          </div>
-        )}
-        {form.discount > 0 && (
-          <div className="flex items-center justify-between gap-3 mt-1">
-            <span className="text-xs text-[var(--color-text3)]">Discount</span>
-            <span className="text-sm tabular-nums text-red">-{cur?.symbol}{form.discount.toFixed(decimals)}</span>
-          </div>
-        )}
-        <div className="text-[11px] italic text-[var(--color-text3)] mt-2 border-t border-[var(--color-border)] pt-2">
+        <div className="text-[11px] italic text-[var(--color-text3)] mt-1.5 border-t border-[var(--color-border)] pt-1.5">
           {words || 'Enter items to see amount in words'}
         </div>
       </div>
-      <div className="surface p-4">
+      <div className="surface p-3 flex-1">
         <ExportActions
+          layout="bar"
           saveLabel={isEditing ? 'Update Invoice' : 'Save Invoice'}
           onSave={handleSave}
           onPreview={handlePreview}
@@ -271,63 +264,13 @@ export default function Invoice() {
   return (
     <DocWorkspace
       title={isEditing ? 'Edit Invoice' : 'New Invoice'}
-      subtitle="Details on the left, live preview on the right."
+      subtitle="Create a tax invoice."
       badge={badge}
       panel={panel}
     >
-      <CollapsibleSection
-        title={
-          <h2 className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="file" className="w-4 h-4" /></span>
-            Invoice Details
-          </h2>
-        }
-      >
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Invoice No." required>
-              <Input value={form.invNo} onChange={(e) => setField('invNo', e.target.value)} placeholder="INV-0001" />
-            </Field>
-            <Field label="Date">
-              <Input type="date" value={form.date} onChange={(e) => setField('date', e.target.value)} />
-            </Field>
-          </div>
-
-          <div>
-            <hr className="border-[var(--color-border)] my-4" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text3)] mb-3">Payment</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Payment Method">
-                <Select value={form.payMethod} onChange={(e) => setField('payMethod', e.target.value)}>
-                  <option value="">-- Select --</option>
-                  <option>Cash</option>
-                  <option>Cheque</option>
-                  <option>Bank Transfer</option>
-                </Select>
-              </Field>
-              {showCheque && (
-                <Field label="Cheque No.">
-                  <Input value={form.chequeNo} onChange={(e) => setField('chequeNo', e.target.value)} />
-                </Field>
-              )}
-              {showBank && (
-                <Field label="Bank Name">
-                  <Input value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} />
-                </Field>
-              )}
-            </div>
-          </div>
-        </div>
-      </CollapsibleSection>
-
-      <CollapsibleSection
-        title={
-          <h2 className="flex items-center gap-2">
-            <Svg name="users" className="w-4 h-4 text-[var(--color-primary)]" />
-            Customer
-          </h2>
-        }
-        right={
+      <div className="surface p-4 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <SectionTitle icon="file">Invoice Details</SectionTitle>
           <CustomerPicker
             companyId={co?.id || null}
             currentName={form.custName}
@@ -340,55 +283,74 @@ export default function Invoice() {
               markDirty()
             }}
           />
-        }
-      >
-        <div className="space-y-4">
-          <Field label="Customer Name" required>
-            <Input value={form.custName} onChange={(e) => setField('custName', fmtName(e.target.value))} list="custNameList" placeholder="Enter customer name" />
-            <datalist id="custNameList">
-              {customers.map((c) => <option key={c} value={c} />)}
-            </datalist>
-          </Field>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Address">
-              <Input value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} placeholder="Street, city" />
-            </Field>
-            <Field label="Phone">
-              <Input value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} placeholder="+968 ..." />
-            </Field>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="C.R.">
-              <Input value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} placeholder="Commercial registration" />
-            </Field>
-            <Field label="Email">
-              <Input type="email" value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} placeholder="name@example.com" />
-            </Field>
-          </div>
         </div>
-      </CollapsibleSection>
 
-      <CollapsibleSection
-        alwaysOpen
-        title={
-          <h2 className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="box" className="w-4 h-4" /></span>
-            Line Items
-          </h2>
-        }
-      >
-        <div className="space-y-4">
-          <LineItemsTable items={form.items} onChange={(items) => setField('items', items)} dp={decimals} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[var(--color-border)]">
-            <Field label="Discount">
-              <Input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => setField('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Field label="Invoice No." required dense>
+            <Input dense value={form.invNo} onChange={(e) => setField('invNo', e.target.value)} placeholder="INV-0001" />
+          </Field>
+          <Field label="Date" dense>
+            <Input dense type="date" value={form.date} onChange={(e) => setField('date', e.target.value)} />
+          </Field>
+          <Field label="Payment Method" dense>
+            <Select dense value={form.payMethod} onChange={(e) => setField('payMethod', e.target.value)}>
+              <option value="">-- Select --</option>
+              <option>Cash</option>
+              <option>Cheque</option>
+              <option>Bank Transfer</option>
+            </Select>
+          </Field>
+          {showCheque && (
+            <Field label="Cheque No." dense>
+              <Input dense value={form.chequeNo} onChange={(e) => setField('chequeNo', e.target.value)} />
+            </Field>
+          )}
+          {showBank && !showCheque && (
+            <Field label="Bank Name" dense>
+              <Input dense value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} />
+            </Field>
+          )}
+        </div>
+
+        <div className="grid grid-cols-4 gap-3">
+          <div className="col-span-2">
+            <Field label="Customer Name" required dense>
+              <Input dense value={form.custName} onChange={(e) => setField('custName', fmtName(e.target.value))} list="custNameList" placeholder="Enter customer name" />
+              <datalist id="custNameList">
+                {customers.map((c) => <option key={c} value={c} />)}
+              </datalist>
             </Field>
           </div>
-          <Field label="Notes">
-            <Textarea value={form.notes} onChange={(e) => setField('notes', e.target.value)} rows={2} placeholder="Invoice notes..." />
+          <div className="col-span-2 grid grid-cols-2 gap-3">
+            <Field label="Phone" dense>
+              <Input dense value={form.custPhone} onChange={(e) => setField('custPhone', e.target.value)} placeholder="+968 ..." />
+            </Field>
+            <Field label="Email" dense>
+              <Input dense type="email" value={form.custEmail} onChange={(e) => setField('custEmail', e.target.value)} placeholder="name@example.com" />
+            </Field>
+          </div>
+          <Field label="Address" dense>
+            <Input dense value={form.custAddr} onChange={(e) => setField('custAddr', e.target.value)} placeholder="Street, city" />
+          </Field>
+          <Field label="C.R." dense>
+            <Input dense value={form.custCr} onChange={(e) => setField('custCr', e.target.value)} placeholder="Commercial registration" />
           </Field>
         </div>
-      </CollapsibleSection>
+
+        <hr className="border-[var(--color-border)]" />
+
+        <SectionTitle icon="box">Line Items</SectionTitle>
+        <LineItemsTable items={form.items} onChange={(items) => setField('items', items)} dp={decimals} />
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Discount" dense>
+            <Input dense type="number" min="0" step="0.001" value={form.discount} onChange={(e) => setField('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
+          </Field>
+          <Field label="Notes" dense>
+            <Textarea dense value={form.notes} onChange={(e) => setField('notes', e.target.value)} rows={2} placeholder="Invoice notes..." />
+          </Field>
+        </div>
+      </div>
     </DocWorkspace>
   )
 }

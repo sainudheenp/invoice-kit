@@ -32,7 +32,7 @@ export function LineItemsTable({ items, onChange, dp }: Props) {
 
   return (
     <div>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto max-h-[240px] overflow-y-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b-2 border-[var(--color-border)]">

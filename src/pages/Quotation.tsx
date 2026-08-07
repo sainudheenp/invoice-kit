@@ -3,8 +3,8 @@ import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { Field, Input, Textarea, CustomerPicker, ExportActions, CollapsibleSection } from '@/components/ui'
-import { DocWorkspace } from '@/components/layout/DocWorkspace'
+import { Field, Input, Textarea, CustomerPicker, ExportActions } from '@/components/ui'
+import { DocWorkspace, SectionTitle } from '@/components/layout/DocWorkspace'
 import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { num2words, dp as getDp } from '@/utils'
 import { fmtName } from '@/utils/nameFormat'
@@ -161,7 +161,6 @@ export default function QuotationPage() {
     createdAt: Date.now(),
   })
 
-
   const handlePrint = async () => {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = buildQuotationHTML(buildTempQuotation(), co)
@@ -212,33 +211,27 @@ export default function QuotationPage() {
 
   const panel = (
     <>
-      <div className="surface p-4">
+      <div className="surface p-3 sm:p-4 sm:w-[320px] shrink-0">
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text3)]">Total</span>
           <span className="text-xl font-bold tabular-nums">{cur?.symbol}{grand.toFixed(decimals)}</span>
         </div>
-        <div className="flex items-center justify-between gap-3 mt-1.5">
-          <span className="text-xs text-[var(--color-text3)]">Subtotal</span>
-          <span className="text-sm tabular-nums">{cur?.symbol}{subtotal.toFixed(decimals)}</span>
+        <div className="flex items-center gap-4 mt-1.5 text-xs text-[var(--color-text3)]">
+          <span>Subtotal <b className="text-[var(--color-text)] tabular-nums">{cur?.symbol}{subtotal.toFixed(decimals)}</b></span>
+          {totalTax > 0 && (
+            <span>Tax <b className="text-[var(--color-text)] tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</b></span>
+          )}
+          {form.discount > 0 && (
+            <span>Discount <b className="text-red tabular-nums">-{cur?.symbol}{form.discount.toFixed(decimals)}</b></span>
+          )}
         </div>
-        {totalTax > 0 && (
-          <div className="flex items-center justify-between gap-3 mt-1">
-            <span className="text-xs text-[var(--color-text3)]">Tax</span>
-            <span className="text-sm tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</span>
-          </div>
-        )}
-        {form.discount > 0 && (
-          <div className="flex items-center justify-between gap-3 mt-1">
-            <span className="text-xs text-[var(--color-text3)]">Discount</span>
-            <span className="text-sm tabular-nums text-red">-{cur?.symbol}{form.discount.toFixed(decimals)}</span>
-          </div>
-        )}
-        <div className="text-[11px] italic text-[var(--color-text3)] mt-2 border-t border-[var(--color-border)] pt-2">
+        <div className="text-[11px] italic text-[var(--color-text3)] mt-1.5 border-t border-[var(--color-border)] pt-1.5">
           {words || 'Add items to see amount in words'}
         </div>
       </div>
-      <div className="surface p-4">
+      <div className="surface p-3 flex-1">
         <ExportActions
+          layout="bar"
           saveLabel={isEditing ? 'Update Quotation' : 'Save Quotation'}
           onSave={handleSave}
           onPreview={handlePreview}
@@ -255,45 +248,13 @@ export default function QuotationPage() {
   return (
     <DocWorkspace
       title={isEditing ? 'Edit Quotation' : 'New Quotation'}
-      subtitle="Details on the left, live preview on the right."
+      subtitle="Prepare a quotation for your customer."
       badge={badge}
       panel={panel}
     >
-      <CollapsibleSection
-        title={
-          <h2 className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="file" className="w-4 h-4" /></span>
-            Quotation Details
-          </h2>
-        }
-      >
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Field label="Quotation No." required>
-              <Input value={form.quotNo} onChange={(e) => set('quotNo', e.target.value)} placeholder="QUO-0001" />
-            </Field>
-            <Field label="Date">
-              <Input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
-            </Field>
-            <Field label="Valid Until">
-              <Input type="date" value={form.validUntil} onChange={(e) => set('validUntil', e.target.value)} />
-            </Field>
-          </div>
-          <div className="p-4 rounded-2xl bg-[var(--color-primary-bg)] border border-[var(--color-primary)]/20 text-xs text-[var(--color-primary-dark)] flex items-center gap-2">
-            <Svg name="warning" className="w-4 h-4 shrink-0" />
-            Quotations are valid for 30 days by default — adjust the "Valid Until" date as needed.
-          </div>
-        </div>
-      </CollapsibleSection>
-
-      <CollapsibleSection
-        title={
-          <h2 className="flex items-center gap-2">
-            <Svg name="users" className="w-4 h-4 text-[var(--color-primary)]" />
-            Customer
-          </h2>
-        }
-        right={
+      <div className="surface p-4 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <SectionTitle icon="file">Quotation Details</SectionTitle>
           <CustomerPicker
             companyId={co?.id || null}
             currentName={form.custName}
@@ -306,58 +267,62 @@ export default function QuotationPage() {
               markDirty()
             }}
           />
-        }
-      >
-        <div className="space-y-4">
-          <Field label="Customer Name" required>
-            <Input value={form.custName} onChange={(e) => set('custName', fmtName(e.target.value))} list="quotCustNameList" placeholder="Enter customer name" />
+        </div>
+
+        <div className="grid grid-cols-4 gap-3">
+          <Field label="Quotation No." required dense>
+            <Input dense value={form.quotNo} onChange={(e) => set('quotNo', e.target.value)} placeholder="QUO-0001" />
+          </Field>
+          <Field label="Date" dense>
+            <Input dense type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
+          </Field>
+          <Field label="Valid Until" dense>
+            <Input dense type="date" value={form.validUntil} onChange={(e) => set('validUntil', e.target.value)} />
+          </Field>
+          <Field label="Discount" dense>
+            <Input dense type="number" min="0" step="0.001" value={form.discount} onChange={(e) => set('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Customer Name" required dense>
+            <Input dense value={form.custName} onChange={(e) => set('custName', fmtName(e.target.value))} list="quotCustNameList" placeholder="Enter customer name" />
             <datalist id="quotCustNameList">
               {customers.map((c) => <option key={c} value={c} />)}
             </datalist>
           </Field>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Address">
-              <Input value={form.custAddr} onChange={(e) => set('custAddr', e.target.value)} placeholder="Street, city" />
+          <div className="grid grid-cols-3 gap-3">
+            <Field label="Phone" dense>
+              <Input dense value={form.custPhone} onChange={(e) => set('custPhone', e.target.value)} placeholder="+968 ..." />
             </Field>
-            <Field label="Phone">
-              <Input value={form.custPhone} onChange={(e) => set('custPhone', e.target.value)} placeholder="+968 ..." />
+            <Field label="C.R." dense>
+              <Input dense value={form.custCr} onChange={(e) => set('custCr', e.target.value)} placeholder="Commercial reg" />
             </Field>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="C.R.">
-              <Input value={form.custCr} onChange={(e) => set('custCr', e.target.value)} placeholder="Commercial registration" />
-            </Field>
-            <Field label="Email">
-              <Input type="email" value={form.custEmail} onChange={(e) => set('custEmail', e.target.value)} placeholder="name@example.com" />
+            <Field label="Email" dense>
+              <Input dense type="email" value={form.custEmail} onChange={(e) => set('custEmail', e.target.value)} placeholder="name@email.com" />
             </Field>
           </div>
         </div>
-      </CollapsibleSection>
 
-      <CollapsibleSection
-        alwaysOpen
-        title={
-          <h2 className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center"><Svg name="box" className="w-4 h-4" /></span>
-            Line Items
-          </h2>
-        }
-      >
-        <div className="space-y-4">
-          <LineItemsTable items={form.items} onChange={(items) => set('items', items)} dp={decimals} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[var(--color-border)]">
-            <Field label="Discount">
-              <Input type="number" min="0" step="0.001" value={form.discount} onChange={(e) => set('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Address" dense>
+            <Input dense value={form.custAddr} onChange={(e) => set('custAddr', e.target.value)} placeholder="Street, city" />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Terms & Conditions" dense>
+              <Textarea dense value={form.terms} onChange={(e) => set('terms', e.target.value)} rows={2} placeholder="Payment terms, delivery..." />
+            </Field>
+            <Field label="Notes" dense>
+              <Textarea dense value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} placeholder="Quotation notes..." />
             </Field>
           </div>
-          <Field label="Notes">
-            <Textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} placeholder="Quotation notes..." />
-          </Field>
-          <Field label="Terms & Conditions">
-            <Textarea value={form.terms} onChange={(e) => set('terms', e.target.value)} rows={2} placeholder="Payment terms, delivery, etc." />
-          </Field>
         </div>
-      </CollapsibleSection>
+
+        <hr className="border-[var(--color-border)]" />
+
+        <SectionTitle icon="box">Line Items</SectionTitle>
+        <LineItemsTable items={form.items} onChange={(items) => set('items', items)} dp={decimals} />
+      </div>
     </DocWorkspace>
   )
 }
