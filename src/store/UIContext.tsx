@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useReducer, useEffect, useRef, type ReactNode } from 'react'
 import type { Toast, ToastType } from '@/types'
 import { uid } from '@/utils/uid'
 
@@ -81,6 +81,15 @@ const UIContext = createContext<UIContextValue | null>(null)
 
 export function UIProvider({ children }: { children: ReactNode }) {
   const [ui, dispatchUI] = useReducer(uiReducer, initialUI)
+  const toastTimers = useRef<Map<string, number>>(new Map())
+
+  useEffect(() => {
+    const timers = toastTimers.current
+    return () => {
+      timers.forEach((id) => clearTimeout(id))
+      timers.clear()
+    }
+  }, [])
 
   useEffect(() => {
     const isDark = localStorage.getItem('_darkMode') === '1'
@@ -116,7 +125,11 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const showToast = (msg: string, type: ToastType = 'ok', duration = 3000) => {
     const id = uid()
     dispatchUI({ type: 'ADD_TOAST', payload: { id, msg, type, duration } })
-    setTimeout(() => dispatchUI({ type: 'REMOVE_TOAST', payload: id }), duration)
+    const timerId = window.setTimeout(() => {
+      toastTimers.current.delete(id)
+      dispatchUI({ type: 'REMOVE_TOAST', payload: id })
+    }, duration)
+    toastTimers.current.set(id, timerId)
   }
   const showResetModal = () => dispatchUI({ type: 'SET_RESET_MODAL', payload: true })
   const hideResetModal = () => dispatchUI({ type: 'SET_RESET_MODAL', payload: false })

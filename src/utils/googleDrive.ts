@@ -10,6 +10,19 @@ export interface CloudBackupFile {
   size: number
 }
 
+interface GoogleTokenResponse {
+  access_token?: string
+  error?: string
+  error_description?: string
+}
+
+interface DriveFile {
+  id: string
+  name: string
+  createdTime: string
+  size: string
+}
+
 const DRIVE_APPDATA_SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
 const GOOGLE_GIS_SCRIPT_ID = 'google-gis-sdk'
 
@@ -52,7 +65,7 @@ export async function requestGoogleAccessToken(
     const client = window.google.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: DRIVE_APPDATA_SCOPE,
-      callback: (response: any) => {
+      callback: (response: GoogleTokenResponse) => {
         if (response.error) {
           onError(response.error_description || response.error || 'Google Authorization failed')
           return
@@ -64,8 +77,8 @@ export async function requestGoogleAccessToken(
     })
 
     client.requestAccessToken()
-  } catch (err: any) {
-    onError(err?.message || 'Failed to initialize Google login.')
+  } catch (err) {
+    onError(err instanceof Error ? err.message : 'Failed to initialize Google login.')
   }
 }
 
@@ -132,7 +145,7 @@ export async function listAppDataBackups(accessToken: string): Promise<CloudBack
   }
 
   const data = await response.json()
-  return (data.files || []).map((f: any) => ({
+  return (data.files || []).map((f: DriveFile) => ({
     id: f.id,
     name: f.name,
     createdTime: f.createdTime,
@@ -184,7 +197,7 @@ declare global {
           initTokenClient: (config: {
             client_id: string
             scope: string
-            callback: (response: any) => void
+            callback: (response: GoogleTokenResponse) => void
           }) => {
             requestAccessToken: () => void
           }

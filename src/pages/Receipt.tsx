@@ -193,14 +193,18 @@ export default function Receipt() {
     if (!co) { showToast('No active file.', 'err'); return }
     const html = buildReceiptHTML(buildTempReceipt(), co)
     if (!html) { showToast('Cannot generate empty receipt.', 'err'); return }
+    let pdfFailed = false
     showPdfOverlay()
     try {
       await htmlToPDF(html, form.recNo || 'receipt')
     } catch (e) {
+      pdfFailed = true
       console.error('PDF generation failed, falling back to print:', e)
       showToast('PDF export unavailable, opening print instead.', 'err')
       printHTML(html)
-    } finally { hidePdfOverlay() }
+    } finally {
+      setTimeout(() => hidePdfOverlay(), pdfFailed ? 300 : 0)
+    }
   }
 
   const handlePreview = () => {

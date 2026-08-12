@@ -179,14 +179,18 @@ export default function QuotationPage() {
     if (!co) { showToast('No active company.', 'err'); return }
     const html = buildQuotationHTML(buildTempQuotation(), co)
     if (!html) { showToast('Cannot generate empty quotation.', 'err'); return }
+    let pdfFailed = false
     showPdfOverlay()
     try {
       await htmlToPDF(html, form.quotNo || 'quotation')
     } catch (e) {
+      pdfFailed = true
       console.error('PDF generation failed, falling back to print:', e)
       showToast('PDF export unavailable, opening print instead.', 'err')
       printHTML(html)
-    } finally { hidePdfOverlay() }
+    } finally {
+      setTimeout(() => hidePdfOverlay(), pdfFailed ? 300 : 0)
+    }
   }
 
   const handleText = () => {

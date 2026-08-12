@@ -97,7 +97,7 @@ export function safePdfName(name: string | null | undefined, fallback = 'documen
     .normalize('NFKC')
     .replace(/[/\\]+/g, '-')
     .replace(/[<>:"|?*]+/g, '')
-    .replace(/\p{Cc}+/gu, '')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/^\.+/, '')

@@ -127,8 +127,9 @@ export function validateBackupFile(jsonString: string): {
     }
 
     return { valid: true, payload }
-  } catch (e: any) {
-    return { valid: false, error: `JSON Parse Error: ${e?.message || 'Invalid JSON format'}` }
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Invalid JSON format'
+    return { valid: false, error: `JSON Parse Error: ${message}` }
   }
 }
 

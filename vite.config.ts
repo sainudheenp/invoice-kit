@@ -8,7 +8,7 @@ import { execSync } from 'child_process'
 let commitCount = '00'
 try {
   commitCount = execSync('git rev-list --count HEAD').toString().trim()
-} catch (e) {
+} catch {
 }
 process.env.VITE_APP_VERSION = '1.' + String(commitCount).padStart(2, '0')
 
