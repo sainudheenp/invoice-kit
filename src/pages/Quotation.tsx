@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useSavedCustomers } from '@/hooks/useSavedCustomers'
@@ -9,7 +9,7 @@ import { LineItemsTable } from '@/components/invoice/LineItemsTable'
 import { num2words, dp as getDp } from '@/utils'
 import { fmtName } from '@/utils/nameFormat'
 import { buildQuotationHTML } from '@/templates'
-import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
+import { printHTML, htmlToPDFWithProgress, downloadText } from '@/utils/pdf'
 import { Svg } from '@/icons'
 import type { LineItem, Customer } from '@/types/invoice'
 import type { Quotation } from '@/types/quotation'
@@ -41,11 +41,12 @@ const emptyForm = (): QuotationFormState => ({
 
 export default function QuotationPage() {
   const { state, getCo, saveCompany, createQuotation, setEditing } = useApp()
-  const { markDirty, markClean, showToast, showPreview, showPdfOverlay, hidePdfOverlay } = useUI()
+  const { markDirty, markClean, showToast, showPreview, showPdfOverlay, hidePdfOverlay, setPdfPhase } = useUI()
   const { customers, saveCustomer } = useSavedCustomers()
   const co = getCo()
   const [form, setForm] = useState<QuotationFormState>(emptyForm)
   const [isEditing, setIsEditing] = useState(false)
+  const downloadingRef = useRef(false)
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
@@ -177,19 +178,27 @@ export default function QuotationPage() {
 
   const handleDownloadPDF = async () => {
     if (!co) { showToast('No active company.', 'err'); return }
+    if (downloadingRef.current) return
+    downloadingRef.current = true
     const html = buildQuotationHTML(buildTempQuotation(), co)
-    if (!html) { showToast('Cannot generate empty quotation.', 'err'); return }
+    if (!html) { showToast('Cannot generate empty quotation.', 'err'); downloadingRef.current = false; return }
     let pdfFailed = false
     showPdfOverlay()
+    setPdfPhase('preparing', 'Building document structure')
     try {
-      await htmlToPDF(html, form.quotNo || 'quotation')
+      await htmlToPDFWithProgress(html, form.quotNo || 'quotation', (p) => setPdfPhase(p.phase, p.detail))
     } catch (e) {
       pdfFailed = true
+      setPdfPhase('error', 'PDF generation failed')
       console.error('PDF generation failed, falling back to print:', e)
       showToast('PDF export unavailable, opening print instead.', 'err')
       printHTML(html)
     } finally {
-      setTimeout(() => hidePdfOverlay(), pdfFailed ? 300 : 0)
+      setTimeout(() => {
+        hidePdfOverlay()
+        setPdfPhase('idle')
+        downloadingRef.current = false
+      }, pdfFailed ? 300 : 0)
     }
   }
 

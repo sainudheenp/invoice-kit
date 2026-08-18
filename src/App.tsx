@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AppProvider, useApp } from '@/store/AppContext'
 import { UIProvider, useUI } from '@/store/UIContext'
@@ -17,10 +17,26 @@ import Customers from '@/pages/Customers'
 import Products from '@/pages/Products'
 import History from '@/pages/History'
 import Settings from '@/pages/Settings'
+import { prewarmPdf, prefetchPdfFonts } from '@/utils/pdf'
 
 function AppContent() {
   const { state, loading } = useApp()
   const { ui, toggleSidebar } = useUI()
+
+  useEffect(() => {
+    if (loading) return
+    const schedule = (fn: () => void) => {
+      if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(fn, { timeout: 2000 })
+      } else {
+        setTimeout(fn, 1000)
+      }
+    }
+    schedule(() => {
+      prefetchPdfFonts().catch(() => {})
+      prewarmPdf()
+    })
+  }, [loading])
 
   if (loading) {
     return (

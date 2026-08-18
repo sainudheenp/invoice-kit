@@ -1,6 +1,7 @@
 import { createContext, useContext, useReducer, useEffect, useRef, type ReactNode } from 'react'
 import type { Toast, ToastType } from '@/types'
 import { uid } from '@/utils/uid'
+import type { PdfPhase } from '@/utils/pdf'
 
 interface UIState {
   sidebarOpen: boolean
@@ -11,6 +12,8 @@ interface UIState {
   previewModal: boolean
   previewContent: string
   pdfOverlay: boolean
+  pdfPhase: PdfPhase
+  pdfPhaseDetail?: string
 }
 
 type UIAction =
@@ -23,6 +26,7 @@ type UIAction =
   | { type: 'SET_RESET_MODAL'; payload: boolean }
   | { type: 'SET_PREVIEW'; payload: { open: boolean; content?: string } }
   | { type: 'SET_PDF_OVERLAY'; payload: boolean }
+  | { type: 'SET_PDF_PHASE'; payload: { phase: PdfPhase; detail?: string } }
 
 function uiReducer(state: UIState, action: UIAction): UIState {
   switch (action.type) {
@@ -44,6 +48,8 @@ function uiReducer(state: UIState, action: UIAction): UIState {
       return { ...state, previewModal: action.payload.open, previewContent: action.payload.content || '' }
     case 'SET_PDF_OVERLAY':
       return { ...state, pdfOverlay: action.payload }
+    case 'SET_PDF_PHASE':
+      return { ...state, pdfPhase: action.payload.phase, pdfPhaseDetail: action.payload.detail }
     default:
       return state
   }
@@ -58,6 +64,8 @@ const initialUI: UIState = {
   previewModal: false,
   previewContent: '',
   pdfOverlay: false,
+  pdfPhase: 'idle',
+  pdfPhaseDetail: undefined,
 }
 
 interface UIContextValue {
@@ -75,6 +83,7 @@ interface UIContextValue {
   closePreview: () => void
   showPdfOverlay: () => void
   hidePdfOverlay: () => void
+  setPdfPhase: (phase: PdfPhase, detail?: string) => void
 }
 
 const UIContext = createContext<UIContextValue | null>(null)
@@ -137,6 +146,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const closePreview = () => dispatchUI({ type: 'SET_PREVIEW', payload: { open: false } })
   const showPdfOverlay = () => dispatchUI({ type: 'SET_PDF_OVERLAY', payload: true })
   const hidePdfOverlay = () => dispatchUI({ type: 'SET_PDF_OVERLAY', payload: false })
+  const setPdfPhase = (phase: PdfPhase, detail?: string) => dispatchUI({ type: 'SET_PDF_PHASE', payload: { phase, detail } })
 
   return (
     <UIContext.Provider value={{
@@ -146,7 +156,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
       showToast,
       showResetModal, hideResetModal,
       showPreview, closePreview,
-      showPdfOverlay, hidePdfOverlay,
+      showPdfOverlay, hidePdfOverlay, setPdfPhase,
     }}>
       {children}
     </UIContext.Provider>

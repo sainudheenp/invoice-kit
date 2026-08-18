@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
@@ -8,7 +8,7 @@ import { ReceiptItems } from '@/components/receipt/ReceiptItems'
 import { num2words, dp as getDp } from '@/utils'
 import { fmtName } from '@/utils/nameFormat'
 import { buildReceiptHTML } from '@/templates'
-import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
+import { printHTML, htmlToPDFWithProgress, downloadText } from '@/utils/pdf'
 import { Svg } from '@/icons'
 import type { LineItem } from '@/types/invoice'
 import type { Receipt } from '@/types/receipt'
@@ -47,10 +47,11 @@ const emptyForm = (): ReceiptFormState => ({
 
 export default function Receipt() {
   const { state, getCo, saveCompany, createReceipt, setEditing } = useApp()
-  const { markDirty, markClean, showToast, showPreview, showPdfOverlay, hidePdfOverlay } = useUI()
+  const { markDirty, markClean, showToast, showPreview, showPdfOverlay, hidePdfOverlay, setPdfPhase } = useUI()
   const co = getCo()
   const [form, setForm] = useState<ReceiptFormState>(emptyForm)
   const [isEditing, setIsEditing] = useState(false)
+  const downloadingRef = useRef(false)
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
@@ -191,19 +192,27 @@ export default function Receipt() {
 
   const handleDownloadPDF = async () => {
     if (!co) { showToast('No active file.', 'err'); return }
+    if (downloadingRef.current) return
+    downloadingRef.current = true
     const html = buildReceiptHTML(buildTempReceipt(), co)
-    if (!html) { showToast('Cannot generate empty receipt.', 'err'); return }
+    if (!html) { showToast('Cannot generate empty receipt.', 'err'); downloadingRef.current = false; return }
     let pdfFailed = false
     showPdfOverlay()
+    setPdfPhase('preparing', 'Building document structure')
     try {
-      await htmlToPDF(html, form.recNo || 'receipt')
+      await htmlToPDFWithProgress(html, form.recNo || 'receipt', (p) => setPdfPhase(p.phase, p.detail))
     } catch (e) {
       pdfFailed = true
+      setPdfPhase('error', 'PDF generation failed')
       console.error('PDF generation failed, falling back to print:', e)
       showToast('PDF export unavailable, opening print instead.', 'err')
       printHTML(html)
     } finally {
-      setTimeout(() => hidePdfOverlay(), pdfFailed ? 300 : 0)
+      setTimeout(() => {
+        hidePdfOverlay()
+        setPdfPhase('idle')
+        downloadingRef.current = false
+      }, pdfFailed ? 300 : 0)
     }
   }
 

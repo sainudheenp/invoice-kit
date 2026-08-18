@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
@@ -6,7 +6,7 @@ import { Card, CardHeader, Button } from '@/components/ui'
 import { Svg } from '@/icons'
 import { invStatus, uid } from '@/utils'
 import { buildInvoiceHTML, buildReceiptHTML, buildQuotationHTML } from '@/templates'
-import { printHTML, htmlToPDF, downloadText } from '@/utils/pdf'
+import { printHTML, htmlToPDFWithProgress, downloadText } from '@/utils/pdf'
 import { invoicesToCSV, receiptsToCSV, quotationsToCSV, downloadCSV } from '@/utils/csv'
 import { sendDocumentEmail } from '@/utils/email'
 import type { Invoice } from '@/types/invoice'
@@ -18,11 +18,12 @@ type Tab = 'inv' | 'rec' | 'quot'
 export default function History() {
   const navigate = useNavigate()
   const { state, deleteInvoice, deleteReceipt, deleteQuotation, markInvoicePaid, setEditing, saveInvoice, saveReceipt, saveQuotation } = useApp()
-  const { showToast, showPdfOverlay, hidePdfOverlay } = useUI()
+  const { showToast, showPdfOverlay, hidePdfOverlay, setPdfPhase } = useUI()
   const co = state.companies.find((c) => c.id === state.activeId)
   const [tab, setTab] = useState<Tab>('inv')
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const downloadingRef = useRef(false)
 
   const invoices = state.invoices
     .filter((i) => i.companyId === co?.id)
@@ -126,13 +127,23 @@ export default function History() {
 
   const handleDownloadPDF = async (type: Tab, doc: Invoice | Receipt | Quotation) => {
     if (!co) { showToast('No active company.', 'err'); return }
+    if (downloadingRef.current) return
+    downloadingRef.current = true
     const html = type === 'inv' ? buildInvoiceHTML(doc as Invoice, co) : type === 'rec' ? buildReceiptHTML(doc as Receipt, co) : buildQuotationHTML(doc as Quotation, co)
-    if (!html) { showToast('Cannot generate PDF.', 'err'); return }
+    if (!html) { showToast('Cannot generate PDF.', 'err'); downloadingRef.current = false; return }
     const name = type === 'inv' ? (doc as Invoice).invNo : type === 'rec' ? (doc as Receipt).recNo : (doc as Quotation).quotNo
     showPdfOverlay()
-    try { await htmlToPDF(html, name || 'document') } catch (e) {
+    setPdfPhase('preparing', 'Building document structure')
+    try {
+      await htmlToPDFWithProgress(html, name || 'document', (p) => setPdfPhase(p.phase, p.detail))
+    } catch (e) {
+      setPdfPhase('error', 'PDF generation failed')
       console.error('PDF failed:', e); showToast('PDF unavailable, opening print.', 'err'); printHTML(html)
-    } finally { hidePdfOverlay() }
+    } finally {
+      hidePdfOverlay()
+      setPdfPhase('idle')
+      downloadingRef.current = false
+    }
   }
 
   const handleText = (type: Tab, doc: Invoice | Receipt | Quotation) => {

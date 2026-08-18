@@ -8,7 +8,7 @@ import pdf from 'taepdf'
  * place or the feature silently breaks:
  *
  *   1. WASM must load. `vite.config.ts` has `optimizeDeps.exclude: ['taepdf']`
- *      and `assetsInclude: ['**\/*.wasm']`. Removing either makes the WASM 404 in
+ *      and `assetsInclude` glob patterns for .wasm. Removing either makes the WASM 404 in
  *      dev and `pdf.render` throws "Cannot read properties of undefined
  *      (reading 'list_registered_fonts')". Do NOT remove them.
  *
@@ -26,6 +26,21 @@ import pdf from 'taepdf'
  * fall back to the browser print dialog (also 100% exact, no image).
  */
 
+export type PdfPhase =
+  | 'idle'
+  | 'preparing'
+  | 'fonts'
+  | 'engine'
+  | 'rendering'
+  | 'downloading'
+  | 'done'
+  | 'error'
+
+export interface PdfProgress {
+  phase: PdfPhase
+  detail?: string
+}
+
 const FONTS_DIR = '/fonts'
 
 const LAYOUT_CSS = `
@@ -37,9 +52,6 @@ const LAYOUT_CSS = `
   * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 `
 
-// Single source of truth for embedded fonts. Each entry maps a font-family name
-// used inside the templates to the woff2 file that provides its glyphs.
-// Keep in sync with public/fonts/ and scripts/sync-fonts.mjs.
 const FONT_FACES: ReadonlyArray<{ family: string; file: string; weight: number; style: 'normal' | 'italic' }> = [
   { family: 'Helvetica', file: 'arimo-latin-400-normal.woff2', weight: 400, style: 'normal' },
   { family: 'Helvetica', file: 'arimo-latin-700-normal.woff2', weight: 700, style: 'normal' },
@@ -61,14 +73,11 @@ const FONT_FACES: ReadonlyArray<{ family: string; file: string; weight: number; 
   { family: 'Courier', file: 'cousine-latin-400-normal.woff2', weight: 400, style: 'normal' },
   { family: 'Courier', file: 'cousine-latin-700-normal.woff2', weight: 700, style: 'normal' },
   { family: 'Lucida Sans Typewriter', file: 'cousine-latin-400-normal.woff2', weight: 400, style: 'normal' },
-  // Arabic fallback (currency symbols like ع.ع and Arabic text). taepdf falls
-  // back to any registered font for glyphs the primary font lacks.
   { family: 'Noto Sans Arabic', file: 'noto-sans-arabic-arabic-400-normal.woff2', weight: 400, style: 'normal' },
   { family: 'Noto Sans Arabic', file: 'noto-sans-arabic-arabic-700-normal.woff2', weight: 700, style: 'normal' },
 ]
 
-// The unique set of font files that must exist in public/fonts/.
-export const REQUIRED_FONT_FILES: readonly string[] = Array.from(new Set(FONT_FACES.map((f) => f.file)))
+const REQUIRED_FONT_FILES: readonly string[] = Array.from(new Set(FONT_FACES.map((f) => f.file)))
 
 function usedFontFaces(html: string) {
   const families = new Set<string>()
@@ -88,19 +97,22 @@ function usedFontFaces(html: string) {
 
 export function withPdfFonts(html: string): string {
   const faces = usedFontFaces(html)
-  const fontCss = faces.map(
-    (f) => `@font-face { font-family:'${f.family}'; src:url('${FONTS_DIR}/${f.file}') format('woff2'); font-weight:${f.weight}; font-style:${f.style}; }`,
-  ).join('\n')
+  const groups = new Map<string, { file: string; weight: number; style: string; families: string[] }>()
+  for (const f of faces) {
+    const key = `${f.file}|${f.weight}|${f.style}`
+    const entry = groups.get(key) || { file: f.file, weight: f.weight, style: f.style, families: [] as string[] }
+    if (!entry.families.includes(`'${f.family}'`)) entry.families.push(`'${f.family}'`)
+    groups.set(key, entry)
+  }
+  const fontCss = Array.from(groups.values()).map(group => {
+    const familyList = group.families.join(',')
+    return `@font-face { font-family:${familyList}; src:url('${FONTS_DIR}/${group.file}') format('woff2'); font-weight:${group.weight}; font-style:${group.style}; }`
+  }).join('\n')
   const css = `\n<style>\n${fontCss}\n${LAYOUT_CSS}\n</style>\n`
   const i = html.indexOf('<head>')
   return i !== -1 ? html.slice(0, i + 6) + css + html.slice(i + 6) : css + html
 }
 
-/**
- * Make a safe download filename. Strips path separators and characters that are
- * illegal or awkward in filenames, collapses whitespace, and bounds the length.
- * Always returns a non-empty base name (no extension).
- */
 export function safePdfName(name: string | null | undefined, fallback = 'document'): string {
   const cleaned = (name ?? '')
     .normalize('NFKC')
@@ -115,12 +127,10 @@ export function safePdfName(name: string | null | undefined, fallback = 'documen
   return cleaned || fallback
 }
 
-// Warm up the WASM engine once and reuse the same promise.
 let warmupPromise: Promise<void> | null = null
 function ensureWarm(): Promise<void> {
   if (!warmupPromise) {
     warmupPromise = pdf.warmup().catch((e) => {
-      // Reset so a later attempt can retry a transient failure.
       warmupPromise = null
       throw e
     })
@@ -128,17 +138,59 @@ function ensureWarm(): Promise<void> {
   return warmupPromise
 }
 
-/**
- * Generate and download a vector PDF from template HTML.
- * Throws if the engine fails so the caller can fall back to print.
- */
-export async function htmlToPDF(html: string, filename: string): Promise<void> {
+let prefetchPromise: Promise<void> | null = null
+function ensurePrefetched(): Promise<void> {
+  if (!prefetchPromise) {
+    prefetchPromise = Promise.all(
+      REQUIRED_FONT_FILES.map(f =>
+        fetch(`${FONTS_DIR}/${f}`, { mode: 'no-cors' }).catch(() => {})
+      )
+    ).then(() => {}).catch(() => {})
+  }
+  return prefetchPromise
+}
+
+export function prewarmPdf(): void {
+  ensureWarm().catch(() => {})
+}
+
+export async function prefetchPdfFonts(): Promise<void> {
+  await ensurePrefetched()
+}
+
+export async function htmlToPDFWithProgress(
+  html: string,
+  filename: string,
+  onProgress?: (progress: PdfProgress) => void
+): Promise<void> {
   if (!html || !html.trim()) throw new Error('Cannot generate PDF from empty content.')
-  // Yield so the loading overlay can paint and its progress animation can start
-  // before the CPU-heavy WASM render blocks the main thread.
+
+  onProgress?.({ phase: 'preparing', detail: 'Building document structure' })
+
   await new Promise((r) => setTimeout(r, 60))
+
+  onProgress?.({ phase: 'fonts', detail: 'Loading fonts' })
+  const fontHtml = withPdfFonts(html)
+  const faces = usedFontFaces(html)
+  const uniqueFiles = Array.from(new Set(faces.map(f => f.file)))
+  await Promise.all(uniqueFiles.map(f =>
+    fetch(`${FONTS_DIR}/${f}`, { mode: 'no-cors' }).catch(() => {})
+  ))
+
+  onProgress?.({ phase: 'engine', detail: 'Preparing PDF engine' })
   await ensureWarm()
-  await pdf.download(withPdfFonts(html), 'A4', safePdfName(filename) + '.pdf')
+
+  onProgress?.({ phase: 'rendering', detail: 'Rendering pages' })
+  await pdf.download(fontHtml, 'A4', safePdfName(filename) + '.pdf')
+
+  onProgress?.({ phase: 'downloading', detail: 'Starting download' })
+  await new Promise((r) => setTimeout(r, 80))
+
+  onProgress?.({ phase: 'done' })
+}
+
+export async function htmlToPDF(html: string, filename: string): Promise<void> {
+  await htmlToPDFWithProgress(html, filename)
 }
 
 export function printHTML(html: string): void {

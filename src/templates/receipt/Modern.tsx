@@ -10,7 +10,7 @@ export function ReceiptModern(d:RecTemplateData): string {
   @page { margin:0;size:A4; }
   * { box-sizing:border-box;margin:0;padding:0; }
   body { font-family:'Helvetica','Arial',sans-serif; color:#1f2937; background:#fff; width:794px; padding:40px 50px 100px; }
-  .sidebar { position:absolute; top:0; left:0; width:5px; height:1403.75px; background:linear-gradient(to bottom, ${p}, ${p}88); }
+  .sidebar { position:absolute; top:0; left:0; width:5px; height:100%; background:linear-gradient(to bottom, ${p}, ${p}88); }
   .header { display:flex; justify-content:space-between; align-items:flex-start; padding:20px 25px; background:#f8fafc; border-radius:10px; margin-bottom:25px; }
   .brand { display:flex; gap:12.5px; align-items:center; }
   .doc-label { font-size:12.5px; color:${p}; font-weight:bold; letter-spacing:2.5px; border-left:3.75px solid ${p}; padding-left:10px; }
