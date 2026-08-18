@@ -11,8 +11,6 @@ self.addEventListener('install', function (e) {
   e.waitUntil(
     caches.open(CACHE).then(function (c) {
       return c.addAll(SHELL)
-    }).then(function () {
-      return self.skipWaiting()
     }).catch(function () {})
   )
 })
@@ -23,8 +21,6 @@ self.addEventListener('activate', function (e) {
       return Promise.all(
         keys.filter(function (k) { return k !== CACHE }).map(function (k) { return caches.delete(k) })
       )
-    }).then(function () {
-      return self.clients.claim()
     })
   )
 })

@@ -359,7 +359,7 @@ export default function Settings() {
     await resetAll()
     hideResetModal()
     setResetConfirm('')
-    window.location.reload()
+    showToast('All data has been reset.')
   }
 
   const handlePreview = (type: 'inv' | 'rec' | 'quot', tpl: string) => {

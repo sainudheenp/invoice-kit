@@ -6,11 +6,11 @@ import type { Quotation } from '@/types/quotation'
 import type { CustomerRecord } from '@/types/customer'
 import type { ProductRecord } from '@/types/product'
 import type { EditingDoc } from '@/types'
-import { db } from '@/db'
+import { db, isOnboardingComplete, markOnboardingComplete } from '@/db'
 import { uid } from '@/utils/uid'
 import { executeRestore, type BackupPayload, type ImportResult } from '@/utils/backup'
 
-const STORAGE_ACTIVE_ID_KEY = 'ik_activeId'
+export const STORAGE_ACTIVE_ID_KEY = 'ik_activeId'
 
 interface AppState {
   companies: Company[]
@@ -22,6 +22,7 @@ interface AppState {
   activeId: string | null
   editingDoc: EditingDoc | null
   dbError: string | null
+  onboardingComplete: boolean
 }
 
 type AppAction =
@@ -46,7 +47,7 @@ type AppAction =
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_ALL':
-      return { ...action.payload, editingDoc: null, dbError: null }
+      return { ...action.payload, editingDoc: null, dbError: null, onboardingComplete: action.payload.onboardingComplete ?? false }
     case 'UPSERT_COMPANY': {
       const idx = state.companies.findIndex((c) => c.id === action.payload.id)
       const companies = idx >= 0
@@ -108,7 +109,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'DB_ERROR':
       return { ...state, dbError: action.payload }
     case 'RESET':
-      return { companies: [], invoices: [], receipts: [], quotations: [], customers: [], products: [], activeId: null, editingDoc: null, dbError: null }
+      return { companies: [], invoices: [], receipts: [], quotations: [], customers: [], products: [], activeId: null, editingDoc: null, dbError: null, onboardingComplete: false }
     default:
       return state
   }
@@ -124,6 +125,7 @@ const initialState: AppState = {
   activeId: null,
   editingDoc: null,
   dbError: null,
+  onboardingComplete: false,
 }
 
 interface AppContextValue {
@@ -195,17 +197,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         } else if (companies.length > 0) {
           activeId = companies[0].id
         }
-        dispatch({ type: 'SET_ALL', payload: { companies, invoices, receipts, quotations, customers, products, activeId, editingDoc: null, dbError: null } })
+        const onboardingDone = await isOnboardingComplete()
+        dispatch({ type: 'SET_ALL', payload: { companies, invoices, receipts, quotations, customers, products, activeId, editingDoc: null, dbError: null, onboardingComplete: onboardingDone } })
+        if (companies.length > 0 && !onboardingDone) {
+          await markOnboardingComplete()
+        }
       } catch (err: any) {
         console.error('Failed to load DB:', err)
         if (err?.name === 'VersionError') {
-          try {
-            await db.delete()
-            await db.open()
-            dispatch({ type: 'RESET' })
-          } catch {
-            dispatch({ type: 'DB_ERROR', payload: 'Failed to create database. Please clear browser storage for this site.' })
-          }
+          dispatch({ type: 'DB_ERROR', payload: 'Data version mismatch. Please update the app to the latest version.' })
         } else {
           dispatch({ type: 'DB_ERROR', payload: 'Failed to load data from IndexedDB. See console for details.' })
         }
@@ -224,6 +224,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const saveCompany = async (c: Company) => {
     await db.companies.put(c)
     dispatch({ type: 'UPSERT_COMPANY', payload: c })
+    const done = await isOnboardingComplete()
+    if (!done) {
+      await markOnboardingComplete()
+    }
   }
 
   const deleteCompany = async (id: string) => {
@@ -420,14 +424,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const restoreBackup = async (payload: BackupPayload, mode: 'merge' | 'replace'): Promise<ImportResult> => {
     const { counts, allData } = await executeRestore(payload, mode)
+    const hasData = (allData.companies?.length || 0) > 0
     dispatch({
       type: 'SET_ALL',
       payload: {
         ...allData,
         editingDoc: null,
         dbError: null,
+        onboardingComplete: hasData,
       },
     })
+    if (hasData) {
+      await markOnboardingComplete()
+    }
     return counts
   }
 

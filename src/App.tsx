@@ -1,13 +1,13 @@
 import { Suspense, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { AppProvider, useApp } from '@/store/AppContext'
+import { AppProvider, useApp, STORAGE_ACTIVE_ID_KEY } from '@/store/AppContext'
 import { UIProvider, useUI } from '@/store/UIContext'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
 import { WelcomeOverlay } from '@/components/layout/WelcomeOverlay'
 import { PreviewModal } from '@/components/layout/PreviewModal'
 import { PDFOverlay } from '@/components/layout/PDFOverlay'
-import { ToastContainer } from '@/components/ui'
+import { ToastContainer, Button } from '@/components/ui'
 import { Svg } from '@/icons'
 import Dashboard from '@/pages/Dashboard'
 import Invoice from '@/pages/Invoice'
@@ -62,9 +62,25 @@ function AppContent() {
     )
   }
 
-  if (state.companies.length === 0 || !state.activeId) {
+  if (!state.onboardingComplete || state.companies.length === 0) {
     return (
       <WelcomeOverlay onDone={() => window.location.reload()} />
+    )
+  }
+
+  if (!state.activeId && state.companies.length > 0) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-[var(--color-page-bg)]">
+        <div className="text-center">
+          <div className="text-3xl mb-3">📂</div>
+          <h2 className="text-lg font-bold mb-2">Data Unavailable</h2>
+          <p className="text-sm text-[var(--color-text2)] mb-4">Your data exists but the active company is missing. Please reset and set up again, or restore from a backup.</p>
+          <div className="flex gap-2 justify-center">
+            <Button onClick={() => window.location.reload()} className="cursor-pointer">Retry</Button>
+            <Button variant="danger" onClick={() => { localStorage.removeItem(STORAGE_ACTIVE_ID_KEY); window.location.reload() }} className="cursor-pointer">Reset</Button>
+          </div>
+        </div>
+      </div>
     )
   }
 
