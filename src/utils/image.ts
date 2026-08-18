@@ -1,5 +1,7 @@
 const SVG_RE = /^data:image\/svg\+xml/
 
+export const JPEG_QUALITY = 0.75
+
 export const IMAGE_MAX_SIZES: Record<string, { w: number; h: number }> = {
   logo: { w: 300, h: 300 },
   seal: { w: 400, h: 400 },
@@ -22,7 +24,7 @@ export function resizeImage(dataUrl: string, maxW: number, maxH: number): Promis
       ctx.imageSmoothingEnabled = true
       ctx.imageSmoothingQuality = 'high'
       ctx.drawImage(img, 0, 0, newW, newH)
-      resolve(canvas.toDataURL('image/png'))
+      resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY))
     }
     img.onerror = () => reject(new Error('Failed to load image'))
     img.src = dataUrl

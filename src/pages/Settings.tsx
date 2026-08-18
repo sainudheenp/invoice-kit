@@ -531,7 +531,7 @@ export default function Settings() {
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                         </svg>
                         <span className="text-xs">Click or drop an image</span>
-                        <span className="text-[10px]">PNG, JPG, SVG &middot; Max 2MB</span>
+                        <span className="text-[10px]">JPG, PNG, SVG &middot; Max 2MB</span>
                       </div>
                     )}
                   </div>
