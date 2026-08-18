@@ -37,14 +37,6 @@ const LAYOUT_CSS = `
   * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 `
 
-const PRINT_CSS = `
-  html, body { margin:0; background:#fff; }
-  @media print {
-    @page { margin:0; size:A4; }
-    ${LAYOUT_CSS}
-  }
-`
-
 // Single source of truth for embedded fonts. Each entry maps a font-family name
 // used inside the templates to the woff2 file that provides its glyphs.
 // Keep in sync with public/fonts/ and scripts/sync-fonts.mjs.
@@ -94,7 +86,7 @@ function usedFontFaces(html: string) {
   return FONT_FACES.filter(f => families.has(f.family) || (f.family === 'Noto Sans Arabic' && hasArabic))
 }
 
-function withPdfFonts(html: string): string {
+export function withPdfFonts(html: string): string {
   const faces = usedFontFaces(html)
   const fontCss = faces.map(
     (f) => `@font-face { font-family:'${f.family}'; src:url('${FONTS_DIR}/${f.file}') format('woff2'); font-weight:${f.weight}; font-style:${f.style}; }`,
@@ -153,14 +145,8 @@ export function printHTML(html: string): void {
   const iframe = document.createElement('iframe')
   iframe.style.cssText = 'position:fixed;top:-9999px;left:0;width:794px;height:1123px;border:none;overflow:hidden;'
   document.body.appendChild(iframe)
-  iframe.srcdoc = html
+  iframe.srcdoc = withPdfFonts(html)
   iframe.onload = () => {
-    const doc = iframe.contentDocument
-    if (doc) {
-      const style = doc.createElement('style')
-      style.textContent = PRINT_CSS
-      doc.head.appendChild(style)
-    }
     iframe.contentWindow!.print()
     setTimeout(() => document.body.removeChild(iframe), 1000)
   }
