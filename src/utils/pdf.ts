@@ -28,6 +28,23 @@ import pdf from 'taepdf'
 
 const FONTS_DIR = '/fonts'
 
+const LAYOUT_CSS = `
+  table { break-inside:auto; }
+  tr, td, th { break-inside:avoid; }
+  thead { display:table-header-group; }
+  .header, .rules, .notes, .terms, .sig-area, .amount-box,
+  .amount-block, .det-grid, .footer, .words, .info-row { break-inside:avoid; }
+  * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+`
+
+const PRINT_CSS = `
+  html, body { margin:0; background:#fff; }
+  @media print {
+    @page { margin:0; size:A4; }
+    ${LAYOUT_CSS}
+  }
+`
+
 // Single source of truth for embedded fonts. Each entry maps a font-family name
 // used inside the templates to the woff2 file that provides its glyphs.
 // Keep in sync with public/fonts/ and scripts/sync-fonts.mjs.
@@ -79,10 +96,10 @@ function usedFontFaces(html: string) {
 
 function withPdfFonts(html: string): string {
   const faces = usedFontFaces(html)
-  if (!faces.length) return html
-  const css = `\n<style>\n${faces.map(
+  const fontCss = faces.map(
     (f) => `@font-face { font-family:'${f.family}'; src:url('${FONTS_DIR}/${f.file}') format('woff2'); font-weight:${f.weight}; font-style:${f.style}; }`,
-  ).join('\n')}\n</style>\n`
+  ).join('\n')
+  const css = `\n<style>\n${fontCss}\n${LAYOUT_CSS}\n</style>\n`
   const i = html.indexOf('<head>')
   return i !== -1 ? html.slice(0, i + 6) + css + html.slice(i + 6) : css + html
 }
@@ -141,17 +158,7 @@ export function printHTML(html: string): void {
     const doc = iframe.contentDocument
     if (doc) {
       const style = doc.createElement('style')
-      style.textContent = `
-        html, body { margin:0; background:#fff; }
-        @media print {
-          @page { margin:0; size:A4; }
-          table { break-inside:auto; }
-          tr { break-inside:avoid; }
-          thead { display:table-header-group; }
-          .header, .rules, .notes, .terms, .sig-area, .amount-box,
-          .amount-block, .det-grid, .footer, .words, .info-row { break-inside:avoid; }
-        }
-      `
+      style.textContent = PRINT_CSS
       doc.head.appendChild(style)
     }
     iframe.contentWindow!.print()
