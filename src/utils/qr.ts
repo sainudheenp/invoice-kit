@@ -1,6 +1,6 @@
 import qrcode from 'qrcode-generator'
 
-export function generateQrDataURL(text: string, cellSize = 4, margin = 0): string {
+export function generateQrDataURL(text: string, cellSize = 3, margin = 0): string {
   if (!text) return ''
   try {
     const qr = qrcode(0, 'L')

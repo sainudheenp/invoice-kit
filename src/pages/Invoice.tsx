@@ -27,6 +27,7 @@ interface InvoiceFormState {
   payMethod: string
   chequeNo: string
   bankName: string
+  showSeal: boolean
 }
 
 const emptyForm = (): InvoiceFormState => ({
@@ -35,7 +36,7 @@ const emptyForm = (): InvoiceFormState => ({
   custName: '', custAddr: '', custPhone: '', custCr: '', custEmail: '',
   items: [{ desc: '', qty: 1, price: 0, amount: 0, taxRate: 0 }],
   discount: 0,
-  notes: '', payMethod: '', chequeNo: '', bankName: '',
+  notes: '', payMethod: '', chequeNo: '', bankName: '', showSeal: true,
 })
 
 export default function Invoice() {
@@ -50,6 +51,15 @@ export default function Invoice() {
 
   const cur = co?.currency
   const decimals = cur ? getDp(cur.subPer) : 2
+
+  const invPrefDate = (dt: string, fmt: string): string => {
+    if (!dt || fmt === 'none') return ''
+    const d = new Date(dt)
+    if (isNaN(d.getTime())) return ''
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    return fmt === 'year' ? `${y}` : `${y}-${m}`
+  }
 
   useEffect(() => {
     if (!state.editingDoc || state.editingDoc.type !== 'inv') return
@@ -70,20 +80,23 @@ export default function Invoice() {
       payMethod: inv.payMethod || '',
       chequeNo: inv.payDetails || '',
       bankName: inv.bankName || '',
+      showSeal: inv.showSeal !== false,
     })
     markClean()
   }, [state.editingDoc])
 
   useEffect(() => {
     if (!co || isEditing) return
+    const dateSuffix = invPrefDate(form.date, co.invPrefDate || 'none')
     setForm({
       ...form,
-      invNo: co.invPref + co.invNext,
+      invNo: dateSuffix ? co.invPref + dateSuffix + '-' + co.invNext : co.invPref + co.invNext,
       notes: co.invNotes,
+      showSeal: co.showSeal !== false,
     })
   }, [co?.id, isEditing])
 
-  const setField = useCallback((field: keyof InvoiceFormState, value: string | number | LineItem[]) => {
+  const setField = useCallback((field: keyof InvoiceFormState, value: string | number | boolean | LineItem[]) => {
     setForm({ ...form, [field]: value })
     markDirty()
   }, [form, setForm, markDirty])
@@ -126,6 +139,7 @@ export default function Invoice() {
         payMethod: form.payMethod,
         payDetails: form.chequeNo,
         bankName: form.bankName,
+        showSeal: form.showSeal,
       })
 
       if (!editingId) {
@@ -144,7 +158,7 @@ export default function Invoice() {
   }
 
   const handleNew = () => {
-    setForm(emptyForm())
+    setForm({ ...emptyForm(), showSeal: co?.showSeal !== false })
     setIsEditing(false)
     setEditing(null)
     markClean()
@@ -169,6 +183,7 @@ export default function Invoice() {
       payMethod: form.payMethod,
       payDetails: form.chequeNo,
       bankName: form.bankName,
+      showSeal: form.showSeal,
       createdAt: Date.now(),
     }
   }
@@ -274,6 +289,22 @@ export default function Invoice() {
                   <Input dense value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} />
                 </Field>
               )}
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">Include Seal</div>
+                <div className="text-xs text-[var(--color-text3)]">Show the company seal on the printed invoice</div>
+              </div>
+              <button
+                onClick={() => setField('showSeal', !form.showSeal)}
+                type="button"
+                role="switch"
+                aria-checked={form.showSeal}
+                className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.showSeal ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
+              >
+                <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+              </button>
             </div>
 
             <div className="flex items-center justify-between gap-3">

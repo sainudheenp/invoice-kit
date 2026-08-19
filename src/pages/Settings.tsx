@@ -36,9 +36,10 @@ function parseCo(c: Company) {
     curSub: c.currency.sub, curSubPl: c.currency.subPl, curSubPer: String(c.currency.subPer),
     vatReg: c.vatReg, vatPct: String(c.vatPct),
     bankName: c.bankName, bankAccName: c.bankAccName, bankAcc: c.bankAcc, bankIban: c.bankIban, bankSwift: c.bankSwift, bankBranch: c.bankBranch,
-    invPref: c.invPref, invNext: String(c.invNext), recPref: c.recPref, recNext: String(c.recNext),
+    invPref: c.invPref, invNext: String(c.invNext), invPrefDate: c.invPrefDate || 'none', recPref: c.recPref, recNext: String(c.recNext),
     quotPref: c.quotPref, quotNext: String(c.quotNext),
     invNotes: c.invNotes, invTerms: c.invTerms, invFooter: c.invFooter, recBeing: c.recBeing,
+    showSeal: c.showSeal,
     invTemplate: c.invTemplate, recTemplate: c.recTemplate, quotTemplate: c.quotTemplate, watermark: c.watermark,
     showArabic: c.showArabic,
     logo: c.logo, seal: c.seal, signature: c.signature,
@@ -247,9 +248,10 @@ export default function Settings() {
     },
     vatReg: f.vatReg, vatPct: parseFloat(f.vatPct) || 0,
     bankName: f.bankName, bankAccName: f.bankAccName, bankAcc: f.bankAcc, bankIban: f.bankIban, bankSwift: f.bankSwift, bankBranch: f.bankBranch,
-    invPref: f.invPref, invNext: parseInt(f.invNext) || 1, recPref: f.recPref, recNext: parseInt(f.recNext) || 1,
+    invPref: f.invPref, invNext: parseInt(f.invNext) || 1, invPrefDate: f.invPrefDate || 'none', recPref: f.recPref, recNext: parseInt(f.recNext) || 1,
     quotPref: f.quotPref, quotNext: parseInt(f.quotNext) || 1,
     invNotes: f.invNotes, invTerms: f.invTerms, invFooter: f.invFooter, recBeing: f.recBeing,
+    showSeal: f.showSeal,
     invTemplate: f.invTemplate, recTemplate: f.recTemplate, quotTemplate: f.quotTemplate, watermark: f.watermark,
     showArabic: f.showArabic,
     logo: f.logo, seal: f.seal, signature: f.signature,
@@ -554,6 +556,21 @@ export default function Settings() {
                   </div>
                 </div>
               ))}
+              <div className="flex items-center gap-3 py-1 max-w-md">
+                <div>
+                  <div className="text-sm font-medium">Show Seal on Invoice</div>
+                  <div className="text-xs text-[var(--color-text3)]">Default for new invoices; can be changed per invoice</div>
+                </div>
+                <button
+                  onClick={() => set('showSeal', !form.showSeal)}
+                  type="button"
+                  role="switch"
+                  aria-checked={form.showSeal}
+                  className={`ml-auto w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.showSeal ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
+                >
+                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+                </button>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Primary Color</label>
@@ -630,6 +647,41 @@ export default function Settings() {
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Quotation Prefix</label><input value={form.quotPref} onChange={(e) => set('quotPref', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Next Quotation #</label><input value={form.quotNext} onChange={(e) => set('quotNext', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
               </div>
+              <div className="flex items-center gap-3 pt-1 max-w-md">
+                <div>
+                  <div className="text-sm font-medium">Add Date to Invoice Number</div>
+                  <div className="text-xs text-[var(--color-text3)]">Appends year or year-month to the invoice number</div>
+                </div>
+                <button
+                  onClick={() => set('invPrefDate', form.invPrefDate === 'none' ? 'year' : 'none')}
+                  type="button"
+                  role="switch"
+                  aria-checked={form.invPrefDate !== 'none'}
+                  className={`ml-auto w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.invPrefDate !== 'none' ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
+                >
+                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.invPrefDate !== 'none' ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+                </button>
+              </div>
+              {form.invPrefDate !== 'none' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div><label className="text-xs font-medium text-[var(--color-text2)]">Date Format</label><select value={form.invPrefDate} onChange={(e) => set('invPrefDate', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"><option value="year">Year (YYYY)</option><option value="month">Year-Month (YYYY-MM)</option></select></div>
+                </div>
+              )}
+              {(() => {
+                const d = new Date()
+                const y = d.getFullYear()
+                const m = String(d.getMonth() + 1).padStart(2, '0')
+                const fmt = form.invPrefDate || 'none'
+                const suffix = fmt === 'year' ? `${y}` : fmt === 'month' ? `${y}-${m}` : ''
+                const next = form.invNext || '1'
+                const preview = suffix ? `${form.invPref}${suffix}-${next}` : `${form.invPref}${next}`
+                return (
+                  <div className="rounded-lg bg-[var(--color-input-bg)] border border-[var(--color-input-border)] px-3 py-2 text-sm">
+                    <span className="text-xs font-medium text-[var(--color-text2)]">Next number: </span>
+                    <span className="font-semibold tabular-nums">{preview}</span>
+                  </div>
+                )
+              })()}
               <h3 className="text-xs font-semibold text-[var(--color-text2)] uppercase">Defaults</h3>
               <div><label className="text-xs font-medium text-[var(--color-text2)]">Invoice Notes</label><textarea value={form.invNotes} onChange={(e) => set('invNotes', e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] resize-none" /></div>
               <div><label className="text-xs font-medium text-[var(--color-text2)]">Invoice Terms</label><textarea value={form.invTerms} onChange={(e) => set('invTerms', e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] resize-none" /></div>

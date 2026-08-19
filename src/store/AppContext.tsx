@@ -154,6 +154,7 @@ interface AppContextValue {
     customer: Customer; items: LineItem[]
     subtotal: number; vatPct: number; vatAmt: number; discount: number; grand: number
     notes: string; payMethod: string; payDetails: string; bankName: string
+    showSeal?: boolean
   }) => Promise<Invoice>
   createReceipt: (company: Company, form: {
     recNo: string; date: string
@@ -330,6 +331,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     customer: Customer; items: LineItem[]
     subtotal: number; vatPct: number; vatAmt: number; discount: number; grand: number
     notes: string; payMethod: string; payDetails: string; bankName: string
+    showSeal?: boolean
   }): Promise<Invoice> => {
     const now = Date.now()
     const editing = state.editingDoc?.type === 'inv' ? state.editingDoc.id : null
@@ -350,6 +352,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       payMethod: form.payMethod,
       payDetails: form.payDetails,
       bankName: form.bankName,
+      showSeal: form.showSeal,
       createdAt: now,
     }
     await db.invoices.put(inv)

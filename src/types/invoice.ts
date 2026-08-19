@@ -32,4 +32,5 @@ export interface Invoice {
   payDetails: string
   bankName: string
   createdAt: number
+  showSeal?: boolean
 }

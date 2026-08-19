@@ -96,6 +96,7 @@ function transformInvData(savedInv: Invoice | null, comp?: Company | null): InvT
     gw: grand > 0 ? num2words(grand, cur) + ' only' : '',
     pd: [d.payMethod, d.payDetails].filter(Boolean).join(' - '),
     qr,
+    showSeal: d.showSeal !== false,
   }
 }
 
@@ -201,6 +202,7 @@ export function sampleInvData(comp: Company): InvTemplateData | null {
     gw: num2words(grand, cur) + ' only',
     pd: 'Bank Transfer',
     qr: generateQrDataURL(sampleQrText),
+    showSeal: true,
   }
 }
 

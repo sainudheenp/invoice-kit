@@ -30,6 +30,7 @@ export interface InvTemplateData {
   pd: string
   hasTax: boolean
   qr: string
+  showSeal: boolean
 }
 
 export interface RecTemplateData {

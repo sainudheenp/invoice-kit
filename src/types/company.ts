@@ -30,6 +30,7 @@ export interface Company {
   bankBranch: string
   invPref: string
   invNext: number
+  invPrefDate: string
   recPref: string
   recNext: number
   quotPref: string
@@ -38,6 +39,7 @@ export interface Company {
   invTerms: string
   invFooter: string
   recBeing: string
+  showSeal: boolean
   invTemplate: string
   recTemplate: string
   quotTemplate: string
