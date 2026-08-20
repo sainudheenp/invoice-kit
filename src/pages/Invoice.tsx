@@ -291,20 +291,22 @@ export default function Invoice() {
               )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-medium">Include Seal</div>
-                <div className="text-xs text-[var(--color-text3)]">Show the company seal on the printed invoice</div>
+            <div className="max-w-sm">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-medium">Include Seal</div>
+                  <div className="text-xs text-[var(--color-text3)]">Show the company seal on the printed invoice</div>
+                </div>
+                <button
+                  onClick={() => setField('showSeal', !form.showSeal)}
+                  type="button"
+                  role="switch"
+                  aria-checked={form.showSeal}
+                  className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.showSeal ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
+                >
+                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+                </button>
               </div>
-              <button
-                onClick={() => setField('showSeal', !form.showSeal)}
-                type="button"
-                role="switch"
-                aria-checked={form.showSeal}
-                className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.showSeal ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
-              >
-                <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
-              </button>
             </div>
 
             <div className="flex items-center justify-between gap-3">
