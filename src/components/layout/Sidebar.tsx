@@ -127,7 +127,7 @@ export function Sidebar() {
       </aside>
 
       {ui.sidebarOpen && (
-        <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={closeSidebar} />
+        <div className="fixed inset-0 bg-[var(--color-text)]/40 z-40 md:hidden" onClick={closeSidebar} />
       )}
     </>
   )

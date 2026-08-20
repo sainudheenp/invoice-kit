@@ -303,7 +303,7 @@ export default function Invoice() {
                 aria-checked={form.showSeal}
                 className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.showSeal ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
               >
-                <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+                <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
               </button>
             </div>
 

@@ -61,7 +61,7 @@ export function PDFOverlay() {
 
   return (
     <div
-      className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 backdrop-blur-md animate-[fadeIn_0.2s_ease]"
+      className="fixed inset-0 z-[9998] flex items-center justify-center bg-[var(--color-text)]/60 backdrop-blur-md animate-[fadeIn_0.2s_ease]"
       role="alert"
       aria-busy={active && !isDone}
       aria-live="assertive"
@@ -73,7 +73,7 @@ export function PDFOverlay() {
               <polyline points="20 6 9 17 4 12" />
             </svg>
           ) : isError ? (
-            <svg className="w-8 h-8 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-8 h-8 text-[var(--color-red)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -102,7 +102,7 @@ export function PDFOverlay() {
             className="h-full rounded-full transition-all duration-300 ease-out"
             style={{
               width: `${progressPercent}%`,
-              background: isError ? 'linear-gradient(90deg, #ef4444, #f87171)' : 'linear-gradient(90deg, var(--color-primary, #D97706), #f59e0b)',
+              background: isError ? 'linear-gradient(90deg, var(--color-red), #f87171)' : 'linear-gradient(90deg, var(--color-primary, #D97706), #f59e0b)',
             }}
           />
         </div>
@@ -125,7 +125,7 @@ export function PDFOverlay() {
               >
                 <div className="flex items-center gap-2.5">
                   {isFinished ? (
-                    <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center text-[10px] font-bold">
+                    <span className="w-4 h-4 rounded-full bg-[var(--color-green)]/15 text-[var(--color-green-dark)] flex items-center justify-center text-[10px] font-bold">
                       ✓
                     </span>
                   ) : isCurrent ? (
@@ -144,10 +144,10 @@ export function PDFOverlay() {
                   </span>
                 )}
                 {isFinished && !isDone && (
-                  <span className="text-[10px] text-emerald-600 font-medium">Done</span>
+                  <span className="text-[10px] text-[var(--color-green-dark)] font-medium">Done</span>
                 )}
                 {isDone && idx === PHASES.length - 1 && (
-                  <span className="text-[10px] text-emerald-600 font-medium">Complete</span>
+                  <span className="text-[10px] text-[var(--color-green-dark)] font-medium">Complete</span>
                 )}
               </div>
             )

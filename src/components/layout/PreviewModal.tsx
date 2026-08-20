@@ -4,7 +4,7 @@ export function PreviewModal() {
   const { ui, closePreview } = useUI()
   if (!ui.previewModal) return null
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" onClick={closePreview}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[var(--color-text)]/40 backdrop-blur-sm" onClick={closePreview}>
       <div
         className="bg-[var(--color-card)] rounded-2xl shadow-lg mx-4 w-full flex flex-col overflow-hidden"
         style={{ maxWidth: 900, maxHeight: '90vh' }}
@@ -19,7 +19,7 @@ export function PreviewModal() {
             ✕
           </button>
         </div>
-        <div className="flex-1 overflow-auto bg-white">
+         <div className="flex-1 overflow-auto bg-[var(--color-card)]">
           <iframe
             srcDoc={ui.previewContent}
             className="w-full h-full"

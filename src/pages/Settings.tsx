@@ -400,7 +400,7 @@ export default function Settings() {
           <p className="text-sm text-[var(--color-text2)]">Manage your company and preferences.</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-[var(--color-text3)] shrink-0 mt-1">
-          <span className={`w-2 h-2 rounded-full transition-colors ${saving ? 'bg-amber-400' : 'bg-green'}`} />
+          <span className={`w-2 h-2 rounded-full transition-colors ${saving ? 'bg-[var(--color-amber)]' : 'bg-green'}`} />
           {saving ? 'Saving...' : 'Saved'}
         </div>
       </div>
@@ -568,7 +568,7 @@ export default function Settings() {
                   aria-checked={form.showSeal}
                   className={`ml-auto w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.showSeal ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
                 >
-                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -659,7 +659,7 @@ export default function Settings() {
                   aria-checked={form.invPrefDate !== 'none'}
                   className={`ml-auto w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.invPrefDate !== 'none' ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
                 >
-                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.invPrefDate !== 'none' ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${form.invPrefDate !== 'none' ? 'translate-x-[18px]' : 'translate-x-0'}`} />
                 </button>
               </div>
               {form.invPrefDate !== 'none' && (
@@ -776,7 +776,7 @@ export default function Settings() {
                   aria-checked={form.showArabic}
                   className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${form.showArabic ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}
                 >
-                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.showArabic ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${form.showArabic ? 'translate-x-[18px]' : 'translate-x-0'}`} />
                 </button>
               </div>
 
@@ -938,7 +938,7 @@ export default function Settings() {
               <div className="flex items-center gap-3">
                 <span className="text-sm">Dark Mode</span>
                 <button onClick={toggleDark} type="button" role="switch" aria-checked={ui.dark} className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${ui.dark ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}>
-                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${ui.dark ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+                  <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${ui.dark ? 'translate-x-[18px]' : 'translate-x-0'}`} />
                 </button>
               </div>
             </div>
@@ -991,9 +991,9 @@ export default function Settings() {
                   Copy the prompt below & paste it into ChatGPT
                 </p>
                 <p className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-green-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">4</span>
+                  <span className="w-5 h-5 rounded-full bg-[var(--color-green)] text-white text-[10px] font-bold flex items-center justify-center shrink-0">4</span>
                   Download the result, then click <strong className="text-[var(--color-text1)]">Choose File</strong> to upload it
-                  <svg className="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg className="w-4 h-4 text-[var(--color-green)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </p>
               </div>
               <div className="space-y-2">

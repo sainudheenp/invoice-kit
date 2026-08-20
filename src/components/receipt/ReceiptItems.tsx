@@ -46,7 +46,7 @@ export function ReceiptItems({ items, onChange, dp }: Props) {
               <input
                 value={item.desc}
                 onChange={(e) => updateItem(idx, 'desc', e.target.value)}
-                className="flex-1 min-w-0 px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-white dark:bg-[#3a3a3a] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                className="flex-1 min-w-0 px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                 placeholder="Item description"
               />
               <input
@@ -55,7 +55,7 @@ export function ReceiptItems({ items, onChange, dp }: Props) {
                 step="1"
                 value={item.qty || ''}
                 onChange={(e) => updateItem(idx, 'qty', e.target.value)}
-                className="w-16 px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-white dark:bg-[#3a3a3a] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                  className="w-16 px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                 placeholder="Qty"
               />
               <input
@@ -64,7 +64,7 @@ export function ReceiptItems({ items, onChange, dp }: Props) {
                 step={1 / Math.pow(10, dp)}
                 value={item.price || ''}
                 onChange={(e) => updateItem(idx, 'price', e.target.value)}
-                className="w-24 px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-white dark:bg-[#3a3a3a] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                className="w-24 px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                 placeholder="Price"
               />
               <div className="w-24 text-right text-sm font-semibold text-[var(--color-text)] tabular-nums">
@@ -78,7 +78,7 @@ export function ReceiptItems({ items, onChange, dp }: Props) {
                   step="0.01"
                   value={item.taxRate || 0}
                   onChange={(e) => updateItem(idx, 'taxRate', e.target.value)}
-                  className="w-16 px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-white dark:bg-[#3a3a3a] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+                className="w-16 px-2 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm text-right outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
                   placeholder="Tax%"
                 />
                 {(item.taxRate || 0) > 0 && (

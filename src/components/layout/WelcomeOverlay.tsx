@@ -219,7 +219,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
               <div className="flex flex-col items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                   i < step
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-[var(--color-green)] text-white'
                     : i === step
                       ? 'bg-[var(--color-primary)] text-white'
                       : 'border-2 border-[var(--color-border)] text-[var(--color-text3)]'
@@ -236,7 +236,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
               </div>
               {i < STEPS.length - 1 && (
                 <div className={`w-10 sm:w-16 h-0.5 mx-1 sm:mx-2 -mt-4 ${
-                  i < step ? 'bg-green-500' : 'bg-[var(--color-border)]'
+                  i < step ? 'bg-[var(--color-green)]' : 'bg-[var(--color-border)]'
                 }`} />
               )}
             </div>
@@ -467,9 +467,9 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
                   Copy the prompt below & paste it into ChatGPT
                 </p>
                 <p className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-green-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">4</span>
+                  <span className="w-5 h-5 rounded-full bg-[var(--color-green)] text-white text-[10px] font-bold flex items-center justify-center shrink-0">4</span>
                   Download the result, then click <strong className="text-[var(--color-text1)]">Choose File</strong> to upload it
-                  <svg className="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg className="w-4 h-4 text-[var(--color-green)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </p>
               </div>
               <div className="space-y-2">

@@ -21,7 +21,7 @@ export function HeroBanner() {
   const co = state.companies.find((c) => c.id === state.activeId)
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-[var(--color-side-bg)] text-white p-6 md:p-8 mb-6 shadow-[var(--shadow-card)]">
+    <div className="relative overflow-hidden rounded-3xl bg-[var(--color-hero-bg)] text-white p-6 md:p-8 mb-6 shadow-[var(--shadow-card)]">
       {/* Decorative glows */}
       <div className="absolute -top-28 -right-20 w-80 h-80 rounded-full bg-[var(--color-primary)]/25 blur-3xl" />
       <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-[var(--color-primary)]/10 blur-3xl" />

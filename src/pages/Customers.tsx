@@ -185,7 +185,7 @@ export default function Customers() {
                       </button>
                       <button
                         onClick={() => handleDelete(c.id)}
-                        className="p-1.5 rounded-lg text-[var(--color-text2)] hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg text-[var(--color-text2)] hover:bg-[var(--color-red-bg)] hover:text-[var(--color-red)] transition-colors cursor-pointer"
                         title="Delete"
                       >
                         <Svg name="trash" className="w-4 h-4" />

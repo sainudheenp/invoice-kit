@@ -78,9 +78,9 @@ export function RecentActivity() {
 
   const getDocTypeLabel = (type: DocType) => {
     switch (type) {
-      case 'inv': return { lbl: 'Invoice', cls: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' }
-      case 'rec': return { lbl: 'Receipt', cls: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' }
-      case 'quot': return { lbl: 'Quotation', cls: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' }
+       case 'inv': return { lbl: 'Invoice', cls: 'bg-[var(--color-amber-bg)] dark:bg-[var(--color-amber)]/15 text-[var(--color-amber)] dark:text-[var(--color-amber)]' }
+       case 'rec': return { lbl: 'Receipt', cls: 'bg-[var(--color-blue-bg,#EFF6FF)] dark:bg-[var(--color-blue)]/15 text-[var(--color-blue)] dark:text-[var(--color-blue)]' }
+       case 'quot': return { lbl: 'Quotation', cls: 'bg-[var(--color-indigo-bg,#E0E7FF)] dark:bg-[#6366f1]/15 text-[#4f46e5] dark:text-[#818cf8]' }
     }
   }
 
