@@ -88,22 +88,25 @@ export default function Invoice() {
   useEffect(() => {
     if (!co || isEditing) return
     const dateSuffix = invPrefDate(form.date, co.invPrefDate || 'none')
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       invNo: dateSuffix ? co.invPref + dateSuffix + '-' + co.invNext : co.invPref + co.invNext,
       notes: co.invNotes,
       showSeal: co.showSeal !== false,
-    })
+    }))
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally not including form; we read form.date once on company switch
   }, [co?.id, isEditing])
 
   const setField = useCallback((field: keyof InvoiceFormState, value: string | number | boolean | LineItem[]) => {
-    setForm({ ...form, [field]: value })
+    setForm((prev) => ({ ...prev, [field]: value } as InvoiceFormState))
     markDirty()
-  }, [form, setForm, markDirty])
+  }, [setForm, markDirty])
 
   const subtotal = form.items.reduce((s, i) => s + i.amount, 0)
   const totalTax = form.items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
-  const grand = subtotal + totalTax - form.discount
+  const maxDiscount = subtotal + totalTax
+  const clampedDiscount = Math.min(form.discount, maxDiscount)
+  const grand = Math.max(0, maxDiscount - clampedDiscount)
   const words = grand > 0 && cur ? num2words(grand, cur) : ''
 
   const customer: Customer = {
@@ -127,6 +130,9 @@ export default function Invoice() {
     )
     if (dupe) { showToast('Invoice number already exists.', 'err'); return }
 
+    if (form.discount > maxDiscount) {
+      showToast(`Discount cannot exceed total (${cur?.symbol}${maxDiscount.toFixed(decimals)}). Clamped.`, 'info')
+    }
     try {
       const saved = await createInvoice(co, {
         invNo: form.invNo,
@@ -134,7 +140,7 @@ export default function Invoice() {
         paid: isPaid,
         customer,
         items: form.items,
-        subtotal, vatPct: 0, vatAmt: totalTax, discount: form.discount, grand,
+        subtotal, vatPct: 0, vatAmt: totalTax, discount: clampedDiscount, grand,
         notes: form.notes,
         payMethod: form.payMethod,
         payDetails: form.chequeNo,
@@ -178,7 +184,7 @@ export default function Invoice() {
       paid: isPaid,
       customer,
       items: form.items,
-      subtotal, vatPct: 0, vatAmt: totalTax, discount: form.discount, grand,
+      subtotal, vatPct: 0, vatAmt: totalTax, discount: clampedDiscount, grand,
       notes: form.notes,
       payMethod: form.payMethod,
       payDetails: form.chequeNo,
@@ -315,11 +321,11 @@ export default function Invoice() {
                 companyId={co?.id || null}
                 currentName={form.custName}
                 onPick={(c) => {
-                  setForm({
-                    ...form,
+                  setForm((prev) => ({
+                    ...prev,
                     custName: c.name, custAddr: c.address,
                     custPhone: c.phone, custCr: c.cr, custEmail: c.email,
-                  })
+                  } as InvoiceFormState))
                   markDirty()
                 }}
               />
@@ -381,7 +387,11 @@ export default function Invoice() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-[var(--color-text2)]">Discount</span>
-                <Input dense type="number" min="0" step="0.001" value={form.discount} onChange={(e) => setField('discount', Math.max(0, parseFloat(e.target.value) || 0))} className="w-28" />
+                <Input dense type="number" min="0" step="0.001" value={form.discount} onChange={(e) => {
+                  const raw = Math.max(0, parseFloat(e.target.value) || 0)
+                  const clamped = Math.min(raw, maxDiscount)
+                  setField('discount', clamped)
+                }} className="w-28" />
               </div>
               <div className="flex flex-wrap items-center justify-end gap-4 text-sm">
                 <div className="flex items-center gap-1.5">

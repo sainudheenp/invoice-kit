@@ -29,7 +29,7 @@ type AppAction =
   | { type: 'SET_ALL'; payload: AppState }
   | { type: 'UPSERT_COMPANY'; payload: Company }
   | { type: 'REMOVE_COMPANY'; payload: string }
-  | { type: 'SET_ACTIVE'; payload: string }
+  | { type: 'SET_ACTIVE'; payload: string | null }
   | { type: 'UPSERT_INVOICE'; payload: Invoice }
   | { type: 'REMOVE_INVOICE'; payload: string }
   | { type: 'UPSERT_RECEIPT'; payload: Receipt }
@@ -58,7 +58,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'REMOVE_COMPANY':
       return { ...state, companies: state.companies.filter((c) => c.id !== action.payload) }
     case 'SET_ACTIVE':
-      return { ...state, activeId: action.payload }
+      return { ...state, activeId: action.payload as string | null }
     case 'UPSERT_INVOICE': {
       const idx = state.invoices.findIndex((i) => i.id === action.payload.id)
       const invoices = idx >= 0
@@ -135,7 +135,7 @@ interface AppContextValue {
   getCo: () => Company | null
   saveCompany: (c: Company) => Promise<void>
   deleteCompany: (id: string) => Promise<void>
-  setActive: (id: string) => void
+  setActive: (id: string | null) => void
   saveInvoice: (inv: Invoice) => Promise<void>
   deleteInvoice: (id: string) => Promise<void>
   markInvoicePaid: (id: string) => Promise<void>
@@ -197,6 +197,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           activeId = stored
         } else if (companies.length > 0) {
           activeId = companies[0].id
+          localStorage.setItem(STORAGE_ACTIVE_ID_KEY, activeId)
         }
         const onboardingDone = await isOnboardingComplete()
         dispatch({ type: 'SET_ALL', payload: { companies, invoices, receipts, quotations, customers, products, activeId, editingDoc: null, dbError: null, onboardingComplete: onboardingDone } })
@@ -251,10 +252,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     quots.forEach((q) => dispatch({ type: 'REMOVE_QUOTATION', payload: q.id }))
     custs.forEach((c) => dispatch({ type: 'REMOVE_CUSTOMER', payload: c.id }))
     prods.forEach((p) => dispatch({ type: 'REMOVE_PRODUCT', payload: p.id }))
+    // If the deleted company was active, switch to another or clear
+    if (state.activeId === id) {
+      const remaining = state.companies.filter((c) => c.id !== id)
+      const nextId = remaining.length > 0 ? remaining[0].id : null
+      if (nextId) {
+        localStorage.setItem(STORAGE_ACTIVE_ID_KEY, nextId)
+        dispatch({ type: 'SET_ACTIVE', payload: nextId })
+      } else {
+        localStorage.removeItem(STORAGE_ACTIVE_ID_KEY)
+        dispatch({ type: 'SET_ACTIVE', payload: null })
+      }
+    }
   }
 
-  const setActive = (id: string) => {
-    localStorage.setItem(STORAGE_ACTIVE_ID_KEY, id)
+  const setActive = (id: string | null) => {
+    if (id) localStorage.setItem(STORAGE_ACTIVE_ID_KEY, id)
+    else localStorage.removeItem(STORAGE_ACTIVE_ID_KEY)
     dispatch({ type: 'SET_ACTIVE', payload: id })
   }
 
@@ -321,9 +335,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   const resetAll = async () => {
-    await db.delete()
+    try {
+      await db.delete()
+    } catch {
+      // ignore if already deleted
+    }
+    // Dexie.delete() closes the DB; re-open for future use
+    try { await db.open() } catch { /* ignore reopen errors */ }
     dispatch({ type: 'RESET' })
     localStorage.removeItem(STORAGE_ACTIVE_ID_KEY)
+    // Also clear onboarding flag so WelcomeOverlay shows on next mount
+    try { localStorage.removeItem('_savedCust') } catch { /* ignore */ }
   }
 
   const createInvoice = async (company: Company, form: {
@@ -335,6 +357,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }): Promise<Invoice> => {
     const now = Date.now()
     const editing = state.editingDoc?.type === 'inv' ? state.editingDoc.id : null
+    const existing = editing ? state.invoices.find((i) => i.id === editing) : null
     const inv: Invoice = {
       id: editing || uid(),
       companyId: company.id,
@@ -353,7 +376,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       payDetails: form.payDetails,
       bankName: form.bankName,
       showSeal: form.showSeal,
-      createdAt: now,
+      createdAt: existing?.createdAt ?? now,
     }
     await db.invoices.put(inv)
     dispatch({ type: 'UPSERT_INVOICE', payload: inv })
@@ -370,6 +393,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }): Promise<Receipt> => {
     const now = Date.now()
     const editing = state.editingDoc?.type === 'rec' ? state.editingDoc.id : null
+    const existing = editing ? state.receipts.find((r) => r.id === editing) : null
     const rec: Receipt = {
       id: editing || uid(),
       companyId: company.id,
@@ -388,7 +412,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       being: form.being,
       receiver: form.receiver,
       signatory: form.signatory,
-      createdAt: now,
+      createdAt: existing?.createdAt ?? now,
     }
     await db.receipts.put(rec)
     dispatch({ type: 'UPSERT_RECEIPT', payload: rec })
@@ -403,6 +427,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }): Promise<Quotation> => {
     const now = Date.now()
     const editing = state.editingDoc?.type === 'quot' ? state.editingDoc.id : null
+    const existing = editing ? state.quotations.find((q) => q.id === editing) : null
     const quot: Quotation = {
       id: editing || uid(),
       companyId: company.id,
@@ -418,7 +443,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       grand: form.grand,
       notes: form.notes,
       terms: form.terms,
-      createdAt: now,
+      createdAt: existing?.createdAt ?? now,
     }
     await db.quotations.put(quot)
     dispatch({ type: 'UPSERT_QUOTATION', payload: quot })

@@ -97,17 +97,7 @@ function usedFontFaces(html: string) {
 
 export function withPdfFonts(html: string): string {
   const faces = usedFontFaces(html)
-  const groups = new Map<string, { file: string; weight: number; style: string; families: string[] }>()
-  for (const f of faces) {
-    const key = `${f.file}|${f.weight}|${f.style}`
-    const entry = groups.get(key) || { file: f.file, weight: f.weight, style: f.style, families: [] as string[] }
-    if (!entry.families.includes(`'${f.family}'`)) entry.families.push(`'${f.family}'`)
-    groups.set(key, entry)
-  }
-  const fontCss = Array.from(groups.values()).map(group => {
-    const familyList = group.families.join(',')
-    return `@font-face { font-family:${familyList}; src:url('${FONTS_DIR}/${group.file}') format('woff2'); font-weight:${group.weight}; font-style:${group.style}; }`
-  }).join('\n')
+  const fontCss = faces.map(f => `@font-face { font-family:'${f.family}'; src:url('${FONTS_DIR}/${f.file}') format('woff2'); font-weight:${f.weight}; font-style:${f.style}; }`).join('\n')
   const css = `\n<style>\n${fontCss}\n${LAYOUT_CSS}\n</style>\n`
   const i = html.indexOf('<head>')
   return i !== -1 ? html.slice(0, i + 6) + css + html.slice(i + 6) : css + html
@@ -118,6 +108,7 @@ export function safePdfName(name: string | null | undefined, fallback = 'documen
     .normalize('NFKC')
     .replace(/[/\\]+/g, '-')
     .replace(/[<>:"|?*]+/g, '')
+    // eslint-disable-next-line no-control-regex -- intentional sanitization of control chars in filenames
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
@@ -143,7 +134,7 @@ function ensurePrefetched(): Promise<void> {
   if (!prefetchPromise) {
     prefetchPromise = Promise.all(
       REQUIRED_FONT_FILES.map(f =>
-        fetch(`${FONTS_DIR}/${f}`, { mode: 'no-cors' }).catch(() => {})
+        fetch(`${FONTS_DIR}/${f}`).catch(() => {})
       )
     ).then(() => {}).catch(() => {})
   }
@@ -174,7 +165,7 @@ export async function htmlToPDFWithProgress(
   const faces = usedFontFaces(html)
   const uniqueFiles = Array.from(new Set(faces.map(f => f.file)))
   await Promise.all(uniqueFiles.map(f =>
-    fetch(`${FONTS_DIR}/${f}`, { mode: 'no-cors' }).catch(() => {})
+    fetch(`${FONTS_DIR}/${f}`).catch(() => {})
   ))
 
   onProgress?.({ phase: 'engine', detail: 'Preparing PDF engine' })
@@ -199,17 +190,34 @@ export function printHTML(html: string): void {
   document.body.appendChild(iframe)
   iframe.srcdoc = withPdfFonts(html)
   iframe.onload = () => {
-    iframe.contentWindow!.print()
-    setTimeout(() => document.body.removeChild(iframe), 1000)
+    try {
+      iframe.contentWindow?.print()
+    } catch {}
+    setTimeout(() => {
+      try { document.body.removeChild(iframe) } catch {}
+    }, 1000)
   }
+  // Fallback cleanup if onload never fires
+  setTimeout(() => {
+    if (iframe.parentNode) {
+      try { document.body.removeChild(iframe) } catch {}
+    }
+  }, 5000)
 }
 
 export function downloadText(html: string, filename: string): void {
   const div = document.createElement('div')
   div.innerHTML = html
   const cleaned = (div.textContent || '').replace(/\s+/g, ' ').trim()
-  const blob = new Blob([cleaned], { type: 'text/plain' })
+  const blob = new Blob([cleaned], { type: 'text/plain;charset=utf-8' })
   const url = URL.createObjectURL(blob)
-  const a = document.createElement('a'); a.href = url; a.download = safePdfName(filename) + '.txt'
-  a.click(); URL.revokeObjectURL(url)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = safePdfName(filename) + '.txt'
+  document.body.appendChild(a)
+  a.click()
+  setTimeout(() => {
+    URL.revokeObjectURL(url)
+    try { a.remove() } catch {}
+  }, 100)
 }

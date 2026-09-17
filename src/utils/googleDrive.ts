@@ -188,6 +188,21 @@ export async function deleteAppDataFile(accessToken: string, fileId: string): Pr
   }
 }
 
+/**
+ * Revokes an OAuth access token (e.g. on disconnect / expiry).
+ * Best-effort; ignores network errors.
+ */
+export async function revokeGoogleAccessToken(accessToken: string): Promise<void> {
+  try {
+    await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(accessToken)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    })
+  } catch {
+    // ignore
+  }
+}
+
 // Global declaration for Google GIS client SDK
 declare global {
   interface Window {

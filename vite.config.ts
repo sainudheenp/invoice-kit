@@ -12,6 +12,8 @@ try {
 }
 process.env.VITE_APP_VERSION = '1.' + String(commitCount).padStart(2, '0')
 
+const projectRoot = import.meta.dirname ?? path.resolve(path.dirname(new URL(import.meta.url).pathname), '.')
+
 export default defineConfig({
   plugins: [
     react(),
@@ -20,7 +22,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(projectRoot, 'src'),
     },
   },
   // --- PDF ENGINE (taepdf) SAFETY: do not remove ---------------------------

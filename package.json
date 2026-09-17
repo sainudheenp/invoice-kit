@@ -24,7 +24,7 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.0",
-    "taepdf": "2.4.5"
+    "taepdf": "file:./vendor/taepdf"
   },
   "devDependencies": {
     "@fontsource/arimo": "^5.3.0",
@@ -32,6 +32,7 @@
     "@fontsource/noto-sans-arabic": "^5.3.0",
     "@fontsource/tinos": "^5.3.0",
     "@tailwindcss/vite": "^4.3.1",
+    "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^24.13.2",

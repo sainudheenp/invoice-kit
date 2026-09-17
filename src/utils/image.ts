@@ -13,20 +13,38 @@ export function resizeImage(dataUrl: string, maxW: number, maxH: number): Promis
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
-      let { width, height } = img
-      const ratio = Math.min(maxW / width, maxH / height, 1)
-      const newW = Math.max(1, Math.round(width * ratio))
-      const newH = Math.max(1, Math.round(height * ratio))
-      const canvas = document.createElement('canvas')
-      canvas.width = newW
-      canvas.height = newH
-      const ctx = canvas.getContext('2d')!
-      ctx.imageSmoothingEnabled = true
-      ctx.imageSmoothingQuality = 'high'
-      ctx.drawImage(img, 0, 0, newW, newH)
-      resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY))
+      try {
+        let { width, height } = img
+        if (!width || !height) {
+          reject(new Error('Invalid image dimensions'))
+          return
+        }
+        const ratio = Math.min(maxW / width, maxH / height, 1)
+        const newW = Math.max(1, Math.round(width * ratio))
+        const newH = Math.max(1, Math.round(height * ratio))
+        const canvas = document.createElement('canvas')
+        canvas.width = newW
+        canvas.height = newH
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          // Canvas not supported (jsdom / privacy mode) — return original
+          resolve(dataUrl)
+          return
+        }
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = 'high'
+        ctx.drawImage(img, 0, 0, newW, newH)
+        resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY))
+      } catch (e) {
+        reject(e instanceof Error ? e : new Error('Failed to process image'))
+      }
     }
     img.onerror = () => reject(new Error('Failed to load image'))
+    // Guard against huge data URLs that could OOM
+    if (dataUrl.length > 5 * 1024 * 1024) {
+      reject(new Error('Image too large (max 5MB)'))
+      return
+    }
     img.src = dataUrl
   })
 }

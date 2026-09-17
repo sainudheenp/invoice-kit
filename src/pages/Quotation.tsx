@@ -90,7 +90,9 @@ export default function QuotationPage() {
 
   const subtotal = form.items.reduce((s, i) => s + i.amount, 0)
   const totalTax = form.items.reduce((s, i) => s + i.amount * ((i.taxRate || 0) / 100), 0)
-  const grand = subtotal + totalTax - form.discount
+  const maxDiscount = subtotal + totalTax
+  const clampedDiscount = Math.min(form.discount, maxDiscount)
+  const grand = Math.max(0, maxDiscount - clampedDiscount)
   const words = grand > 0 && cur ? num2words(grand, cur) : ''
 
   const customer: Customer = {
@@ -113,13 +115,14 @@ export default function QuotationPage() {
     if (dupe) { showToast('Quotation number already exists.', 'err'); return }
 
     try {
+      if (form.discount > maxDiscount) showToast(`Discount cannot exceed total (${cur?.symbol}${maxDiscount.toFixed(decimals)}). Clamped.`, 'info')
       const saved = await createQuotation(co, {
         quotNo: form.quotNo,
         date: form.date,
         validUntil: form.validUntil,
         customer,
         items: form.items,
-        subtotal, vatPct: 0, vatAmt: totalTax, discount: form.discount, grand,
+        subtotal, vatPct: 0, vatAmt: totalTax, discount: clampedDiscount, grand,
         notes: form.notes,
         terms: form.terms,
       })
@@ -156,7 +159,7 @@ export default function QuotationPage() {
     validUntil: form.validUntil,
     customer,
     items: form.items,
-    subtotal, vatPct: 0, vatAmt: totalTax, discount: form.discount, grand,
+    subtotal, vatPct: 0, vatAmt: totalTax, discount: clampedDiscount, grand,
     notes: form.notes,
     terms: form.terms,
     createdAt: Date.now(),
@@ -234,8 +237,8 @@ export default function QuotationPage() {
           {totalTax > 0 && (
             <span>Tax <b className="text-[var(--color-text)] tabular-nums">{cur?.symbol}{totalTax.toFixed(decimals)}</b></span>
           )}
-          {form.discount > 0 && (
-            <span>Discount <b className="text-red tabular-nums">-{cur?.symbol}{form.discount.toFixed(decimals)}</b></span>
+          {clampedDiscount > 0 && (
+            <span>Discount <b className="text-red tabular-nums">-{cur?.symbol}{clampedDiscount.toFixed(decimals)}</b></span>
           )}
         </div>
         <div className="text-[11px] italic text-[var(--color-text3)] mt-1.5 border-t border-[var(--color-border)] pt-1.5">
@@ -293,7 +296,10 @@ export default function QuotationPage() {
             <Input dense type="date" value={form.validUntil} onChange={(e) => set('validUntil', e.target.value)} />
           </Field>
           <Field label="Discount" dense>
-            <Input dense type="number" min="0" step="0.001" value={form.discount} onChange={(e) => set('discount', Math.max(0, parseFloat(e.target.value) || 0))} />
+            <Input dense type="number" min="0" step="0.001" value={form.discount} onChange={(e) => {
+              const raw = Math.max(0, parseFloat(e.target.value) || 0)
+              set('discount', Math.min(raw, maxDiscount))
+            }} />
           </Field>
         </div>
 

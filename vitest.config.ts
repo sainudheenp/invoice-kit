@@ -1,10 +1,12 @@
 import { defineConfig } from 'vitest/config'
 import { resolve } from 'path'
 
+const projectRoot = import.meta.dirname ?? resolve('.')
+
 export default defineConfig({
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
+      '@': resolve(projectRoot, './src'),
     },
   },
   test: {

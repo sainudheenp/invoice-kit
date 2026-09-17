@@ -171,6 +171,50 @@ export default function Settings() {
   }
 
   const [form, setForm] = useState(co ? parseCo(co) : null)
+  const formRef = useRef(form)
+  formRef.current = form as any
+  const coRef = useRef(co)
+  coRef.current = co as any
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const [saving, setSaving] = useState(false)
+
+  const buildCompany = (f: NonNullable<typeof form>, c: Company): Company => ({
+    ...c,
+    name: f.name, nameAr: f.nameAr, sub: f.sub, subAr: f.subAr,
+    tel: f.tel, fax: f.fax, mob: f.mob, email: f.email, cr: f.cr, pobox: f.pobox, loc: f.loc, website: f.website,
+    pcolor: f.pcolor, acolor: f.acolor,
+    currency: {
+      code: f.curCode, symbol: f.curSym, name: f.curName, namePl: f.curNamePl,
+      sub: f.curSub, subPl: f.curSubPl, subPer: parseInt(f.curSubPer) || 0,
+    },
+    vatReg: f.vatReg, vatPct: parseFloat(f.vatPct) || 0,
+    bankName: f.bankName, bankAccName: f.bankAccName, bankAcc: f.bankAcc, bankIban: f.bankIban, bankSwift: f.bankSwift, bankBranch: f.bankBranch,
+    invPref: f.invPref, invNext: parseInt(f.invNext) || 1, invPrefDate: f.invPrefDate || 'none', recPref: f.recPref, recNext: parseInt(f.recNext) || 1,
+    quotPref: f.quotPref, quotNext: parseInt(f.quotNext) || 1,
+    invNotes: f.invNotes, invTerms: f.invTerms, invFooter: f.invFooter, recBeing: f.recBeing,
+    showSeal: f.showSeal,
+    invTemplate: f.invTemplate, recTemplate: f.recTemplate, quotTemplate: f.quotTemplate, watermark: f.watermark,
+    showArabic: f.showArabic,
+    logo: f.logo, seal: f.seal, signature: f.signature,
+    updatedAt: Date.now(),
+  })
+
+  const doAutoSave = useCallback(async () => {
+    const f = formRef.current
+    const c = coRef.current
+    if (!f || !c) return
+    const subPer = parseInt((f as any).curSubPer) || 0
+    if (subPer < 1) return
+    try {
+      await saveCompany(buildCompany(f as NonNullable<typeof form>, c as Company))
+      setSaving(false)
+      showToast('Saved', 'ok', 1500)
+    } catch {
+      setSaving(false)
+    }
+  }, [saveCompany, showToast])
+
+  useEffect(() => () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current) }, [])
 
   useEffect(() => {
     if (co) setForm(parseCo(co))
@@ -205,7 +249,7 @@ export default function Settings() {
     setForm((f) => f ? { ...f, [field]: value } : f)
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
     setSaving(true)
-    autoSaveTimer.current = setTimeout(doAutoSave, 500)
+    autoSaveTimer.current = setTimeout(() => { void doAutoSave() }, 500)
   }
 
   const handleSave = async () => {
@@ -230,45 +274,6 @@ export default function Settings() {
     set('curSubPer', String(cur.subPer))
   }
 
-  const formRef = useRef(form)
-  formRef.current = form
-  const coRef = useRef(co)
-  coRef.current = co
-  const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  const [saving, setSaving] = useState(false)
-
-  const buildCompany = (f: typeof form, c: Company): Company => ({
-    ...c,
-    name: f.name, nameAr: f.nameAr, sub: f.sub, subAr: f.subAr,
-    tel: f.tel, fax: f.fax, mob: f.mob, email: f.email, cr: f.cr, pobox: f.pobox, loc: f.loc, website: f.website,
-    pcolor: f.pcolor, acolor: f.acolor,
-    currency: {
-      code: f.curCode, symbol: f.curSym, name: f.curName, namePl: f.curNamePl,
-      sub: f.curSub, subPl: f.curSubPl, subPer: parseInt(f.curSubPer) || 0,
-    },
-    vatReg: f.vatReg, vatPct: parseFloat(f.vatPct) || 0,
-    bankName: f.bankName, bankAccName: f.bankAccName, bankAcc: f.bankAcc, bankIban: f.bankIban, bankSwift: f.bankSwift, bankBranch: f.bankBranch,
-    invPref: f.invPref, invNext: parseInt(f.invNext) || 1, invPrefDate: f.invPrefDate || 'none', recPref: f.recPref, recNext: parseInt(f.recNext) || 1,
-    quotPref: f.quotPref, quotNext: parseInt(f.quotNext) || 1,
-    invNotes: f.invNotes, invTerms: f.invTerms, invFooter: f.invFooter, recBeing: f.recBeing,
-    showSeal: f.showSeal,
-    invTemplate: f.invTemplate, recTemplate: f.recTemplate, quotTemplate: f.quotTemplate, watermark: f.watermark,
-    showArabic: f.showArabic,
-    logo: f.logo, seal: f.seal, signature: f.signature,
-    updatedAt: Date.now(),
-  })
-
-  const doAutoSave = useCallback(async () => {
-    const f = formRef.current
-    const c = coRef.current
-    if (!f || !c) return
-    const subPer = parseInt(f.curSubPer) || 0
-    if (subPer < 1) return
-    await saveCompany(buildCompany(f, c))
-    setSaving(false)
-    showToast('Saved', 'ok', 1500)
-  }, [saveCompany, showToast])
-
   const [dragOverField, setDragOverField] = useState<'logo' | 'seal' | 'signature' | null>(null)
 
   const handleUpload = (field: 'logo' | 'seal' | 'signature') => {
@@ -283,12 +288,12 @@ export default function Settings() {
       reader.onload = async () => {
         const dataUrl = reader.result as string
         const { w, h } = IMAGE_MAX_SIZES[field]
-        const resized = await resizeImage(dataUrl, w, h)
-        set(field, resized)
-        if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-        formRef.current = { ...formRef.current, [field]: resized }
-        setSaving(true)
-        await doAutoSave()
+        try {
+          const resized = await resizeImage(dataUrl, w, h)
+          set(field, resized)
+        } catch {
+          showToast('Failed to process image.', 'err')
+        }
       }
       reader.readAsDataURL(file)
     }
@@ -317,13 +322,17 @@ export default function Settings() {
 
   const handleExport = () => {
     const jsonStr = exportBackupData(state)
-    const blob = new Blob([jsonStr], { type: 'application/json' })
+    const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
     a.download = `open_invoice_backup_${new Date().toISOString().slice(0, 10)}.json`
+    document.body.appendChild(a)
     a.click()
-    URL.revokeObjectURL(url)
+    setTimeout(() => {
+      URL.revokeObjectURL(url)
+      try { a.remove() } catch {}
+    }, 100)
     showToast('Backup downloaded successfully!')
   }
 
@@ -508,12 +517,12 @@ export default function Settings() {
                       reader.onload = async () => {
                         const dataUrl = reader.result as string
                         const { w, h } = IMAGE_MAX_SIZES[field]
-                        const resized = await resizeImage(dataUrl, w, h)
-                        set(field, resized)
-                        if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-                        formRef.current = { ...formRef.current, [field]: resized }
-                        setSaving(true)
-                        await doAutoSave()
+                        try {
+                          const resized = await resizeImage(dataUrl, w, h)
+                          set(field, resized)
+                        } catch {
+                          showToast('Failed to process image.', 'err')
+                        }
                       }
                       reader.readAsDataURL(file)
                     }}
@@ -763,14 +772,7 @@ export default function Settings() {
                   <div className="text-xs text-[var(--color-text3)]">Displays Arabic company name and labels in Classic templates</div>
                 </div>
                 <button
-                  onClick={() => {
-                    const next = !form.showArabic
-                    setForm((f) => f ? { ...f, showArabic: next } : f)
-                    formRef.current = { ...formRef.current, showArabic: next }
-                    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-                    setSaving(true)
-                    doAutoSave()
-                  }}
+                  onClick={() => set('showArabic', !form.showArabic)}
                   type="button"
                   role="switch"
                   aria-checked={form.showArabic}
