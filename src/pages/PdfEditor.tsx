@@ -35,6 +35,7 @@ interface TextBox {
   color: string
   bold: boolean
   family: 'Helvetica' | 'Times' | 'Courier'
+  bg?: string
 }
 
 interface ImageBox {
@@ -695,7 +696,8 @@ export default function PdfEditor() {
                 onImageMove={(id, x, y) => setImages((prev) => prev.map((im) => (im.id === id ? { ...im, x, y } : im)))}
                 onDelete={deleteSelected}
                 onEditNativeText={(page, x, y, w, h, str, fontSize, color, family, bold, bg) => {
-                  const wb: Whiteout = { id: uid(), page, x: Math.max(0, x - 0.002), y: Math.max(0, y - 0.002), w: Math.min(1, w + 0.004), h: Math.min(1, h + 0.004), bg: bg || '#ffffff' }
+                  const bgUse = bg || '#ffffff'
+                  const wb: Whiteout = { id: uid(), page, x: Math.max(0, x - 0.002), y: Math.max(0, y - 0.002), w: Math.min(1, w + 0.004), h: Math.min(1, h + 0.004), bg: bgUse }
                   const tb: TextBox = {
                     id: uid(),
                     page,
@@ -708,6 +710,7 @@ export default function PdfEditor() {
                     color: color || '#111827',
                     bold: !!bold,
                     family: family || 'Helvetica',
+                    bg: bgUse,
                   }
                   const wNext = [...whiteouts, wb]
                   const tNext = [...texts, tb]
@@ -840,15 +843,70 @@ function PdfPage({
         renderTaskRef.current = task
         await task.promise
         if (!cancelled) setRendered(true)
-        // Extract native text — preserve exact same color/font for true edit
+        // Extract native text — lossless: use operatorList for exact color/fontSize, sample as fallback
         try {
           const textContent: any = await page.getTextContent()
           const styles: any = textContent.styles || {}
+          // Build exact style map from operatorList (pdf.js OPS) to avoid canvas sampling wash
+          let opStyles: Array<{ color: string; fontSize: number; fontName: string }> = []
+          try {
+            const opList: any = await page.getOperatorList()
+            const OPS: any = (pdfjsLib as any).OPS || {}
+            const fnArray: number[] = opList.fnArray || []
+            const argsArray: any[] = opList.argsArray || []
+            let curColor = '#111827'
+            let curFontSize = 12
+            let curFontName = ''
+            const toHex = (n: number) => Math.round(n).toString(16).padStart(2,'0')
+            // OPS numbers fallback if not exposed
+            const SET_FILL_RGB = OPS.setFillRGBColor ?? 31
+            const SET_FILL_GRAY = OPS.setFillGray ?? 32
+            const SET_FILL_CMYK = OPS.setFillCMYKColor ?? 33
+            const SET_FONT = OPS.setFont ?? 37
+            const SHOW_TEXT = OPS.showText ?? 62
+            const SHOW_SPACED_TEXT = OPS.showSpacedText ?? 63
+            let opIdx = 0
+            for (let k = 0; k < fnArray.length; k++) {
+              const fn = fnArray[k]
+              const args = argsArray[k]
+              if (fn === SET_FILL_RGB && args && args.length >= 3) {
+                const r = Math.round(args[0] * 255), g = Math.round(args[1] * 255), b = Math.round(args[2] * 255)
+                curColor = `#${toHex(r)}${toHex(g)}${toHex(b)}`
+              } else if (fn === SET_FILL_GRAY && args && args.length >= 1) {
+                const v = Math.round(args[0] * 255)
+                curColor = `#${toHex(v)}${toHex(v)}${toHex(v)}`
+              } else if (fn === SET_FILL_CMYK && args && args.length >= 4) {
+                // naive CMYK -> RGB
+                const c = args[0], m = args[1], y = args[2], kk = args[3]
+                const r = 255 * (1 - Math.min(1, c * (1 - kk) + kk))
+                const g = 255 * (1 - Math.min(1, m * (1 - kk) + kk))
+                const b = 255 * (1 - Math.min(1, y * (1 - kk) + kk))
+                curColor = `#${toHex(r)}${toHex(g)}${toHex(b)}`
+              } else if (fn === SET_FONT && args && args.length >= 2) {
+                curFontName = args[0] || curFontName
+                curFontSize = Number(args[1]) || curFontSize
+              } else if (fn === SHOW_TEXT || fn === SHOW_SPACED_TEXT) {
+                // Each showText corresponds to one or more textContent items, but we map sequentially
+                // Duplicate for spaced text arrays
+                const isSpaced = fn === SHOW_SPACED_TEXT
+                let count = 1
+                if (isSpaced && Array.isArray(args[0])) {
+                  // count string chunks in the array
+                  count = args[0].filter((x: any) => typeof x === 'string' && x.trim().length > 0).length || 1
+                }
+                for (let c = 0; c < count; c++) {
+                  opStyles.push({ color: curColor, fontSize: curFontSize, fontName: curFontName })
+                  opIdx++
+                }
+              }
+            }
+            // If opStyles shorter than textContent, pad
+            while (opStyles.length < textContent.items.length) opStyles.push({ color: curColor, fontSize: curFontSize, fontName: curFontName })
+          } catch {}
           const items: Array<{ id: string; x: number; y: number; w: number; h: number; str: string; fontSize: number; color: string; family: 'Helvetica'|'Times'|'Courier'; bold: boolean }> = []
           // @ts-ignore pdfjs Util
           const Util = (pdfjsLib as any).Util
           const canvasEl = canvasRef.current as HTMLCanvasElement
-          // sampler for color (read from already-rendered canvas)
           const sampleAt = (rx: number, ry: number): string | null => {
             try {
               const ctxS = canvasEl.getContext('2d', { willReadFrequently: true } as any) as CanvasRenderingContext2D | null
@@ -857,42 +915,54 @@ function PdfPage({
               const py = Math.max(0, Math.min(canvasEl.height - 1, Math.floor(ry * vp.height)))
               const d = ctxS.getImageData(px, py, 1, 1).data
               if (d[3] === 0) return null
-              const toHex = (n: number) => n.toString(16).padStart(2,'0')
-              return `#${toHex(d[0])}${toHex(d[1])}${toHex(d[2])}`
+              const toHex2 = (n: number) => n.toString(16).padStart(2,'0')
+              return `#${toHex2(d[0])}${toHex2(d[1])}${toHex2(d[2])}`
             } catch { return null }
           }
           for (let i = 0; i < textContent.items.length; i++) {
             const item: any = textContent.items[i]
             if (!item.str || !item.str.trim()) continue
             const tx = Util.transform(vp.transform, item.transform)
-            const fontSize = Math.hypot(item.transform[0], item.transform[1])
-            const w = (item.width * vp.scale) || (item.str.length * fontSize * 0.6) // fallback px
-            const h = (item.height ? item.height * vp.scale : fontSize) // normalize px
+            const fontSizeFromTransform = Math.hypot(item.transform[0], item.transform[1])
+            // prefer operatorList exact size, fallback to transform
+            const op = opStyles[i] || opStyles[opStyles.length - 1]
+            const fontSize = op && op.fontSize ? op.fontSize : fontSizeFromTransform
+            const w = (item.width * vp.scale) || (item.str.length * fontSize * 0.6)
+            const h = (item.height ? item.height * vp.scale : fontSize)
             const canvasX = tx[4]
             const canvasY = tx[5]
             const relX = canvasX / vp.width
             const relY = (canvasY - h) / vp.height
             if (w < 1 || h < 1) continue
-            // family / bold from pdf styles
             let family: 'Helvetica'|'Times'|'Courier' = 'Helvetica'
             let bold = false
             try {
               const style = styles[item.fontName]
               const fam = ((style && style.fontFamily) || '').toLowerCase()
-              const fn = (item.fontName || '').toLowerCase()
+              const fn = (item.fontName || op?.fontName || '').toLowerCase()
               if (fam.includes('times') || fam.includes('serif') || fn.includes('times')) family = 'Times'
               else if (fam.includes('courier') || fam.includes('mono') || fn.includes('courier')) family = 'Courier'
+              else if (fam.includes('helvetica') || fam.includes('arial') || fn.includes('helvetica') || fn.includes('arial')) family = 'Helvetica'
               if (fn.includes('bold') || fam.includes('bold')) bold = true
             } catch {}
-            // color via sampling centre of glyph
-            let color = '#111827'
-            const cx = relX + (w / vp.width) * 0.35
-            const cy = relY + (h / vp.height) * 0.5
-            const sampled = sampleAt(cx, cy)
-            if (sampled && sampled.toLowerCase() !== '#ffffff') {
-              const r = parseInt(sampled.slice(1,3),16), g=parseInt(sampled.slice(3,5),16), b=parseInt(sampled.slice(5,7),16)
-              const isNearWhite = r>245 && g>245 && b>245
-              if (!isNearWhite) color = sampled
+            // exact color from operatorList, fallback to sampling for safety
+            let color: string = op?.color || '#111827'
+            // if color is still default black and sampling gives a distinct non-white, prefer sampled only if op color is near black? keep op as primary
+            // But if op color is black (#000000) and sampled is clearly blue/red, we might still want sampled? No, trust op.
+            // Only fallback to sampling if op color is missing or is white on white page
+            if ((!op || !op.color || op.color.toLowerCase() === '#000000') ) {
+              const cx = relX + (w / vp.width) * 0.35
+              const cy = relY + (h / vp.height) * 0.5
+              const sampled = sampleAt(cx, cy)
+              if (sampled && sampled.toLowerCase() !== '#ffffff') {
+                const r = parseInt(sampled.slice(1,3),16), g=parseInt(sampled.slice(3,5),16), b=parseInt(sampled.slice(5,7),16)
+                const isNearWhite = r>245 && g>245 && b>245
+                const isNearBlack = r<15 && g<15 && b<15
+                // if op is black and sampled is not near black/white, use sampled (handles PDFs where op color not tracked)
+                if (!isNearWhite && !isNearBlack) color = sampled
+                else if (op && op.color) color = op.color
+                else if (!isNearWhite) color = sampled
+              }
             }
             items.push({
               id: `nt_${pageIndex}_${i}`,
@@ -1224,13 +1294,14 @@ function TextOverlay({
           }
           e.stopPropagation()
         }}
-        className={`w-full min-h-[1.2em] px-1 py-0.5 outline-none whitespace-pre-wrap break-words ${editing ? 'bg-white border border-[var(--color-primary)] rounded' : 'bg-transparent'}`}
+        className={`w-full min-h-[1.2em] px-1 py-0.5 outline-none whitespace-pre-wrap break-words ${editing ? 'border border-[var(--color-primary)] rounded' : 'bg-transparent'}`}
         style={{
           fontSize: `${box.fontSize}px`,
           color: box.color,
           fontFamily: box.family === 'Helvetica' ? 'Helvetica, Arial, sans-serif' : box.family === 'Times' ? 'Times New Roman, serif' : 'Courier New, monospace',
           fontWeight: box.bold ? 700 : 400,
           lineHeight: 1.2,
+          backgroundColor: editing ? (box.bg || '#ffffff') : 'transparent',
         }}
       >
         {box.text}
