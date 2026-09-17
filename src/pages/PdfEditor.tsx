@@ -20,6 +20,7 @@ interface Whiteout {
   y: number
   w: number
   h: number
+  bg?: string // preserve page background when whiteouting (sampled)
 }
 
 interface TextBox {
@@ -337,14 +338,15 @@ export default function PdfEditor() {
       for (let p = 0; p < pdfDoc.getPageCount(); p++) {
         const page = pdfDoc.getPage(p)
         const { width, height } = page.getSize()
-        // Whiteouts first (cover)
+        // Whiteouts first (cover) - use sampled bg to keep exact page background if needed
         for (const w of whiteouts.filter((w) => w.page === p)) {
+          const bgColor = w.bg ? hexToRgb(w.bg) : rgb(1, 1, 1)
           page.drawRectangle({
             x: w.x * width,
             y: height - (w.y * height) - (w.h * height),
             width: w.w * width,
             height: w.h * height,
-            color: rgb(1, 1, 1),
+            color: bgColor,
             borderWidth: 0,
           })
         }
@@ -599,7 +601,7 @@ export default function PdfEditor() {
               {/* Hint */}
               <div className="mt-2 text-[11px] text-[var(--color-text3)] flex flex-wrap gap-x-4 gap-y-1">
                 <span>
-                  <b className="text-[var(--color-text2)]">Tip:</b> To edit existing text, use <b>Whiteout</b> to cover it, then <b>Text</b> to retype (true Sejda workflow).
+                  <b className="text-[var(--color-text2)]">Tip:</b> In <b>Select</b> mode, click any text to edit it directly (keeps exact color/font/background). Or use <b>Whiteout</b> → <b>Text</b>.
                 </span>
                 {tool === 'image' && pendingImageRef.current && (
                   <span className="text-[var(--color-primary)] font-medium animate-pulse">Image ready → click on page to place</span>
@@ -692,9 +694,8 @@ export default function PdfEditor() {
                 onTextMove={(id, x, y) => updateText(id, { x, y })}
                 onImageMove={(id, x, y) => setImages((prev) => prev.map((im) => (im.id === id ? { ...im, x, y } : im)))}
                 onDelete={deleteSelected}
-                onEditNativeText={(page, x, y, w, h, str, fontSize) => {
-                  // Sejda-like: whiteout the native text and place editable box
-                  const wb: Whiteout = { id: uid(), page, x: Math.max(0, x - 0.002), y: Math.max(0, y - 0.002), w: Math.min(1, w + 0.004), h: Math.min(1, h + 0.004) }
+                onEditNativeText={(page, x, y, w, h, str, fontSize, color, family, bold, bg) => {
+                  const wb: Whiteout = { id: uid(), page, x: Math.max(0, x - 0.002), y: Math.max(0, y - 0.002), w: Math.min(1, w + 0.004), h: Math.min(1, h + 0.004), bg: bg || '#ffffff' }
                   const tb: TextBox = {
                     id: uid(),
                     page,
@@ -703,10 +704,10 @@ export default function PdfEditor() {
                     w,
                     h: Math.max(h, 0.03),
                     text: str,
-                    fontSize: Math.max(8, Math.min(24, Math.round(fontSize))),
-                    color: '#111827',
-                    bold: false,
-                    family: 'Helvetica',
+                    fontSize: Math.max(8, Math.min(32, Math.round(fontSize))),
+                    color: color || '#111827',
+                    bold: !!bold,
+                    family: family || 'Helvetica',
                   }
                   const wNext = [...whiteouts, wb]
                   const tNext = [...texts, tb]
@@ -773,7 +774,7 @@ function PdfPage({
   onTextMove: (id: string, x: number, y: number) => void
   onImageMove: (id: string, x: number, y: number) => void
   onDelete: () => void
-  onEditNativeText: (page: number, x: number, y: number, w: number, h: number, text: string, fontSize: number) => void
+  onEditNativeText: (page: number, x: number, y: number, w: number, h: number, text: string, fontSize: number, color: string, family: 'Helvetica'|'Times'|'Courier', bold: boolean, bg?: string) => void
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -783,7 +784,7 @@ function PdfPage({
   const [isInView, setIsInView] = useState(pageIndex < 2) // eager for first 2 pages
   const renderTaskRef = useRef<any>(null)
   const pageProxyRef = useRef<any>(null)
-  const [nativeTexts, setNativeTexts] = useState<Array<{ id: string; x: number; y: number; w: number; h: number; str: string; fontSize: number }>>([])
+  const [nativeTexts, setNativeTexts] = useState<Array<{ id: string; x: number; y: number; w: number; h: number; str: string; fontSize: number; color: string; family: 'Helvetica'|'Times'|'Courier'; bold: boolean }>>([])
 
   // Lazy: only render when in viewport (hybrid idle)
   useEffect(() => {
@@ -839,34 +840,60 @@ function PdfPage({
         renderTaskRef.current = task
         await task.promise
         if (!cancelled) setRendered(true)
-        // Extract native text for editability (select tool)
+        // Extract native text — preserve exact same color/font for true edit
         try {
-          const textContent = await page.getTextContent()
-          const items: Array<{ id: string; x: number; y: number; w: number; h: number; str: string; fontSize: number }> = []
+          const textContent: any = await page.getTextContent()
+          const styles: any = textContent.styles || {}
+          const items: Array<{ id: string; x: number; y: number; w: number; h: number; str: string; fontSize: number; color: string; family: 'Helvetica'|'Times'|'Courier'; bold: boolean }> = []
           // @ts-ignore pdfjs Util
           const Util = (pdfjsLib as any).Util
+          const canvasEl = canvasRef.current as HTMLCanvasElement
+          // sampler for color (read from already-rendered canvas)
+          const sampleAt = (rx: number, ry: number): string | null => {
+            try {
+              const ctxS = canvasEl.getContext('2d', { willReadFrequently: true } as any) as CanvasRenderingContext2D | null
+              if (!ctxS) return null
+              const px = Math.max(0, Math.min(canvasEl.width - 1, Math.floor(rx * vp.width)))
+              const py = Math.max(0, Math.min(canvasEl.height - 1, Math.floor(ry * vp.height)))
+              const d = ctxS.getImageData(px, py, 1, 1).data
+              if (d[3] === 0) return null
+              const toHex = (n: number) => n.toString(16).padStart(2,'0')
+              return `#${toHex(d[0])}${toHex(d[1])}${toHex(d[2])}`
+            } catch { return null }
+          }
           for (let i = 0; i < textContent.items.length; i++) {
             const item: any = textContent.items[i]
             if (!item.str || !item.str.trim()) continue
             const tx = Util.transform(vp.transform, item.transform)
-            // font size from transform
             const fontSize = Math.hypot(item.transform[0], item.transform[1])
-            // width/height from item (pdf.js provides width, height scaled)
-            const w = (item.width * vp.scale) || (item.str.length * fontSize * 0.6 * vp.scale / fontSize) // fallback
-            // item.height may be undefined, use fontSize
-            const h = (item.height ? item.height * vp.scale : fontSize * vp.scale / fontSize * 1) // normalize
-            // tx is bottom-left in viewport coords (origin bottom-left for pdf, but viewport transform already maps to canvas coords with origin top-left? Actually viewport y is top-down)
-            // In pdf.js, viewport.transform maps PDF to canvas with y flipped. So tx[5] is already canvas y from top? Let's check.
-            // We'll compute relative
-            // tx[4], tx[5] are canvas coords for baseline. For relative top-left, we need to adjust.
-            // Use viewport to convert: we already used Util.transform which gives canvas coords.
+            const w = (item.width * vp.scale) || (item.str.length * fontSize * 0.6) // fallback px
+            const h = (item.height ? item.height * vp.scale : fontSize) // normalize px
             const canvasX = tx[4]
             const canvasY = tx[5]
-            // Estimate bbox: x = canvasX, y = canvasY - h (since y is baseline)
             const relX = canvasX / vp.width
             const relY = (canvasY - h) / vp.height
-            // Clamp and filter tiny
             if (w < 1 || h < 1) continue
+            // family / bold from pdf styles
+            let family: 'Helvetica'|'Times'|'Courier' = 'Helvetica'
+            let bold = false
+            try {
+              const style = styles[item.fontName]
+              const fam = ((style && style.fontFamily) || '').toLowerCase()
+              const fn = (item.fontName || '').toLowerCase()
+              if (fam.includes('times') || fam.includes('serif') || fn.includes('times')) family = 'Times'
+              else if (fam.includes('courier') || fam.includes('mono') || fn.includes('courier')) family = 'Courier'
+              if (fn.includes('bold') || fam.includes('bold')) bold = true
+            } catch {}
+            // color via sampling centre of glyph
+            let color = '#111827'
+            const cx = relX + (w / vp.width) * 0.35
+            const cy = relY + (h / vp.height) * 0.5
+            const sampled = sampleAt(cx, cy)
+            if (sampled && sampled.toLowerCase() !== '#ffffff') {
+              const r = parseInt(sampled.slice(1,3),16), g=parseInt(sampled.slice(3,5),16), b=parseInt(sampled.slice(5,7),16)
+              const isNearWhite = r>245 && g>245 && b>245
+              if (!isNearWhite) color = sampled
+            }
             items.push({
               id: `nt_${pageIndex}_${i}`,
               x: Math.max(0, Math.min(1, relX)),
@@ -874,11 +901,14 @@ function PdfPage({
               w: Math.max(0.01, Math.min(1, w / vp.width)),
               h: Math.max(0.01, Math.min(1, h / vp.height)),
               str: item.str,
-              fontSize: Math.max(6, Math.min(36, (fontSize * vp.scale) / (vp.scale) )), // keep pdf points approx
+              fontSize: Math.max(6, Math.min(36, fontSize)),
+              color,
+              family,
+              bold,
             })
           }
           if (!cancelled) setNativeTexts(items)
-        } catch (e) {
+        } catch {
           // ignore text extraction failure (scanned pdf)
         }
         // reduce memory
@@ -968,7 +998,26 @@ function PdfPage({
                 key={nt.id}
                 onClick={(e) => {
                   e.stopPropagation()
-                  onEditNativeText(pageIndex, nt.x, nt.y, nt.w, nt.h, nt.str, nt.fontSize)
+                  // sample background just outside the glyph to preserve exact page background
+                  let bg: string | undefined = undefined
+                  try {
+                    const canvasEl = canvasRef.current as HTMLCanvasElement | null
+                    const vpLocal: any = (viewport as any)?.raw || (viewport as any)
+                    if (canvasEl && vpLocal) {
+                      const ctxS = canvasEl.getContext('2d', { willReadFrequently: true } as any) as CanvasRenderingContext2D | null
+                      if (ctxS) {
+                        const rx = Math.max(0, nt.x - 0.008)
+                        const ry = Math.max(0, nt.y - 0.006)
+                        const px = Math.max(0, Math.min(canvasEl.width-1, Math.floor(rx * (vpLocal.width || canvasEl.width))))
+                        const py = Math.max(0, Math.min(canvasEl.height-1, Math.floor(ry * (vpLocal.height || canvasEl.height))))
+                        const d = ctxS.getImageData(px, py, 1, 1).data
+                        const toHex=(n:number)=>n.toString(16).padStart(2,'0')
+                        const sampled=`#${toHex(d[0])}${toHex(d[1])}${toHex(d[2])}`
+                        if (sampled.toLowerCase() !== '#000000') bg = sampled
+                      }
+                    }
+                  } catch {}
+                  onEditNativeText(pageIndex, nt.x, nt.y, nt.w, nt.h, nt.str, nt.fontSize, nt.color, nt.family, nt.bold, bg)
                 }}
                 className="absolute group cursor-text hover:bg-[var(--color-primary)]/10 border border-transparent hover:border-[var(--color-primary)]/30 rounded-[2px] transition-colors"
                 style={{
@@ -995,12 +1044,13 @@ function PdfPage({
               e.stopPropagation()
               onSelect(w.id)
             }}
-            className={`absolute bg-white ${selectedId === w.id ? 'ring-2 ring-[var(--color-primary)]/30' : ''} cursor-pointer`}
+            className={`absolute ${selectedId === w.id ? 'ring-2 ring-[var(--color-primary)]/30' : ''} cursor-pointer`}
             style={{
               left: `${w.x * 100}%`,
               top: `${w.y * 100}%`,
               width: `${w.w * 100}%`,
               height: `${w.h * 100}%`,
+              backgroundColor: w.bg || '#ffffff',
             }}
             title="Whiteout — click to select, Delete to remove"
           />
