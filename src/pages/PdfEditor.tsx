@@ -692,6 +692,29 @@ export default function PdfEditor() {
                 onTextMove={(id, x, y) => updateText(id, { x, y })}
                 onImageMove={(id, x, y) => setImages((prev) => prev.map((im) => (im.id === id ? { ...im, x, y } : im)))}
                 onDelete={deleteSelected}
+                onEditNativeText={(page, x, y, w, h, str, fontSize) => {
+                  // Sejda-like: whiteout the native text and place editable box
+                  const wb: Whiteout = { id: uid(), page, x: Math.max(0, x - 0.002), y: Math.max(0, y - 0.002), w: Math.min(1, w + 0.004), h: Math.min(1, h + 0.004) }
+                  const tb: TextBox = {
+                    id: uid(),
+                    page,
+                    x,
+                    y,
+                    w,
+                    h: Math.max(h, 0.03),
+                    text: str,
+                    fontSize: Math.max(8, Math.min(24, Math.round(fontSize))),
+                    color: '#111827',
+                    bold: false,
+                    family: 'Helvetica',
+                  }
+                  const wNext = [...whiteouts, wb]
+                  const tNext = [...texts, tb]
+                  setWhiteouts(wNext)
+                  setTexts(tNext)
+                  setSelectedId(tb.id)
+                  saveHistory(wNext, tNext, images)
+                }}
               />
             ))}
           </div>
@@ -730,6 +753,7 @@ function PdfPage({
   onTextMove,
   onImageMove,
   onDelete,
+  onEditNativeText,
 }: {
   pageIndex: number
   pdfDocProxy: any
@@ -749,6 +773,7 @@ function PdfPage({
   onTextMove: (id: string, x: number, y: number) => void
   onImageMove: (id: string, x: number, y: number) => void
   onDelete: () => void
+  onEditNativeText: (page: number, x: number, y: number, w: number, h: number, text: string, fontSize: number) => void
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -758,6 +783,7 @@ function PdfPage({
   const [isInView, setIsInView] = useState(pageIndex < 2) // eager for first 2 pages
   const renderTaskRef = useRef<any>(null)
   const pageProxyRef = useRef<any>(null)
+  const [nativeTexts, setNativeTexts] = useState<Array<{ id: string; x: number; y: number; w: number; h: number; str: string; fontSize: number }>>([])
 
   // Lazy: only render when in viewport (hybrid idle)
   useEffect(() => {
@@ -813,6 +839,48 @@ function PdfPage({
         renderTaskRef.current = task
         await task.promise
         if (!cancelled) setRendered(true)
+        // Extract native text for editability (select tool)
+        try {
+          const textContent = await page.getTextContent()
+          const items: Array<{ id: string; x: number; y: number; w: number; h: number; str: string; fontSize: number }> = []
+          // @ts-ignore pdfjs Util
+          const Util = (pdfjsLib as any).Util
+          for (let i = 0; i < textContent.items.length; i++) {
+            const item: any = textContent.items[i]
+            if (!item.str || !item.str.trim()) continue
+            const tx = Util.transform(vp.transform, item.transform)
+            // font size from transform
+            const fontSize = Math.hypot(item.transform[0], item.transform[1])
+            // width/height from item (pdf.js provides width, height scaled)
+            const w = (item.width * vp.scale) || (item.str.length * fontSize * 0.6 * vp.scale / fontSize) // fallback
+            // item.height may be undefined, use fontSize
+            const h = (item.height ? item.height * vp.scale : fontSize * vp.scale / fontSize * 1) // normalize
+            // tx is bottom-left in viewport coords (origin bottom-left for pdf, but viewport transform already maps to canvas coords with origin top-left? Actually viewport y is top-down)
+            // In pdf.js, viewport.transform maps PDF to canvas with y flipped. So tx[5] is already canvas y from top? Let's check.
+            // We'll compute relative
+            // tx[4], tx[5] are canvas coords for baseline. For relative top-left, we need to adjust.
+            // Use viewport to convert: we already used Util.transform which gives canvas coords.
+            const canvasX = tx[4]
+            const canvasY = tx[5]
+            // Estimate bbox: x = canvasX, y = canvasY - h (since y is baseline)
+            const relX = canvasX / vp.width
+            const relY = (canvasY - h) / vp.height
+            // Clamp and filter tiny
+            if (w < 1 || h < 1) continue
+            items.push({
+              id: `nt_${pageIndex}_${i}`,
+              x: Math.max(0, Math.min(1, relX)),
+              y: Math.max(0, Math.min(1, relY)),
+              w: Math.max(0.01, Math.min(1, w / vp.width)),
+              h: Math.max(0.01, Math.min(1, h / vp.height)),
+              str: item.str,
+              fontSize: Math.max(6, Math.min(36, (fontSize * vp.scale) / (vp.scale) )), // keep pdf points approx
+            })
+          }
+          if (!cancelled) setNativeTexts(items)
+        } catch (e) {
+          // ignore text extraction failure (scanned pdf)
+        }
         // reduce memory
         try { page.cleanup() } catch {}
       } catch (e: any) {
@@ -892,6 +960,32 @@ function PdfPage({
         onTouchEnd={handlePointerUp}
       >
         <canvas ref={canvasRef} className="block w-full h-auto" />
+        {/* Native text layer - clickable for edit, only in select mode */}
+        {tool === 'select' && rendered && nativeTexts.length > 0 && (
+          <div className="absolute inset-0">
+            {nativeTexts.map((nt) => (
+              <div
+                key={nt.id}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEditNativeText(pageIndex, nt.x, nt.y, nt.w, nt.h, nt.str, nt.fontSize)
+                }}
+                className="absolute group cursor-text hover:bg-[var(--color-primary)]/10 border border-transparent hover:border-[var(--color-primary)]/30 rounded-[2px] transition-colors"
+                style={{
+                  left: `${nt.x * 100}%`,
+                  top: `${nt.y * 100}%`,
+                  width: `${nt.w * 100}%`,
+                  height: `${nt.h * 100}%`,
+                }}
+                title={`Click to edit: "${nt.str.slice(0, 40)}"`}
+              >
+                <span className="absolute -top-4 left-0 hidden group-hover:block text-[9px] px-1 py-0.5 rounded bg-black/75 text-white whitespace-nowrap pointer-events-none">
+                  Edit
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
         {/* Whiteouts */}
         {whiteouts.map((w) => (
           <div
@@ -901,7 +995,7 @@ function PdfPage({
               e.stopPropagation()
               onSelect(w.id)
             }}
-            className={`absolute bg-white border ${selectedId === w.id ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20' : 'border-gray-300'} shadow-sm cursor-pointer`}
+            className={`absolute bg-white ${selectedId === w.id ? 'ring-2 ring-[var(--color-primary)]/30' : ''} cursor-pointer`}
             style={{
               left: `${w.x * 100}%`,
               top: `${w.y * 100}%`,
