@@ -414,7 +414,7 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="flex gap-5">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-5">
         {/* Settings Nav */}
         <nav className="hidden md:flex flex-col gap-1 w-48 shrink-0 sticky top-4 self-start">
           {SECTIONS.map((sec) => (
@@ -436,7 +436,7 @@ export default function Settings() {
           {/* Company Profiles */}
           <Card id="settings-profiles" data-section="profiles">
             <CardHeader><h2 className="text-sm font-semibold">Company Profiles</h2></CardHeader>
-            <div className="p-5">
+            <div className="p-4 sm:p-5">
               <div className="flex items-center gap-3 flex-wrap">
                 <select
                   value={co.id}
@@ -457,8 +457,8 @@ export default function Settings() {
           {/* Company Details */}
           <Card id="settings-company" data-section="company">
             <CardHeader><h2 className="text-sm font-semibold">Company Details</h2></CardHeader>
-            <div className="p-5">
-              <div className="grid grid-cols-2 gap-3">
+            <div className="p-4 sm:p-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Company Name (EN)</label>
                   <input value={form.name} onChange={(e) => set('name', fmtName(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" />
@@ -482,8 +482,8 @@ export default function Settings() {
           {/* Contact Information */}
           <Card id="settings-contact" data-section="contact">
             <CardHeader><h2 className="text-sm font-semibold">Contact Information</h2></CardHeader>
-            <div className="p-5">
-              <div className="grid grid-cols-2 gap-3">
+            <div className="p-4 sm:p-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Telephone</label><input value={form.tel} onChange={(e) => set('tel', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Fax</label><input value={form.fax} onChange={(e) => set('fax', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Mobile</label><input value={form.mob} onChange={(e) => set('mob', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
@@ -499,7 +499,7 @@ export default function Settings() {
           {/* Branding */}
           <Card id="settings-branding" data-section="branding">
             <CardHeader><h2 className="text-sm font-semibold">Branding</h2></CardHeader>
-            <div className="p-5 space-y-4">
+            <div className="p-4 sm:p-5 space-y-4">
               {(['logo', 'seal', 'signature'] as const).map((field) => (
                 <div key={field}>
                   <label className="text-xs font-medium text-[var(--color-text2)] capitalize mb-1.5 block">{field}</label>
@@ -580,7 +580,7 @@ export default function Settings() {
                   <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-[var(--color-text2)]">Primary Color</label>
                   <div className="flex gap-2 items-center">
@@ -602,7 +602,7 @@ export default function Settings() {
           {/* Currency */}
           <Card id="settings-currency" data-section="currency">
             <CardHeader><h2 className="text-sm font-semibold">Currency</h2></CardHeader>
-            <div className="p-5 space-y-3">
+            <div className="p-4 sm:p-5 space-y-3">
               <div className="flex gap-2 items-center">
                 <select id="curPresetSelect" defaultValue="" className="px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]">
                   <option value="" disabled>Presets</option>
@@ -610,7 +610,7 @@ export default function Settings() {
                 </select>
                 <Button size="sm" onClick={applyPreset}>Apply</Button>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Code</label><input value={form.curCode} onChange={(e) => set('curCode', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Symbol</label><input value={form.curSym} onChange={(e) => set('curSym', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Sub-units per unit</label><input value={form.curSubPer} onChange={(e) => set('curSubPer', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
@@ -625,14 +625,14 @@ export default function Settings() {
           {/* Tax & Banking */}
           <Card id="settings-tax" data-section="tax">
             <CardHeader><h2 className="text-sm font-semibold">Tax &amp; Banking</h2></CardHeader>
-            <div className="p-5 space-y-4">
+            <div className="p-4 sm:p-5 space-y-4">
               <h3 className="text-xs font-semibold text-[var(--color-text2)] uppercase">VAT</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">VAT Reg No.</label><input value={form.vatReg} onChange={(e) => set('vatReg', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Default VAT %</label><input type="number" min="0" step="0.01" value={form.vatPct} onChange={(e) => set('vatPct', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
               </div>
               <h3 className="text-xs font-semibold text-[var(--color-text2)] uppercase">Bank Details</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Bank Name</label><input value={form.bankName} onChange={(e) => set('bankName', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Account Name</label><input value={form.bankAccName} onChange={(e) => set('bankAccName', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Account No.</label><input value={form.bankAcc} onChange={(e) => set('bankAcc', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
@@ -646,9 +646,9 @@ export default function Settings() {
           {/* Numbering & Defaults */}
           <Card id="settings-documents" data-section="documents">
             <CardHeader><h2 className="text-sm font-semibold">Numbering &amp; Defaults</h2></CardHeader>
-            <div className="p-5 space-y-4">
+            <div className="p-4 sm:p-5 space-y-4">
               <h3 className="text-xs font-semibold text-[var(--color-text2)] uppercase">Numbering</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Invoice Prefix</label><input value={form.invPref} onChange={(e) => set('invPref', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Next Invoice #</label><input value={form.invNext} onChange={(e) => set('invNext', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
                 <div><label className="text-xs font-medium text-[var(--color-text2)]">Receipt Prefix</label><input value={form.recPref} onChange={(e) => set('recPref', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
@@ -672,7 +672,7 @@ export default function Settings() {
                 </button>
               </div>
               {form.invPrefDate !== 'none' && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className="text-xs font-medium text-[var(--color-text2)]">Date Format</label><select value={form.invPrefDate} onChange={(e) => set('invPrefDate', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"><option value="year">Year (YYYY)</option><option value="month">Year-Month (YYYY-MM)</option></select></div>
                 </div>
               )}
@@ -702,7 +702,7 @@ export default function Settings() {
           {/* Templates */}
           <Card id="settings-templates" data-section="templates">
             <CardHeader><h2 className="text-sm font-semibold">Templates</h2></CardHeader>
-            <div className="p-5 space-y-4">
+            <div className="p-4 sm:p-5 space-y-4">
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Invoice Template</label>
                 <div className="flex flex-wrap gap-1.5 mt-1">
@@ -796,7 +796,7 @@ export default function Settings() {
           {/* Backup & Restore */}
           <Card id="settings-backup" data-section="backup">
             <CardHeader><h2 className="text-sm font-semibold">Backup &amp; Restore</h2></CardHeader>
-            <div className="p-5 space-y-6">
+            <div className="p-4 sm:p-5 space-y-6">
               {/* Local File Backup */}
               <div>
                 <h3 className="text-xs font-semibold text-[var(--color-text1)] mb-1">Local File Backup</h3>
@@ -812,7 +812,7 @@ export default function Settings() {
 
               {/* Google Drive Cloud Backup */}
               <div>
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
                   <h3 className="text-xs font-semibold text-[var(--color-text1)] flex items-center gap-2">
                     <svg className="w-4 h-4 text-blue-500" viewBox="0 0 87.3 78" fill="currentColor">
                       <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.55z" fill="#0066da"/>
@@ -886,7 +886,7 @@ export default function Settings() {
 
               {/* Local Snapshots Vault */}
               <div>
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
                   <h3 className="text-xs font-semibold text-[var(--color-text1)]">Local Automatic Snapshots Vault</h3>
                   <Button size="sm" variant="outline" onClick={handleCreateLocalSnapshot} className="text-xs py-1">
                     + Create Snapshot Now
@@ -936,8 +936,8 @@ export default function Settings() {
           {/* Theme */}
           <Card id="settings-theme" data-section="theme">
             <CardHeader><h2 className="text-sm font-semibold">Theme</h2></CardHeader>
-            <div className="p-5">
-              <div className="flex items-center gap-3">
+            <div className="p-4 sm:p-5">
+              <div className="flex items-center gap-3 flex-wrap">
                 <span className="text-sm">Dark Mode</span>
                 <button onClick={toggleDark} type="button" role="switch" aria-checked={ui.dark} className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${ui.dark ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'}`}>
                   <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${ui.dark ? 'translate-x-[18px]' : 'translate-x-0'}`} />

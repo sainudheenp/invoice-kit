@@ -86,7 +86,7 @@ export function BrandingSection({ form, set, setUploadField, dragOverField, setD
             </div>
           </div>
         ))}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-xs font-medium text-[var(--color-text2)]">Primary Color</label>
             <div className="flex gap-2 items-center">

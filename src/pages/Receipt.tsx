@@ -345,14 +345,14 @@ export default function Receipt() {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Payer / Customer" required dense>
             <Input dense value={form.receivedFrom} onChange={(e) => set('receivedFrom', fmtName(e.target.value))} list="recvCustNameList" placeholder="Name of the payer" />
             <datalist id="recvCustNameList">
               {state.customers.filter((c) => c.companyId === co?.id).map((c) => <option key={c.id} value={c.name} />)}
             </datalist>
           </Field>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Receiver Name" dense>
               <Input dense value={form.receiver} onChange={(e) => set('receiver', e.target.value)} placeholder="Who received the payment" />
             </Field>
@@ -363,7 +363,7 @@ export default function Receipt() {
         </div>
 
         {form.mode === 'simple' ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Amount" required dense>
               <Input dense type="number" min="0" step="0.001" value={form.simpleAmount} onChange={(e) => set('simpleAmount', Math.max(0, parseFloat(e.target.value) || 0))} />
             </Field>

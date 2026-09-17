@@ -285,7 +285,7 @@ export default function QuotationPage() {
           />
         </div>
 
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Field label="Quotation No." required dense>
             <Input dense value={form.quotNo} onChange={(e) => set('quotNo', e.target.value)} placeholder="QUO-0001" />
           </Field>
@@ -303,14 +303,14 @@ export default function QuotationPage() {
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Customer Name" required dense>
             <Input dense value={form.custName} onChange={(e) => set('custName', fmtName(e.target.value))} list="quotCustNameList" placeholder="Enter customer name" />
             <datalist id="quotCustNameList">
               {customers.map((c) => <option key={c} value={c} />)}
             </datalist>
           </Field>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <Field label="Phone" dense>
               <Input dense value={form.custPhone} onChange={(e) => set('custPhone', e.target.value)} placeholder="+968 ..." />
             </Field>
@@ -323,11 +323,11 @@ export default function QuotationPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Address" dense>
             <Input dense value={form.custAddr} onChange={(e) => set('custAddr', e.target.value)} placeholder="Street, city" />
           </Field>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Terms & Conditions" dense>
               <Textarea dense value={form.terms} onChange={(e) => set('terms', e.target.value)} rows={2} placeholder="Payment terms, delivery..." />
             </Field>

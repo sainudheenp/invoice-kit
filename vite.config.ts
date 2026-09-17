@@ -25,6 +25,13 @@ export default defineConfig({
       '@': path.resolve(projectRoot, 'src'),
     },
   },
+  server: {
+    host: '0.0.0.0',
+    allowedHosts: true,
+    headers: {
+      'X-Frame-Options': 'ALLOWALL',
+    },
+  },
   // --- PDF ENGINE (taepdf) SAFETY: do not remove ---------------------------
   // taepdf loads its Rust/WASM binary via `new URL('taetype_bg.wasm',
   // import.meta.url)`. If Vite pre-bundles taepdf, that URL breaks and the WASM
