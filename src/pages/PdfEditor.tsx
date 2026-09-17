@@ -752,50 +752,87 @@ function PdfPage({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const [viewport, setViewport] = useState<any>(null)
   const [rendered, setRendered] = useState(false)
+  const [isInView, setIsInView] = useState(pageIndex < 2) // eager for first 2 pages
+  const renderTaskRef = useRef<any>(null)
+  const pageProxyRef = useRef<any>(null)
 
-  // Render pdf page to canvas
+  // Lazy: only render when in viewport (hybrid idle)
   useEffect(() => {
-    let cancelled = false
-    const render = async () => {
-      if (!pdfDocProxy || !canvasRef.current) return
-      const page = await pdfDocProxy.getPage(pageIndex + 1)
-      const containerWidth = containerRef.current?.clientWidth || 800
-      const unscaled = page.getViewport({ scale: 1 })
-      const scale = (containerWidth * zoom) / unscaled.width
-      const vp = page.getViewport({ scale })
-      setViewport(vp)
-      const canvas = canvasRef.current!
-      const ctx = canvas.getContext('2d')!
-      canvas.width = vp.width
-      canvas.height = vp.height
-      canvas.style.width = '100%'
-      canvas.style.height = 'auto'
-      const renderTask = page.render({ canvasContext: ctx, viewport: vp })
-      await renderTask.promise
-      if (!cancelled) setRendered(true)
+    const el = wrapperRef.current
+    if (!el) return
+    if (typeof IntersectionObserver === 'undefined') {
+      setIsInView(true)
+      return
     }
-    render()
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) if (e.isIntersecting) setIsInView(true)
+      },
+      { rootMargin: '600px 0px', threshold: 0.01 }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  // Render pdf page to canvas - debounced & cancellable
+  useEffect(() => {
+    if (!isInView) return
+    let cancelled = false
+    let timeoutId: number | undefined
+
+    const doRender = async () => {
+      if (!pdfDocProxy || !canvasRef.current || !containerRef.current) return
+      // cancel previous task
+      try { renderTaskRef.current?.cancel() } catch {}
+      setRendered(false)
+      try {
+        const page = pageProxyRef.current || (await pdfDocProxy.getPage(pageIndex + 1))
+        pageProxyRef.current = page
+        const containerWidth = containerRef.current.clientWidth || 700
+        const unscaled = page.getViewport({ scale: 1 })
+        // Cap DPR to avoid huge canvas on retina + zoom 2
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+        const scale = (containerWidth * zoom) / unscaled.width
+        const vp = page.getViewport({ scale: scale * dpr })
+        setViewport({ width: vp.width / dpr, height: vp.height / dpr, raw: vp })
+        const canvas = canvasRef.current!
+        const ctx = canvas.getContext('2d', { alpha: false }) as CanvasRenderingContext2D
+        if (!ctx) return
+        // Use dpr for crisp but not too large
+        canvas.width = vp.width
+        canvas.height = vp.height
+        canvas.style.width = '100%'
+        canvas.style.height = 'auto'
+        // Fill white to avoid transparency flash
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        const task = page.render({ canvasContext: ctx, viewport: vp })
+        renderTaskRef.current = task
+        await task.promise
+        if (!cancelled) setRendered(true)
+        // reduce memory
+        try { page.cleanup() } catch {}
+      } catch (e: any) {
+        if (e?.name !== 'RenderingCancelledException' && !cancelled) {
+          console.warn('render failed', e)
+          setRendered(true)
+        }
+      }
+    }
+
+    // Debounce zoom/resize: 80ms
+    timeoutId = window.setTimeout(doRender, 80)
     return () => {
       cancelled = true
+      window.clearTimeout(timeoutId)
+      try { renderTaskRef.current?.cancel() } catch {}
     }
-  }, [pdfDocProxy, pageIndex, zoom])
+  }, [pdfDocProxy, pageIndex, zoom, isInView])
 
-  // Handle resize to re-render
-  useEffect(() => {
-    const ro = new ResizeObserver(() => {
-      // Trigger re-render by changing viewport? We'll just force via zoom effect?
-      // For now, re-render on resize by toggling rendered
-      setRendered(false)
-      setTimeout(() => {
-        // cause effect to re-run by updating zoom slightly? Instead call render again
-        // We trigger by depending on container width via window resize listener
-      }, 100)
-    })
-    if (containerRef.current) ro.observe(containerRef.current)
-    return () => ro.disconnect()
-  }, [])
+  // Fast resize without full re-render using CSS only if zoom unchanged? We still need re-render for quality, but debounce covers
 
   const getRel = (e: React.MouseEvent | React.TouchEvent) => {
     const rect = containerRef.current!.getBoundingClientRect()
@@ -837,14 +874,14 @@ function PdfPage({
   }
 
   return (
-    <div className="bg-[var(--color-card)] rounded-xl sm:rounded-2xl shadow-sm border border-[var(--color-border)] overflow-hidden">
+    <div ref={wrapperRef} className="bg-[var(--color-card)] rounded-xl sm:rounded-2xl shadow-sm border border-[var(--color-border)] overflow-hidden">
       <div className="px-3 sm:px-4 py-2 flex items-center justify-between bg-[var(--color-input-bg)]/50 border-b border-[var(--color-border)] text-xs">
         <span className="font-medium">Page {pageIndex + 1}</span>
         <span className="text-[var(--color-text3)] hidden sm:inline">{rendered && viewport ? `${Math.round(viewport.width)} × ${Math.round(viewport.height)} px` : 'loading…'}</span>
       </div>
       <div
         ref={containerRef}
-        className={`relative bg-white select-none ${tool === 'whiteout' ? 'cursor-crosshair' : tool === 'text' ? 'cursor-text' : 'cursor-default'}`}
+        className={`relative bg-white select-none min-h-[280px] sm:min-h-[400px] ${tool === 'whiteout' ? 'cursor-crosshair' : tool === 'text' ? 'cursor-text' : 'cursor-default'}`}
         onMouseDown={handlePointerDown}
         onMouseMove={handlePointerMove}
         onMouseUp={handlePointerUp}
