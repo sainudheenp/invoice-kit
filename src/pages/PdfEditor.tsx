@@ -54,6 +54,17 @@ function uid() {
   return Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4)
 }
 
+// How much of box `a` is covered by box `b` (0..1). Native text already whiteouted/edited is hidden.
+function coverRatio(a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }) {
+  const x = Math.max(a.x, b.x)
+  const y = Math.max(a.y, b.y)
+  const r = Math.min(a.x + a.w, b.x + b.w)
+  const bt = Math.min(a.y + a.h, b.y + b.h)
+  if (r <= x || bt <= y) return 0
+  const area = a.w * a.h
+  return area > 0 ? ((r - x) * (bt - y)) / area : 0
+}
+
 function hexToRgb(hex: string) {
   const normalized = hex.replace('#', '')
   const bigint = parseInt(normalized, 16)
@@ -81,7 +92,7 @@ export default function PdfEditor() {
   const [saving, setSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
-  const pendingImageRef = useRef<{ bytes: Uint8Array; src: string; mime: string } | null>(null)
+  const pendingImageRef = useRef<{ bytes: Uint8Array; src: string; mime: string; aspect: number } | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const [history, setHistory] = useState<{ whiteouts: Whiteout[]; texts: TextBox[]; images: ImageBox[] }[]>([])
@@ -100,6 +111,25 @@ export default function PdfEditor() {
       return next > 49 ? 49 : next
     })
   }, [historyIdx])
+
+  // Debounced history for continuous edits (typing, resizing, dragging) — one snapshot per gesture
+  const stateRef = useRef({ whiteouts, texts, images })
+  stateRef.current = { whiteouts, texts, images }
+  const historyTimer = useRef<number>(0)
+  const scheduleHistory = useCallback(() => {
+    window.clearTimeout(historyTimer.current)
+    historyTimer.current = window.setTimeout(() => {
+      const s = stateRef.current
+      pushHistory(s.whiteouts, s.texts, s.images)
+    }, 600)
+  }, [pushHistory])
+
+  // Destroy the pdf.js document when replaced/unmounted (avoids worker + memory leak)
+  useEffect(() => {
+    return () => {
+      try { pdfDocProxy?.destroy?.() } catch {}
+    }
+  }, [pdfDocProxy])
 
   const undo = () => {
     if (historyIdx <= 0) return
@@ -189,6 +219,7 @@ export default function PdfEditor() {
 
   const updateText = (id: string, patch: Partial<TextBox>) => {
     setTexts((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
+    scheduleHistory()
   }
 
   const deleteSelected = () => {
@@ -239,9 +270,16 @@ export default function PdfEditor() {
     const reader = new FileReader()
     reader.onload = () => {
       const src = reader.result as string
-      pendingImageRef.current = { bytes, src, mime: file.type || 'image/png' }
-      setTool('image')
-      showToast('Click on page to place image')
+      const done = (aspect: number) => {
+        pendingImageRef.current = { bytes, src, mime: file.type || 'image/png', aspect }
+        setTool('image')
+        showToast('Click on page to place image')
+      }
+      // measure natural size to preserve aspect on placement
+      const img = new Image()
+      img.onload = () => done(img.naturalHeight / Math.max(1, img.naturalWidth))
+      img.onerror = () => done(0.5)
+      img.src = src
     }
     reader.readAsDataURL(file)
     e.target.value = ''
@@ -253,13 +291,15 @@ export default function PdfEditor() {
     } else if (tool === 'image' && pendingImageRef.current) {
       const p = pendingImageRef.current
       const id = uid()
+      const w = 0.2
+      const h = Math.max(0.03, Math.min(0.9, w * (p.aspect || 0.5)))
       const im: ImageBox = {
         id,
         page: pageIdx,
-        x: Math.max(0, relX - 0.1),
-        y: Math.max(0, relY - 0.08),
-        w: 0.2,
-        h: 0.15,
+        x: Math.max(0, relX - w / 2),
+        y: Math.max(0, relY - h / 2),
+        w,
+        h,
         src: p.src,
         bytes: p.bytes,
         mime: p.mime,
@@ -693,7 +733,10 @@ export default function PdfEditor() {
                 onWhiteoutEnd={handleWhiteoutEnd}
                 onTextUpdate={updateText}
                 onTextMove={(id, x, y) => updateText(id, { x, y })}
-                onImageMove={(id, x, y) => setImages((prev) => prev.map((im) => (im.id === id ? { ...im, x, y } : im)))}
+                onImageMove={(id, x, y) => {
+                  setImages((prev) => prev.map((im) => (im.id === id ? { ...im, x, y } : im)))
+                  scheduleHistory()
+                }}
                 onDelete={deleteSelected}
                 onEditNativeText={(page, x, y, w, h, str, fontSize, color, family, bold, bg) => {
                   const bgUse = bg || '#ffffff'
@@ -706,7 +749,7 @@ export default function PdfEditor() {
                     w,
                     h: Math.max(h, 0.03),
                     text: str,
-                    fontSize: Math.max(8, Math.min(32, Math.round(fontSize))),
+                    fontSize: Math.max(8, Math.min(96, Math.round(fontSize))),
                     color: color || '#111827',
                     bold: !!bold,
                     family: family || 'Helvetica',
@@ -788,6 +831,13 @@ function PdfPage({
   const renderTaskRef = useRef<any>(null)
   const pageProxyRef = useRef<any>(null)
   const [nativeTexts, setNativeTexts] = useState<Array<{ id: string; x: number; y: number; w: number; h: number; str: string; fontSize: number; color: string; family: 'Helvetica'|'Times'|'Courier'; bold: boolean }>>([])
+  // Text extraction (getOperatorList + getTextContent) is expensive — do it once per doc, not per zoom step
+  const textExtractedRef = useRef(false)
+
+  useEffect(() => {
+    textExtractedRef.current = false
+    setNativeTexts([])
+  }, [pdfDocProxy])
 
   // Lazy: only render when in viewport (hybrid idle)
   useEffect(() => {
@@ -844,7 +894,9 @@ function PdfPage({
         await task.promise
         if (!cancelled) setRendered(true)
         // Extract native text — lossless: use operatorList for exact color/fontSize, sample as fallback
-        try {
+        if (!textExtractedRef.current) {
+          textExtractedRef.current = true
+          try {
           const textContent: any = await page.getTextContent()
           const styles: any = textContent.styles || {}
           // Build exact style map from operatorList (pdf.js OPS) to avoid canvas sampling wash
@@ -928,7 +980,8 @@ function PdfPage({
             const op = opStyles[i] || opStyles[opStyles.length - 1]
             const fontSize = op && op.fontSize ? op.fontSize : fontSizeFromTransform
             const w = (item.width * vp.scale) || (item.str.length * fontSize * 0.6)
-            const h = (item.height ? item.height * vp.scale : fontSize)
+            // item.height doesn't exist on pdf.js TextItem — use font size in points → px
+            const h = fontSize * vp.scale * 1.25
             const canvasX = tx[4]
             const canvasY = tx[5]
             const relX = canvasX / vp.width
@@ -971,15 +1024,16 @@ function PdfPage({
               w: Math.max(0.01, Math.min(1, w / vp.width)),
               h: Math.max(0.01, Math.min(1, h / vp.height)),
               str: item.str,
-              fontSize: Math.max(6, Math.min(36, fontSize)),
+              fontSize: Math.max(6, Math.min(120, fontSize)),
               color,
               family,
               bold,
             })
           }
           if (!cancelled) setNativeTexts(items)
-        } catch {
+          } catch {
           // ignore text extraction failure (scanned pdf)
+          }
         }
         // reduce memory
         try { page.cleanup() } catch {}
@@ -1063,7 +1117,9 @@ function PdfPage({
         {/* Native text layer - clickable for edit, only in select mode */}
         {tool === 'select' && rendered && nativeTexts.length > 0 && (
           <div className="absolute inset-0">
-            {nativeTexts.map((nt) => (
+            {nativeTexts
+              .filter((nt) => whiteouts.every((w) => coverRatio(nt, w) < 0.55))
+              .map((nt) => (
               <div
                 key={nt.id}
                 onClick={(e) => {
@@ -1185,7 +1241,7 @@ function PdfPage({
               window.addEventListener('mouseup', onUp)
             }}
           >
-            <img src={im.src} alt="" className="w-full h-full object-contain bg-white pointer-events-none select-none" draggable={false} />
+            <img src={im.src} alt="" className="w-full h-full object-fill bg-white pointer-events-none select-none" draggable={false} />
             {selectedId === im.id && (
               <button
                 onClick={(e) => {
