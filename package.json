@@ -10,13 +10,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run fonts:check && tsc -b && vite build",
+    "build": "npm run fonts:check && npm run taepdf:ensure && tsc -b && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "oxlint",
     "preview": "vite preview",
     "fonts:sync": "node scripts/sync-fonts.mjs",
-    "fonts:check": "node scripts/sync-fonts.mjs --check"
+    "fonts:check": "node scripts/sync-fonts.mjs --check",
+    "taepdf:ensure": "node scripts/ensure-taepdf.mjs",
+    "predev": "npm run taepdf:ensure"
   },
   "dependencies": {
     "dexie": "^4.4.4",
