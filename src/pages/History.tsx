@@ -28,17 +28,17 @@ export default function History() {
   const invoices = state.invoices
     .filter((i) => i.companyId === co?.id)
     .filter((i) => !search || i.invNo.toLowerCase().includes(search.toLowerCase()) || i.customer.name.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => b.createdAt - a.createdAt)
+    .sort((a, b) => b.createdAt - a.createdAt || b.invNo.localeCompare(a.invNo))
 
   const receipts = state.receipts
     .filter((r) => r.companyId === co?.id)
     .filter((r) => !search || r.recNo.toLowerCase().includes(search.toLowerCase()) || r.receivedFrom.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => b.createdAt - a.createdAt)
+    .sort((a, b) => b.createdAt - a.createdAt || b.recNo.localeCompare(a.recNo))
 
   const quotations = state.quotations
     .filter((q) => q.companyId === co?.id)
     .filter((q) => !search || q.quotNo.toLowerCase().includes(search.toLowerCase()) || q.customer.name.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => b.createdAt - a.createdAt)
+    .sort((a, b) => b.createdAt - a.createdAt || b.quotNo.localeCompare(a.quotNo))
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
@@ -105,13 +105,25 @@ export default function History() {
       const now = Date.now()
       const newId = uid()
       if (type === 'inv') {
-        const dupe: Invoice = { ...doc, id: newId, invNo: doc.invNo + '-COPY', createdAt: now, paid: false }
+        let base = doc.invNo + '-COPY'
+        let uniq = base
+        let n = 2
+        while (state.invoices.some(i => i.invNo === uniq && i.companyId === co?.id)) { uniq = `${base}-${n++}` }
+        const dupe: Invoice = { ...doc, id: newId, invNo: uniq, createdAt: now, paid: false }
         await saveInvoice(dupe)
       } else if (type === 'rec') {
-        const dupe: Receipt = { ...doc, id: newId, recNo: doc.recNo + '-COPY', createdAt: now }
+        let base = doc.recNo + '-COPY'
+        let uniq = base
+        let n = 2
+        while (state.receipts.some(r => r.recNo === uniq && r.companyId === co?.id)) { uniq = `${base}-${n++}` }
+        const dupe: Receipt = { ...doc, id: newId, recNo: uniq, createdAt: now }
         await saveReceipt(dupe)
       } else {
-        const dupe: Quotation = { ...doc, id: newId, quotNo: doc.quotNo + '-COPY', createdAt: now }
+        let base = doc.quotNo + '-COPY'
+        let uniq = base
+        let n = 2
+        while (state.quotations.some(q => q.quotNo === uniq && q.companyId === co?.id)) { uniq = `${base}-${n++}` }
+        const dupe: Quotation = { ...doc, id: newId, quotNo: uniq, createdAt: now }
         await saveQuotation(dupe)
       }
       showToast('Duplicated.')
@@ -157,6 +169,7 @@ export default function History() {
   const handleEmail = (type: Tab, doc: Invoice | Receipt | Quotation) => {
     if (!co) { showToast('No active company.', 'err'); return }
     const customerEmail = type === 'inv' ? (doc as Invoice).customer.email : type === 'rec' ? '' : (doc as Quotation).customer.email
+    if (!customerEmail || !customerEmail.trim()) { showToast('No customer email available for this document.', 'err'); return }
     const docNo = type === 'inv' ? (doc as Invoice).invNo : type === 'rec' ? (doc as Receipt).recNo : (doc as Quotation).quotNo
     const docType = type === 'inv' ? 'Invoice' : type === 'rec' ? 'Receipt' : 'Quotation'
     const grand = type === 'inv' ? (doc as Invoice).grand : type === 'rec' ? (doc as Receipt).amount : (doc as Quotation).grand

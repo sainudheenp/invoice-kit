@@ -7,12 +7,17 @@ interface ShortcutMap {
 export function useKeyboardShortcuts(shortcuts: ShortcutMap) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement).tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
       if (!e.ctrlKey && !e.metaKey) return
       const key = e.key.toLowerCase()
+      // Only allow registered shortcut keys inside inputs; block plain typing
+      const tag = (e.target as HTMLElement)?.tagName
+      const inField = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target as HTMLElement)?.isContentEditable
+      if (inField) {
+        const isSaveKey = Object.keys(shortcuts).some(k => k.toLowerCase() === key)
+        if (!isSaveKey) return
+      }
       for (const [k, fn] of Object.entries(shortcuts)) {
-        if (key === k) { e.preventDefault(); fn(); return }
+        if (key === k.toLowerCase()) { e.preventDefault(); fn(); return }
       }
     }
     document.addEventListener('keydown', handler)

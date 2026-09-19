@@ -1,0 +1,16 @@
+{
+  "name": "tae-pdf",
+  "type": "module",
+  "description": "Client-side HTML to PDF engine powered by TypeScript and Rust",
+  "version": "2.3.1",
+  "files": [
+    "tae_pdf_bg.wasm",
+    "tae_pdf.js",
+    "tae_pdf.d.ts"
+  ],
+  "main": "tae_pdf.js",
+  "types": "tae_pdf.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

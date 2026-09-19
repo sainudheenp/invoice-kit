@@ -36,8 +36,14 @@ function _t(n: number): string {
 }
 
 export function num2words(num: number, cur: Currency): string {
-  const whole = Math.floor(num)
-  const frac = Math.round((num - whole) * cur.subPer)
+  const safeNum = isFinite(num) ? Math.max(0, num) : 0
+  let whole = Math.floor(safeNum)
+  let frac = Math.round((safeNum - whole) * cur.subPer)
+  // Handle rounding overflow (e.g. 1.999 with subPer 100 -> 2.00)
+  if (frac >= cur.subPer && cur.subPer > 0) {
+    whole += 1
+    frac = 0
+  }
   const wholeW = _t(whole)
   const wholeLabel = whole === 1 ? cur.name : cur.namePl
   let result = `${wholeW} ${wholeLabel}`
@@ -46,5 +52,5 @@ export function num2words(num: number, cur: Currency): string {
     const fracLabel = frac === 1 ? cur.sub : cur.subPl
     result += ` and ${fracW} ${fracLabel}`
   }
-  return result 
+  return result
 }

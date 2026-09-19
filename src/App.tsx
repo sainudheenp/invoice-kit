@@ -18,6 +18,8 @@ import Products from '@/pages/Products'
 import History from '@/pages/History'
 import Settings from '@/pages/Settings'
 import { prewarmPdf, prefetchPdfFonts } from '@/utils/pdf'
+import { lazy } from 'react'
+const PdfEditor = lazy(() => import('@/pages/PdfEditor'))
 
 function AppContent() {
   const { state, loading } = useApp()
@@ -112,6 +114,7 @@ function AppContent() {
               <Route path="/products" element={<Products />} />
               <Route path="/history" element={<History />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/pdf-editor" element={<PdfEditor />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>

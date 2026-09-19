@@ -40,8 +40,8 @@ describe('safeImgSrc', () => {
     expect(safeImgSrc('https://example.com/logo.png')).toBe('https://example.com/logo.png')
   })
 
-  it('allows http URLs', () => {
-    expect(safeImgSrc('http://example.com/logo.png')).toBe('http://example.com/logo.png')
+  it('blocks http URLs (mixed content)', () => {
+    expect(safeImgSrc('http://example.com/logo.png')).toBe('')
   })
 
   it('blocks javascript: URLs', () => {

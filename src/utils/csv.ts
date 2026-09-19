@@ -68,9 +68,10 @@ export function customersToCSV(customers: Array<{ name: string; address?: string
 
 export function productsToCSV(products: Array<{ name: string; desc?: string; price: number }>, symbol = ''): string {
   const header = toCSVRow(['Name', 'Description', 'Price'])
-  const rows = products.map((p) =>
-    toCSVRow([p.name || '', p.desc || '', p.price ? `${symbol}${p.price.toFixed(2)}` : '0.00'])
-  )
+  const rows = products.map((p) => {
+    const priceStr = `${symbol}${(p.price ?? 0).toFixed(2)}`
+    return toCSVRow([p.name || '', p.desc || '', priceStr])
+  })
   return [header, ...rows].join('\n')
 }
 
@@ -187,11 +188,17 @@ export function parseProductsCsv(csvContent: string, companyId: string) {
 }
 
 export function downloadCSV(csv: string, filename: string): void {
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  // Prepend BOM so Excel detects UTF-8 correctly
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
   a.download = filename
+  document.body.appendChild(a)
   a.click()
-  URL.revokeObjectURL(url)
+  // Cleanup on next tick to avoid revoking before download starts (Safari)
+  setTimeout(() => {
+    URL.revokeObjectURL(url)
+    a.remove()
+  }, 100)
 }

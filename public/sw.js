@@ -1,4 +1,4 @@
-var CACHE = 'invoicekit-v3'
+var CACHE = 'invoicekit-v4'
 var SHELL = [
   '/index.html',
   '/manifest.json',

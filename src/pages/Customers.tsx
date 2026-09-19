@@ -300,11 +300,11 @@ export default function Customers() {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[var(--color-border)]">
-            <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 pt-3 border-t border-[var(--color-border)]">
+            <Button type="button" variant="outline" className="w-full sm:w-auto justify-center" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="w-full sm:w-auto justify-center">
               {editingCust ? 'Save Changes' : 'Add Customer'}
             </Button>
           </div>

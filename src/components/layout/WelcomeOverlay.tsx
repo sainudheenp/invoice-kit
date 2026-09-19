@@ -202,8 +202,8 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[99999] flex items-start sm:items-center justify-center bg-[var(--color-page-bg)] p-3 sm:p-4 overflow-y-auto">
-      <div className="w-full max-w-xl bg-[var(--color-card)] rounded-2xl shadow-lg p-5 sm:p-8 my-4">
+    <div className="fixed inset-0 z-[99999] flex items-start sm:items-center justify-center bg-[var(--color-page-bg)] p-3 sm:p-4 overflow-y-auto overflow-x-hidden">
+      <div className="w-full max-w-xl mx-auto bg-[var(--color-card)] rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 my-4 sm:my-6 max-w-[calc(100vw-1.5rem)] sm:max-w-xl">
         <div className="flex justify-center mb-4">
           <span className="text-4xl text-[var(--color-primary)]">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
@@ -213,7 +213,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
         <p className="text-sm text-[var(--color-text2)] text-center mb-6">Set up your company to get started.</p>
 
         {/* Progress Indicator */}
-        <div className="flex items-center justify-center gap-0 mb-6">
+        <div className="flex items-center justify-center gap-1 sm:gap-0 mb-6 w-full max-w-full overflow-hidden px-1">
           {STEPS.map((label, i) => (
             <div key={label} className="flex items-center">
               <div className="flex flex-col items-center">
@@ -235,7 +235,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
                 }`}>{label}</span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`w-10 sm:w-16 h-0.5 mx-1 sm:mx-2 -mt-4 ${
+                <div className={`flex-1 max-w-16 min-w-8 h-0.5 mx-1 sm:mx-2 -mt-4 shrink ${
                   i < step ? 'bg-[var(--color-green)]' : 'bg-[var(--color-border)]'
                 }`} />
               )}
@@ -304,10 +304,10 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
                 ))}
               </select>
             </div>
-            <div className="flex gap-3 mt-2">
-              <Button variant="outline" onClick={() => setStep(0)}>Back</Button>
-              <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>Skip &rarr;</Button>
-              <Button className="flex-1" onClick={completeStep1}>Continue</Button>
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 mt-2">
+              <Button variant="outline" onClick={() => setStep(0)} className="sm:w-auto w-full justify-center">Back</Button>
+              <Button variant="outline" className="flex-1 justify-center" onClick={() => setStep(2)}>Skip &rarr;</Button>
+              <Button className="flex-1 justify-center" onClick={completeStep1}>Continue</Button>
             </div>
           </div>
         )}
@@ -346,7 +346,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
                 )}
               </div>
             ))}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-[var(--color-text2)]">Primary Color</label>
                 <div className="flex gap-2 items-center mt-1">
@@ -362,10 +362,10 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
                 </div>
               </div>
             </div>
-            <div className="flex gap-3 mt-2">
-              <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
-              <Button variant="outline" className="flex-1" onClick={finish}>Skip &rarr;</Button>
-              <Button className="flex-1" onClick={completeStep2}>Get Started</Button>
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 mt-2">
+              <Button variant="outline" onClick={() => setStep(1)} className="sm:w-auto w-full justify-center">Back</Button>
+              <Button variant="outline" className="flex-1 justify-center" onClick={finish}>Skip &rarr;</Button>
+              <Button className="flex-1 justify-center" onClick={completeStep2}>Get Started</Button>
             </div>
           </div>
         )}
@@ -416,7 +416,7 @@ export function WelcomeOverlay({ onDone }: { onDone: () => void }) {
             <div className="mt-2 space-y-2">
               {localSnapshots.length > 0 ? (
                 localSnapshots.map((snap) => (
-                  <div key={snap.id} className="p-2 flex justify-between items-center bg-[var(--color-input-bg)] rounded">
+                  <div key={snap.id} className="p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 bg-[var(--color-input-bg)] rounded">
                     <div>
                       <div className="font-medium text-[var(--color-text1)]">{snap.name}</div>
                       <div className="text-[10px] text-[var(--color-text3)]">{new Date(snap.createdAt).toLocaleString()}</div>

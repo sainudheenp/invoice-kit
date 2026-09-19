@@ -32,7 +32,7 @@ export function CurrencySection({ form, set }: Props) {
           </select>
           <Button size="sm" onClick={applyPreset}>Apply</Button>
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div><label className="text-xs font-medium text-[var(--color-text2)]">Code</label><input value={form.curCode} onChange={(e) => set('curCode', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
           <div><label className="text-xs font-medium text-[var(--color-text2)]">Symbol</label><input value={form.curSym} onChange={(e) => set('curSym', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
           <div><label className="text-xs font-medium text-[var(--color-text2)]">Sub-units per unit</label><input value={form.curSubPer} onChange={(e) => set('curSubPer', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]" /></div>
