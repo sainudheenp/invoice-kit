@@ -342,35 +342,71 @@ export async function htmlToPDF(html: string, filename: string): Promise<void> {
   await htmlToPDFWithProgress(html, filename)
 }
 
+async function waitForPrintReady(doc: Document): Promise<void> {
+  const fontReady = doc.fonts?.ready || Promise.resolve()
+  const imageReady = Array.from(doc.images).map((image) => {
+    if (image.complete) return image.decode?.().catch(() => {}) || Promise.resolve()
+    return new Promise<void>((resolve) => {
+      const finish = () => {
+        image.removeEventListener('load', finish)
+        image.removeEventListener('error', finish)
+        resolve()
+      }
+      image.addEventListener('load', finish, { once: true })
+      image.addEventListener('error', finish, { once: true })
+      setTimeout(finish, 4000)
+    })
+  })
+  await Promise.race([fontReady, new Promise<void>((resolve) => setTimeout(resolve, 4000))])
+  await Promise.all(imageReady)
+
+  const win = doc.defaultView
+  await new Promise<void>((resolve) => {
+    if (!win?.requestAnimationFrame) {
+      setTimeout(resolve, 32)
+      return
+    }
+    win.requestAnimationFrame(() => win.requestAnimationFrame(() => resolve()))
+  })
+}
+
 export function printHTML(html: string): void {
   const iframe = document.createElement('iframe')
   iframe.style.cssText = 'position:fixed;top:-9999px;left:0;width:794px;height:1123px;border:none;overflow:hidden;'
   document.body.appendChild(iframe)
   const paged = preparePagedDocument(withPdfFonts(html))
+  let cleaned = false
+  const cleanup = () => {
+    if (cleaned) return
+    cleaned = true
+    window.removeEventListener('afterprint', cleanup)
+    try { iframe.contentWindow?.removeEventListener('afterprint', cleanup) } catch {}
+    try { iframe.remove() } catch {}
+  }
+  window.addEventListener('afterprint', cleanup, { once: true })
   iframe.srcdoc = paged.printHtml
-  iframe.onload = () => {
+  iframe.onload = async () => {
     const printDoc = iframe.contentDocument
-    const printHeader = printDoc?.querySelector<HTMLElement>('[data-pdf-print-header]')
-    const printFooter = printDoc?.querySelector<HTMLElement>('[data-pdf-print-footer]')
-    if (printDoc?.body) {
+    if (!printDoc) return
+    await waitForPrintReady(printDoc)
+    const printHeader = printDoc.querySelector<HTMLElement>('[data-pdf-print-header]')
+    const printFooter = printDoc.querySelector<HTMLElement>('[data-pdf-print-footer]')
+    if (printDoc.body) {
       // Reserve exactly the measured fixed bands so long tables never run
       // underneath the repeated header or footer in the browser print path.
       if (printHeader) printDoc.body.style.setProperty('padding-top', `${printHeader.getBoundingClientRect().height}px`, 'important')
       if (printFooter) printDoc.body.style.setProperty('padding-bottom', `${printFooter.getBoundingClientRect().height}px`, 'important')
     }
     try {
+      iframe.contentWindow?.addEventListener('afterprint', cleanup, { once: true })
       iframe.contentWindow?.print()
-    } catch {}
-    setTimeout(() => {
-      try { document.body.removeChild(iframe) } catch {}
-    }, 1000)
-  }
-  // Fallback cleanup if onload never fires
-  setTimeout(() => {
-    if (iframe.parentNode) {
-      try { document.body.removeChild(iframe) } catch {}
+    } catch {
+      cleanup()
     }
-  }, 5000)
+  }
+  // Keep the print document alive until the print dialog closes. The timeout
+  // only covers browsers that do not emit an afterprint event.
+  setTimeout(cleanup, 120000)
 }
 
 export function downloadText(html: string, filename: string): void {
