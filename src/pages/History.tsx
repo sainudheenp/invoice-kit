@@ -84,13 +84,13 @@ export default function History() {
   }
 
   const batchDelete = async () => {
-    if (!confirm(`Delete ${selected.size} selected document(s)?`)) return
+    if (!confirm(`Delete ${selected.size} selected item(s)?`)) return
     for (const id of selected) {
       if (tab === 'inv') await deleteInvoice(id)
       else if (tab === 'rec') await deleteReceipt(id)
       else await deleteQuotation(id)
     }
-    showToast(`${selected.size} document(s) deleted.`)
+    showToast(`${selected.size} item(s) deleted.`)
     clearSelection()
   }
 
@@ -221,7 +221,7 @@ export default function History() {
       <td colSpan={span} className="py-8 text-center text-[var(--color-text3)] text-sm">
         {dateFilterActive ? (
           <div className="flex flex-col items-center gap-2">
-            <span>No documents match the selected date range.</span>
+            <span>No items match the selected date range.</span>
             <button onClick={clearDateFilter} className="text-xs px-3 py-1.5 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-input-bg)] cursor-pointer text-[var(--color-text2)]">
               Clear date filter
             </button>
@@ -234,13 +234,13 @@ export default function History() {
   return (
     <div>
       <div className="mb-5">
-        <h1 className="text-xl font-bold">Documents</h1>
-        <p className="text-sm text-[var(--color-text2)]">View and manage saved documents.</p>
+        <h1 className="text-xl font-bold">Saved Items</h1>
+        <p className="text-sm text-[var(--color-text2)]">View and manage your saved invoices, receipts, and quotations.</p>
       </div>
 
       <Card className="overflow-hidden">
         <CardHeader>
-          <h2 className="text-sm font-semibold">Saved Documents</h2>
+          <h2 className="text-sm font-semibold">All Items</h2>
           <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] font-medium">{count}</span>
         </CardHeader>
 

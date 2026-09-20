@@ -15,7 +15,7 @@ generated on-device as real, selectable, vector PDFs.
   currency, VAT registration, bank details, watermark).
 - **Customers & Products** catalogs for quick line-item entry.
 - **Dashboard** with totals and recent activity.
-- **History** with search, **date-range filter** (presets + custom), edit, duplicate, delete, and mark-as-paid.
+- **Saved Items** (history) with search, **date-range filter** (presets + custom), edit, duplicate, delete, and mark-as-paid.
 - **Export options per document:**
   - **Preview** — in-app modal render.
   - **Print** — browser print dialog (A4).

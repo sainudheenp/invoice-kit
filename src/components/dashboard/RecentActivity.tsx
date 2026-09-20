@@ -87,12 +87,12 @@ export function RecentActivity() {
   return (
     <Card className="mb-6">
       <CardHeader>
-        <h2 className="text-sm font-semibold">Recent Documents</h2>
+        <h2 className="text-sm font-semibold">Recent Saved Items</h2>
         <button 
           onClick={() => navigate('/history')}
           className="text-xs text-[var(--color-primary)] hover:underline font-medium cursor-pointer"
         >
-          View All Documents &rarr;
+          View All Saved Items &rarr;
         </button>
       </CardHeader>
       
