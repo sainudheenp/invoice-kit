@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AppProvider, useApp, STORAGE_ACTIVE_ID_KEY } from '@/store/AppContext'
 import { UIProvider, useUI } from '@/store/UIContext'
@@ -18,8 +18,6 @@ import Products from '@/pages/Products'
 import History from '@/pages/History'
 import Settings from '@/pages/Settings'
 import { prewarmPdf, prefetchPdfFonts } from '@/utils/pdf'
-import { lazy } from 'react'
-const PdfEditor = lazy(() => import('@/pages/PdfEditor'))
 
 function AppContent() {
   const { state, loading } = useApp()
@@ -100,24 +98,17 @@ function AppContent() {
 
       <main className="flex-1 min-w-0 ml-0 md:ml-[248px] p-3 md:p-5 max-w-[1600px]">
         <ErrorBoundary>
-          <Suspense fallback={
-            <div className="flex items-center justify-center py-20">
-              <div className="spinner" />
-            </div>
-          }>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/invoice" element={<Invoice />} />
-              <Route path="/receipt" element={<Receipt />} />
-              <Route path="/quotation" element={<Quotation />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/history" element={<History />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/pdf-editor" element={<PdfEditor />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/invoice" element={<Invoice />} />
+            <Route path="/receipt" element={<Receipt />} />
+            <Route path="/quotation" element={<Quotation />} />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </ErrorBoundary>
       </main>
 
