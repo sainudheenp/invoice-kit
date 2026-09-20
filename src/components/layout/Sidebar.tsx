@@ -26,7 +26,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { page: 'customers', label: 'Customers', icon: 'users' },
       { page: 'products', label: 'Products', icon: 'box' },
-      { page: 'history', label: 'Documents', icon: 'clipboard' },
+      { page: 'history', label: 'Saved Items', icon: 'clipboard' },
     ],
   },
   {

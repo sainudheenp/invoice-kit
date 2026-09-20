@@ -25,6 +25,25 @@ describe('paged document preparation', () => {
     expect(prepared.printHtml).toContain('padding-top: 40px')
     expect(prepared.printHtml).toContain('padding-left: 50px')
   })
+
+  it('clones body page padding onto every printed page so fixed bands never hide content', () => {
+    const html = `<!DOCTYPE html><html><head><style>
+      body { padding:40px 50px 100px; }
+      .header { background:#f8fafc; }
+      .footer { position:fixed; bottom:0; }
+    </style></head><body>
+      <div class="header">Header</div>
+      <p>Content</p>
+      <div class="footer">Footer</div>
+    </body></html>`
+
+    const prepared = preparePagedDocument(html)
+    // Only the browser print path needs the clone rule — the vector PDF
+    // engine (taepdf) renders its own per-page bands.
+    expect(prepared.printHtml).toContain('box-decoration-break: clone')
+    expect(prepared.printHtml).toContain('-webkit-box-decoration-break: clone')
+    expect(prepared.html).not.toContain('box-decoration-break')
+  })
 })
 
 describe('QR export format', () => {

@@ -201,6 +201,15 @@ export function preparePagedDocument(html: string): PagedDocument {
   const mainHtml = '<!DOCTYPE html>' + doc.documentElement.outerHTML
   const printStyle = doc.createElement('style')
   printStyle.textContent = `
+    /* Repeating fixed bands must never hide content: body padding only pads
+       the first/last page unless cloned, so pages 2+ slid underneath the
+       repeated header/footer. Cloning re-applies the reserved bands' padding
+       on every printed page (Chrome 130+, Firefox; Safari falls back to the
+       old first/last-page behaviour). */
+    body {
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
     [data-pdf-print-header] {
       position:fixed !important;
       top:0 !important;
