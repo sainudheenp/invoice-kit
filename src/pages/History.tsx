@@ -4,7 +4,8 @@ import { useApp } from '@/store/AppContext'
 import { useUI } from '@/store/UIContext'
 import { Card, CardHeader, Button } from '@/components/ui'
 import { Svg } from '@/icons'
-import { invStatus, uid } from '@/utils'
+import { invStatus, uid, DATE_PRESETS, presetRange, detectPreset, dateInRange } from '@/utils'
+import type { DatePreset } from '@/utils'
 import { buildInvoiceHTML, buildReceiptHTML, buildQuotationHTML } from '@/templates'
 import { printHTML, htmlToPDFWithProgress, downloadText } from '@/utils/pdf'
 import { invoicesToCSV, receiptsToCSV, quotationsToCSV, downloadCSV } from '@/utils/csv'
@@ -22,21 +23,36 @@ export default function History() {
   const co = state.companies.find((c) => c.id === state.activeId)
   const [tab, setTab] = useState<Tab>('inv')
   const [search, setSearch] = useState('')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const downloadingRef = useRef(false)
 
+  const dateFilterActive = !!(fromDate || toDate)
+  const clearDateFilter = () => { setFromDate(''); setToDate('') }
+  const presetKey: DatePreset = detectPreset({ from: fromDate, to: toDate })
+  const applyPreset = (id: DatePreset) => {
+    if (id === 'custom') return
+    const r = presetRange(id)
+    setFromDate(r.from)
+    setToDate(r.to)
+  }
+
   const invoices = state.invoices
     .filter((i) => i.companyId === co?.id)
+    .filter((i) => dateInRange(i.date, fromDate, toDate))
     .filter((i) => !search || i.invNo.toLowerCase().includes(search.toLowerCase()) || i.customer.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => b.createdAt - a.createdAt || b.invNo.localeCompare(a.invNo))
 
   const receipts = state.receipts
     .filter((r) => r.companyId === co?.id)
+    .filter((r) => dateInRange(r.date, fromDate, toDate))
     .filter((r) => !search || r.recNo.toLowerCase().includes(search.toLowerCase()) || r.receivedFrom.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => b.createdAt - a.createdAt || b.recNo.localeCompare(a.recNo))
 
   const quotations = state.quotations
     .filter((q) => q.companyId === co?.id)
+    .filter((q) => dateInRange(q.date, fromDate, toDate))
     .filter((q) => !search || q.quotNo.toLowerCase().includes(search.toLowerCase()) || q.customer.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => b.createdAt - a.createdAt || b.quotNo.localeCompare(a.quotNo))
 
@@ -200,6 +216,21 @@ export default function History() {
     </button>
   )
 
+  const emptyRow = (noneMsg: string, span: number) => (
+    <tr>
+      <td colSpan={span} className="py-8 text-center text-[var(--color-text3)] text-sm">
+        {dateFilterActive ? (
+          <div className="flex flex-col items-center gap-2">
+            <span>No documents match the selected date range.</span>
+            <button onClick={clearDateFilter} className="text-xs px-3 py-1.5 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-input-bg)] cursor-pointer text-[var(--color-text2)]">
+              Clear date filter
+            </button>
+          </div>
+        ) : noneMsg}
+      </td>
+    </tr>
+  )
+
   return (
     <div>
       <div className="mb-5">
@@ -218,6 +249,47 @@ export default function History() {
             {tabBtn('inv', 'Invoices')}
             {tabBtn('rec', 'Receipts')}
             {tabBtn('quot', 'Quotations')}
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <select
+              value={presetKey}
+              onChange={(e) => applyPreset(e.target.value as DatePreset)}
+              aria-label="Filter by date"
+              title="Filter by date"
+              className="pl-2.5 pr-3 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)] cursor-pointer"
+            >
+              {DATE_PRESETS.map((p) => (
+                <option key={p.id} value={p.id}>{p.label}</option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={fromDate}
+              max={toDate || undefined}
+              onChange={(e) => setFromDate(e.target.value)}
+              aria-label="From date"
+              title="From date"
+              className="px-2.5 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+            />
+            <span className="text-xs text-[var(--color-text3)]">to</span>
+            <input
+              type="date"
+              value={toDate}
+              min={fromDate || undefined}
+              onChange={(e) => setToDate(e.target.value)}
+              aria-label="To date"
+              title="To date"
+              className="px-2.5 py-1.5 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary-ring)]"
+            />
+            {dateFilterActive && (
+              <button
+                onClick={clearDateFilter}
+                className="text-xs px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-input-bg)] cursor-pointer text-[var(--color-text2)]"
+                title="Clear date filter"
+              >
+                ✕ Clear
+              </button>
+            )}
           </div>
           <div className="relative flex-1 max-w-xs ml-auto">
             <Svg name="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text3)]" />
@@ -255,9 +327,7 @@ export default function History() {
                 </tr>
               </thead>
               <tbody>
-                {invoices.length === 0 && (
-                  <tr><td colSpan={7} className="py-8 text-center text-[var(--color-text3)] text-sm">No invoices yet.</td></tr>
-                )}
+                {invoices.length === 0 && emptyRow('No invoices yet.', 7)}
                 {invoices.map((inv) => {
                   const status = invStatus(inv)
                   return (
@@ -306,9 +376,7 @@ export default function History() {
                 </tr>
               </thead>
               <tbody>
-                {receipts.length === 0 && (
-                  <tr><td colSpan={6} className="py-8 text-center text-[var(--color-text3)] text-sm">No receipts yet.</td></tr>
-                )}
+                {receipts.length === 0 && emptyRow('No receipts yet.', 6)}
                 {receipts.map((rec) => (
                   <tr key={rec.id} className={`border-b border-[var(--color-border)]/50 hover:bg-[var(--color-input-bg)]/50 ${selected.has(rec.id) ? 'bg-[var(--color-primary-bg)]/20' : ''}`}>
                     <td className="py-2.5 px-4">
@@ -347,9 +415,7 @@ export default function History() {
                 </tr>
               </thead>
               <tbody>
-                {quotations.length === 0 && (
-                  <tr><td colSpan={6} className="py-8 text-center text-[var(--color-text3)] text-sm">No quotations yet.</td></tr>
-                )}
+                {quotations.length === 0 && emptyRow('No quotations yet.', 6)}
                 {quotations.map((q) => (
                   <tr key={q.id} className={`border-b border-[var(--color-border)]/50 hover:bg-[var(--color-input-bg)]/50 ${selected.has(q.id) ? 'bg-[var(--color-primary-bg)]/20' : ''}`}>
                     <td className="py-2.5 px-4">
