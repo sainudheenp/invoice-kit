@@ -103,6 +103,154 @@ export function withPdfFonts(html: string): string {
   return i !== -1 ? html.slice(0, i + 6) + css + html.slice(i + 6) : css + html
 }
 
+interface PagedDocument {
+  html: string
+  printHtml: string
+  header?: string
+  footer?: string
+}
+
+function cssRuleValue(css: string, selector: string, property: string, fallback: string): string {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const re = new RegExp(`[^{}]*${escapedSelector}\\b[^{}]*\\{([^{}]*)\\}`, 'gi')
+  let match: RegExpExecArray | null
+  while ((match = re.exec(css)) !== null) {
+    const value = match[1].match(new RegExp(`(?:^|;)\\s*${property}\\s*:\\s*([^;]+)`, 'i'))
+    if (value) return value[1].trim()
+  }
+  return fallback
+}
+
+function cssBoxPadding(css: string): { top: string; right: string; bottom: string; left: string } {
+  const shorthand = cssRuleValue(css, 'body', 'padding', '0px').split(/\s+/).filter(Boolean)
+  const values = shorthand.length === 1
+    ? [shorthand[0], shorthand[0], shorthand[0], shorthand[0]]
+    : shorthand.length === 2
+      ? [shorthand[0], shorthand[1], shorthand[0], shorthand[1]]
+      : shorthand.length === 3
+        ? [shorthand[0], shorthand[1], shorthand[2], shorthand[1]]
+        : [shorthand[0] || '0px', shorthand[1] || '0px', shorthand[2] || '0px', shorthand[3] || '0px']
+  return { top: values[0], right: values[1], bottom: values[2], left: values[3] }
+}
+
+function chromeDocument(styles: string, fragment: string, overrides: string): string {
+  return `<!DOCTYPE html><html><head>${styles}<style>${overrides}</style></head><body>${fragment}</body></html>`
+}
+
+/**
+ * Move the document header/footer into taepdf's page chrome bands. Normal-flow
+ * headers only render on page one and fixed footers can cover the last table
+ * rows, so keeping them in the main content flow causes both pagination bugs.
+ */
+export function preparePagedDocument(html: string): PagedDocument {
+  if (typeof DOMParser === 'undefined') return { html, printHtml: html }
+
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  const bodyChildren = Array.from(doc.body.children)
+  const headerElement = bodyChildren.find((el) => el.classList.contains('header'))
+  const headerNodes = headerElement
+    ? bodyChildren.filter((el) => el === headerElement || el.classList.contains('top-border') || el.classList.contains('top-db'))
+    : bodyChildren.filter((el) => el.classList.contains('top-black') || el.classList.contains('brand-area'))
+  const footerElement = bodyChildren.find((el) => el.classList.contains('footer'))
+
+  if (!headerNodes.length && !footerElement) return { html, printHtml: html }
+
+  const styles = Array.from(doc.head.querySelectorAll('style')).map((style) => style.outerHTML).join('\n')
+  const headerFragment = headerNodes.map((el) => el.outerHTML).join('\n')
+  const footerFragment = footerElement?.outerHTML || ''
+  const footerLeft = cssRuleValue(styles, '.footer', 'left', '0px')
+  const footerRight = cssRuleValue(styles, '.footer', 'right', '0px')
+  const bodyPadding = cssBoxPadding(styles)
+
+  for (const el of headerNodes) el.remove()
+  footerElement?.remove()
+
+  // The extracted header and footer now occupy dedicated page bands. Keep the
+  // template's horizontal padding, but don't apply its old top/bottom padding
+  // a second time inside the content area.
+  const contentStyle = doc.createElement('style')
+  contentStyle.textContent = `
+    body { padding-top:0 !important; padding-bottom:0 !important; }
+    body > .border-frame, body > .vintage-border, body > .vintage-border-inner, body > .sidebar { display:none !important; }
+  `
+  doc.head.appendChild(contentStyle)
+
+  const header = headerFragment
+    ? chromeDocument(styles, headerFragment, 'body { padding-bottom:0 !important; }')
+    : undefined
+  const footer = footerFragment
+    ? chromeDocument(
+      styles,
+      footerFragment,
+      `
+        body { padding:0 !important; }
+        .footer {
+          position:static !important;
+          top:auto !important;
+          right:auto !important;
+          bottom:auto !important;
+          left:auto !important;
+          width:auto !important;
+          margin-left:${footerLeft} !important;
+          margin-right:${footerRight} !important;
+        }
+      `,
+    )
+    : undefined
+
+  const mainHtml = '<!DOCTYPE html>' + doc.documentElement.outerHTML
+  const printStyle = doc.createElement('style')
+  printStyle.textContent = `
+    [data-pdf-print-header] {
+      position:fixed !important;
+      top:0 !important;
+      left:0 !important;
+      right:0 !important;
+      z-index:1000 !important;
+    }
+    [data-pdf-print-footer] {
+      position:fixed !important;
+      bottom:0 !important;
+      left:0 !important;
+      right:0 !important;
+      z-index:1000 !important;
+    }
+    [data-pdf-print-footer] .footer {
+      position:static !important;
+      top:auto !important;
+      right:auto !important;
+      bottom:auto !important;
+      left:auto !important;
+      width:auto !important;
+      margin-left:${footerLeft} !important;
+      margin-right:${footerRight} !important;
+    }
+  `
+  doc.head.appendChild(printStyle)
+  if (headerFragment) {
+    const headerWrapper = doc.createElement('div')
+    headerWrapper.setAttribute('data-pdf-print-header', '')
+    headerWrapper.style.paddingTop = bodyPadding.top
+    headerWrapper.style.paddingLeft = bodyPadding.left
+    headerWrapper.style.paddingRight = bodyPadding.right
+    headerWrapper.innerHTML = headerFragment
+    doc.body.prepend(headerWrapper)
+  }
+  if (footerFragment) {
+    const footerWrapper = doc.createElement('div')
+    footerWrapper.setAttribute('data-pdf-print-footer', '')
+    footerWrapper.innerHTML = footerFragment
+    doc.body.appendChild(footerWrapper)
+  }
+
+  return {
+    html: mainHtml,
+    printHtml: '<!DOCTYPE html>' + doc.documentElement.outerHTML,
+    header,
+    footer,
+  }
+}
+
 export function safePdfName(name: string | null | undefined, fallback = 'document'): string {
   const cleaned = (name ?? '')
     .normalize('NFKC')
@@ -172,7 +320,17 @@ export async function htmlToPDFWithProgress(
   await ensureWarm()
 
   onProgress?.({ phase: 'rendering', detail: 'Rendering pages' })
-  await pdf.download(fontHtml, 'A4', safePdfName(filename) + '.pdf')
+  const paged = preparePagedDocument(fontHtml)
+  await pdf.download(
+    paged.html,
+    'A4',
+    safePdfName(filename) + '.pdf',
+    undefined,
+    {
+      header: paged.header ? () => paged.header || '' : undefined,
+      footer: paged.footer ? () => paged.footer || '' : undefined,
+    },
+  )
 
   onProgress?.({ phase: 'downloading', detail: 'Starting download' })
   await new Promise((r) => setTimeout(r, 80))
@@ -184,25 +342,71 @@ export async function htmlToPDF(html: string, filename: string): Promise<void> {
   await htmlToPDFWithProgress(html, filename)
 }
 
+async function waitForPrintReady(doc: Document): Promise<void> {
+  const fontReady = doc.fonts?.ready || Promise.resolve()
+  const imageReady = Array.from(doc.images).map((image) => {
+    if (image.complete) return image.decode?.().catch(() => {}) || Promise.resolve()
+    return new Promise<void>((resolve) => {
+      const finish = () => {
+        image.removeEventListener('load', finish)
+        image.removeEventListener('error', finish)
+        resolve()
+      }
+      image.addEventListener('load', finish, { once: true })
+      image.addEventListener('error', finish, { once: true })
+      setTimeout(finish, 4000)
+    })
+  })
+  await Promise.race([fontReady, new Promise<void>((resolve) => setTimeout(resolve, 4000))])
+  await Promise.all(imageReady)
+
+  const win = doc.defaultView
+  await new Promise<void>((resolve) => {
+    if (!win?.requestAnimationFrame) {
+      setTimeout(resolve, 32)
+      return
+    }
+    win.requestAnimationFrame(() => win.requestAnimationFrame(() => resolve()))
+  })
+}
+
 export function printHTML(html: string): void {
   const iframe = document.createElement('iframe')
   iframe.style.cssText = 'position:fixed;top:-9999px;left:0;width:794px;height:1123px;border:none;overflow:hidden;'
   document.body.appendChild(iframe)
-  iframe.srcdoc = withPdfFonts(html)
-  iframe.onload = () => {
-    try {
-      iframe.contentWindow?.print()
-    } catch {}
-    setTimeout(() => {
-      try { document.body.removeChild(iframe) } catch {}
-    }, 1000)
+  const paged = preparePagedDocument(withPdfFonts(html))
+  let cleaned = false
+  const cleanup = () => {
+    if (cleaned) return
+    cleaned = true
+    window.removeEventListener('afterprint', cleanup)
+    try { iframe.contentWindow?.removeEventListener('afterprint', cleanup) } catch {}
+    try { iframe.remove() } catch {}
   }
-  // Fallback cleanup if onload never fires
-  setTimeout(() => {
-    if (iframe.parentNode) {
-      try { document.body.removeChild(iframe) } catch {}
+  window.addEventListener('afterprint', cleanup, { once: true })
+  iframe.srcdoc = paged.printHtml
+  iframe.onload = async () => {
+    const printDoc = iframe.contentDocument
+    if (!printDoc) return
+    await waitForPrintReady(printDoc)
+    const printHeader = printDoc.querySelector<HTMLElement>('[data-pdf-print-header]')
+    const printFooter = printDoc.querySelector<HTMLElement>('[data-pdf-print-footer]')
+    if (printDoc.body) {
+      // Reserve exactly the measured fixed bands so long tables never run
+      // underneath the repeated header or footer in the browser print path.
+      if (printHeader) printDoc.body.style.setProperty('padding-top', `${printHeader.getBoundingClientRect().height}px`, 'important')
+      if (printFooter) printDoc.body.style.setProperty('padding-bottom', `${printFooter.getBoundingClientRect().height}px`, 'important')
     }
-  }, 5000)
+    try {
+      iframe.contentWindow?.addEventListener('afterprint', cleanup, { once: true })
+      iframe.contentWindow?.print()
+    } catch {
+      cleanup()
+    }
+  }
+  // Keep the print document alive until the print dialog closes. The timeout
+  // only covers browsers that do not emit an afterprint event.
+  setTimeout(cleanup, 120000)
 }
 
 export function downloadText(html: string, filename: string): void {

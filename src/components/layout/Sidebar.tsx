@@ -30,10 +30,6 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: 'Tools',
-    items: [{ page: 'pdf-editor', label: 'PDF Editor', icon: 'edit' }],
-  },
-  {
     label: 'System',
     items: [{ page: 'settings', label: 'Settings', icon: 'settings' }],
   },

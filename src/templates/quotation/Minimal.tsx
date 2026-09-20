@@ -3,6 +3,7 @@ import type { QuotTemplateData } from '@/types/template'
 
 export function QuotationMinimal(d:QuotTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#94a3b8'
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:32.5px;width:auto;" alt="logo"/>` : ''
 
   const rows = d.items.map((item, i) => `
     <tr>
@@ -47,9 +48,12 @@ export function QuotationMinimal(d:QuotTemplateData): string {
   .footer { position:fixed; bottom:0; left:75px; right:75px; padding-top:15px; border-top:1.25px solid #e2e8f0; font-size:8.75px; color:#94a3b8; text-align:center; letter-spacing:0.375px; z-index:100; }
 </style></head><body>
 <div class="header">
-  <div>
-    <div class="co-name">${esc(c.name)}</div>
-    ${c.sub ? `<div class="co-sub">${esc(c.sub)}</div>` : ''}
+  <div style="display:flex;align-items:center;gap:10px;">
+    ${logoHtml}
+    <div>
+      <div class="co-name">${esc(c.name)}</div>
+      ${c.sub ? `<div class="co-sub">${esc(c.sub)}</div>` : ''}
+    </div>
   </div>
   <div style="text-align:right;">
     <div class="doc-type">Quotation</div>
