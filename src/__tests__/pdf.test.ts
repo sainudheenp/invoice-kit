@@ -22,6 +22,8 @@ describe('paged document preparation', () => {
     expect(prepared.footer).toContain('position:static !important')
     expect(prepared.printHtml).toContain('data-pdf-print-header')
     expect(prepared.printHtml).toContain('data-pdf-print-footer')
+    expect(prepared.printHtml).toContain('padding-top: 40px')
+    expect(prepared.printHtml).toContain('padding-left: 50px')
   })
 })
 

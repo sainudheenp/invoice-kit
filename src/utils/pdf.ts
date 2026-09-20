@@ -110,14 +110,27 @@ interface PagedDocument {
   footer?: string
 }
 
-function cssRuleValue(css: string, className: string, property: string, fallback: string): string {
-  const re = new RegExp(`[^{}]*\\.${className}\\b[^{}]*\\{([^{}]*)\\}`, 'gi')
+function cssRuleValue(css: string, selector: string, property: string, fallback: string): string {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const re = new RegExp(`[^{}]*${escapedSelector}\\b[^{}]*\\{([^{}]*)\\}`, 'gi')
   let match: RegExpExecArray | null
   while ((match = re.exec(css)) !== null) {
     const value = match[1].match(new RegExp(`(?:^|;)\\s*${property}\\s*:\\s*([^;]+)`, 'i'))
     if (value) return value[1].trim()
   }
   return fallback
+}
+
+function cssBoxPadding(css: string): { top: string; right: string; bottom: string; left: string } {
+  const shorthand = cssRuleValue(css, 'body', 'padding', '0px').split(/\s+/).filter(Boolean)
+  const values = shorthand.length === 1
+    ? [shorthand[0], shorthand[0], shorthand[0], shorthand[0]]
+    : shorthand.length === 2
+      ? [shorthand[0], shorthand[1], shorthand[0], shorthand[1]]
+      : shorthand.length === 3
+        ? [shorthand[0], shorthand[1], shorthand[2], shorthand[1]]
+        : [shorthand[0] || '0px', shorthand[1] || '0px', shorthand[2] || '0px', shorthand[3] || '0px']
+  return { top: values[0], right: values[1], bottom: values[2], left: values[3] }
 }
 
 function chromeDocument(styles: string, fragment: string, overrides: string): string {
@@ -145,8 +158,9 @@ export function preparePagedDocument(html: string): PagedDocument {
   const styles = Array.from(doc.head.querySelectorAll('style')).map((style) => style.outerHTML).join('\n')
   const headerFragment = headerNodes.map((el) => el.outerHTML).join('\n')
   const footerFragment = footerElement?.outerHTML || ''
-  const footerLeft = cssRuleValue(styles, 'footer', 'left', '0px')
-  const footerRight = cssRuleValue(styles, 'footer', 'right', '0px')
+  const footerLeft = cssRuleValue(styles, '.footer', 'left', '0px')
+  const footerRight = cssRuleValue(styles, '.footer', 'right', '0px')
+  const bodyPadding = cssBoxPadding(styles)
 
   for (const el of headerNodes) el.remove()
   footerElement?.remove()
@@ -216,6 +230,9 @@ export function preparePagedDocument(html: string): PagedDocument {
   if (headerFragment) {
     const headerWrapper = doc.createElement('div')
     headerWrapper.setAttribute('data-pdf-print-header', '')
+    headerWrapper.style.paddingTop = bodyPadding.top
+    headerWrapper.style.paddingLeft = bodyPadding.left
+    headerWrapper.style.paddingRight = bodyPadding.right
     headerWrapper.innerHTML = headerFragment
     doc.body.prepend(headerWrapper)
   }
