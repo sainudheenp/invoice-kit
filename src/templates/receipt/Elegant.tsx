@@ -3,6 +3,7 @@ import type { RecTemplateData } from '@/types/template'
 
 export function ReceiptElegant(d:RecTemplateData): string {
   const c = d.comp; const p = d.pc || '#8b6914'
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:35px;width:auto;" alt="logo"/>` : ''
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
@@ -40,9 +41,12 @@ export function ReceiptElegant(d:RecTemplateData): string {
 <div class="vintage-border-inner"></div>
 
 <div class="header">
-  <div>
-    <div class="brand-name">${esc(c.name)}</div>
-    ${c.sub ? `<div class="brand-sub">${esc(c.sub)}</div>` : ''}
+  <div style="display:flex;align-items:center;gap:10px;">
+    ${logoHtml}
+    <div>
+      <div class="brand-name">${esc(c.name)}</div>
+      ${c.sub ? `<div class="brand-sub">${esc(c.sub)}</div>` : ''}
+    </div>
   </div>
   <div class="right-panel">
     <h1>Receipt</h1>

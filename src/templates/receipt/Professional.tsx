@@ -3,6 +3,7 @@ import type { RecTemplateData } from '@/types/template'
 
 export function ReceiptProfessional(d:RecTemplateData): string {
   const c = d.comp; const p = d.pc || '#1e3a5f'
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:32.5px;width:auto;" alt="logo"/>` : ''
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
@@ -40,9 +41,12 @@ export function ReceiptProfessional(d:RecTemplateData): string {
 <div class="top-db"></div>
 
 <div class="header">
-  <div>
-    <div class="brand-name">${esc(c.name)}</div>
-    ${c.sub ? `<div class="brand-sub">${esc(c.sub)}</div>` : ''}
+  <div style="display:flex;align-items:center;gap:10px;">
+    ${logoHtml}
+    <div>
+      <div class="brand-name">${esc(c.name)}</div>
+      ${c.sub ? `<div class="brand-sub">${esc(c.sub)}</div>` : ''}
+    </div>
   </div>
   <div class="right">
     <div class="doc-box">
