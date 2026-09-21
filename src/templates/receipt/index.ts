@@ -1,7 +1,0 @@
-export { ReceiptClassic } from './Classic'
-export { ReceiptModern } from './Modern'
-export { ReceiptProfessional } from './Professional'
-export { ReceiptMinimal } from './Minimal'
-export { ReceiptElegant } from './Elegant'
-export { ReceiptBold } from './Bold'
-export { ReceiptBeirak } from './Beirak'

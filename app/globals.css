@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/* In Drive Tours — design tokens                                      */
+/* Woody Wayanad greens + warm cream + marigold accent.                */
+/* ------------------------------------------------------------------ */
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Forest — primary brand green */
+  --color-forest-50: #f2f7f3;
+  --color-forest-100: #dfece1;
+  --color-forest-200: #c1d9c6;
+  --color-forest-300: #95bda1;
+  --color-forest-400: #679c76;
+  --color-forest-500: #477f59;
+  --color-forest-600: #356547;
+  --color-forest-700: #2b513a;
+  --color-forest-800: #254130;
+  --color-forest-900: #1e3629;
+  --color-forest-950: #0e1e15;
+
+  /* Cream — warm page backgrounds */
+  --color-cream-50: #fdfcf8;
+  --color-cream-100: #f8f4e9;
+  --color-cream-200: #efe6d2;
+
+  /* Sun — marigold accent for CTAs and highlights */
+  --color-sun-300: #ffd57a;
+  --color-sun-400: #fbbf24;
+  --color-sun-500: #f59e0b;
+
+  /* WhatsApp green */
+  --color-wa-100: #dcf8e7;
+  --color-wa-500: #25d366;
+  --color-wa-600: #1da851;
+  --color-wa-700: #128c4b;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 120px;
+}
+
+body {
+  background-color: var(--color-cream-50);
+  color: var(--color-stone-900);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: var(--color-forest-800);
+  color: #fff;
+}
+
+/* Visible, consistent keyboard focus */
+:focus-visible {
+  outline: 2px solid var(--color-forest-700);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Subtle scroll reveal (see components/Reveal.tsx) */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out;
+  will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

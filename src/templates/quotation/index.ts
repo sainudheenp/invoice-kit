@@ -1,7 +1,0 @@
-export { QuotationClassic } from './Classic'
-export { QuotationModern } from './Modern'
-export { QuotationProfessional } from './Professional'
-export { QuotationMinimal } from './Minimal'
-export { QuotationElegant } from './Elegant'
-export { QuotationBold } from './Bold'
-export { QuotationBeirak } from './Beirak'

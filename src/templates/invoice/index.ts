@@ -1,7 +1,0 @@
-export { InvoiceClassic } from './Classic'
-export { InvoiceModern } from './Modern'
-export { InvoiceProfessional } from './Professional'
-export { InvoiceMinimal } from './Minimal'
-export { InvoiceElegant } from './Elegant'
-export { InvoiceBold } from './Bold'
-export { InvoiceBeirak } from './Beirak'
