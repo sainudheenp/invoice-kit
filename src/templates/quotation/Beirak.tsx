@@ -3,7 +3,7 @@ import type { QuotTemplateData } from '@/types/template'
 
 export function QuotationBeirak(d:QuotTemplateData): string {
   const c = d.comp; const DB = '#1e3a5f'; const LB = '#e8edf3'
-  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:37.5px;width:auto;" alt="logo"/>` : ''
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:60px;width:auto;max-width:220px;object-fit:contain;" alt="logo"/>` : ''
 
   const rows = d.items.map((item, i) => `
     <tr${i % 2 === 1 ? ` style="background:${LB};"` : ''}>

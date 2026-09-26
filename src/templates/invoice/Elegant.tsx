@@ -3,7 +3,7 @@ import type { InvTemplateData } from '@/types/template'
 
 export function InvoiceElegant(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#8b6914'
-  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:40px;width:auto;" alt="logo"/>` : ''
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:62px;width:auto;max-width:220px;object-fit:contain;" alt="logo"/>` : ''
   const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
   const qrHtml = d.qr || ''
 

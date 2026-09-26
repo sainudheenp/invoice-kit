@@ -3,7 +3,7 @@ import type { RecTemplateData } from '@/types/template'
 
 export function ReceiptModern(d:RecTemplateData): string {
   const c = d.comp; const p = d.pc || '#D97706'
-  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:35px;width:auto;" alt="logo"/>` : ''
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:56px;width:auto;max-width:200px;object-fit:contain;" alt="logo"/>` : ''
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>

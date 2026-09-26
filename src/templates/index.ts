@@ -22,14 +22,24 @@ import {
 } from './quotation'
 
 const SCALE = 1.1
+const LOGO_SCALE = 1.35
 
 function scaleTemplate(html: string): string {
   let out = html.replace(/font-size:\s*([\d.]+)px/g, (_m, px) => {
     const v = Math.round(parseFloat(px) * SCALE * 10) / 10
     return `font-size:${v}px`
   })
+  // Logo gets a larger boost so it stands out in PDF/print
   out = out.replace(
-    /(<img\b[^>]*?)height:\s*([\d.]+)px([^>]*?alt="(?:logo|seal|signature)")/g,
+    /(<img\b[^>]*?)height:\s*([\d.]+)px([^>]*?alt="logo")/g,
+    (_m, pre, px, post) => {
+      const v = Math.round(parseFloat(px) * LOGO_SCALE)
+      return `${pre}height:${v}px${post}`
+    },
+  )
+  // Seal, signature and sig variants keep the standard scale
+  out = out.replace(
+    /(<img\b[^>]*?)height:\s*([\d.]+)px([^>]*?alt="(?:seal|signature|sig)")/g,
     (_m, pre, px, post) => {
       const v = Math.round(parseFloat(px) * SCALE)
       return `${pre}height:${v}px${post}`
