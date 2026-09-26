@@ -1,4 +1,3 @@
-
 import { resizeImage, IMAGE_MAX_SIZES } from '@/utils/image'
 
 interface Props {
@@ -12,6 +11,111 @@ interface Props {
   formRef: React.MutableRefObject<Record<string, string>>
   setSaving: (v: boolean) => void
   doAutoSave: () => void
+}
+
+const COLOR_JODIS = [
+  { name: 'Original Orange', primary: '#D97706', accent: '#78716C' },
+  { name: 'Black & Gray', primary: '#000000', accent: '#616161' },
+  { name: 'Charcoal & Slate', primary: '#1f2937', accent: '#64748b' },
+  { name: 'Navy & Gray', primary: '#1e3a5f', accent: '#6b7280' },
+  { name: 'Slate & Stone', primary: '#334155', accent: '#78716C' },
+  { name: 'Dark & Medium', primary: '#111827', accent: '#4b5563' },
+]
+
+function JodiPicker({
+  pcolor,
+  acolor,
+  set,
+}: {
+  pcolor: string
+  acolor: string
+  set: (field: string, value: string) => void
+}) {
+  return (
+    <div>
+      <label className="text-xs font-medium text-[var(--color-text2)]">Color Templates (Jodi) – Matching Pairs</label>
+      <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+        {COLOR_JODIS.map((jodi) => {
+          const active = pcolor.toLowerCase() === jodi.primary.toLowerCase() && acolor.toLowerCase() === jodi.accent.toLowerCase()
+          return (
+            <button
+              key={jodi.name}
+              type="button"
+              onClick={() => {
+                set('pcolor', jodi.primary)
+                set('acolor', jodi.accent)
+              }}
+              className={`p-2.5 rounded-xl border-2 text-left transition-all cursor-pointer group ${
+                active
+                  ? 'border-[var(--color-primary)] bg-[var(--color-primary-bg)] ring-2 ring-[var(--color-primary-ring)]'
+                  : 'border-[var(--color-border)] bg-[var(--color-input-bg)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-card)]'
+              }`}
+            >
+              <div className="flex gap-1.5 mb-1.5">
+                <span className="w-6 h-6 rounded-full border border-white/20 shadow-sm" style={{ background: jodi.primary }} />
+                <span className="w-6 h-6 rounded-full border border-white/20 shadow-sm -ml-2" style={{ background: jodi.accent }} />
+                {active && (
+                  <span className="ml-auto w-5 h-5 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center">
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+              <div className="text-[11px] font-medium text-[var(--color-text1)] leading-tight">{jodi.name}</div>
+              <div className="text-[10px] font-mono text-[var(--color-text3)] mt-0.5">
+                {jodi.primary} / {jodi.accent}
+              </div>
+            </button>
+          )
+        })}
+        {/* Custom Both Card */}
+        <div className="p-2.5 rounded-xl border-2 border-dashed border-[var(--color-border)] bg-[var(--color-input-bg)]">
+          <div className="text-[11px] font-medium text-[var(--color-text1)] mb-2">Custom Both</div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={pcolor}
+                onChange={(e) => set('pcolor', e.target.value)}
+                className="w-6 h-6 rounded-full border border-[var(--color-input-border)] cursor-pointer"
+                title="Primary custom"
+              />
+              <span className="text-[10px] font-mono text-[var(--color-text2)]">{pcolor}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={acolor}
+                onChange={(e) => set('acolor', e.target.value)}
+                className="w-6 h-6 rounded-full border border-[var(--color-input-border)] cursor-pointer"
+                title="Accent custom"
+              />
+              <span className="text-[10px] font-mono text-[var(--color-text2)]">{acolor}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Detailed custom pickers below for fine control */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg bg-[var(--color-input-bg)] border border-[var(--color-border)]">
+        <div>
+          <label className="text-[11px] font-medium text-[var(--color-text2)]">Primary Custom</label>
+          <div className="mt-1 flex gap-2 items-center">
+            <input type="color" value={pcolor} onChange={(e) => set('pcolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
+            <span className="text-xs font-mono text-[var(--color-text2)]">{pcolor}</span>
+          </div>
+        </div>
+        <div>
+          <label className="text-[11px] font-medium text-[var(--color-text2)]">Accent Custom</label>
+          <div className="mt-1 flex gap-2 items-center">
+            <input type="color" value={acolor} onChange={(e) => set('acolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
+            <span className="text-xs font-mono text-[var(--color-text2)]">{acolor}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function BrandingSection({ form, set, setUploadField, dragOverField, setDragOverField, showToast, autoSaveTimer, formRef, setSaving, doAutoSave }: Props) {
@@ -38,7 +142,7 @@ export function BrandingSection({ form, set, setUploadField, dragOverField, setD
   return (
     <div id="settings-branding" data-section="branding">
       <h2 className="text-sm font-semibold mb-3">Branding</h2>
-      <div className="space-y-4">
+      <div className="space-y-5">
         {(['logo', 'seal', 'signature'] as const).map((field) => (
           <div key={field}>
             <label className="text-xs font-medium text-[var(--color-text2)] capitalize mb-1.5 block">{field}</label>
@@ -86,22 +190,7 @@ export function BrandingSection({ form, set, setUploadField, dragOverField, setD
             </div>
           </div>
         ))}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-medium text-[var(--color-text2)]">Primary Color</label>
-            <div className="flex gap-2 items-center">
-              <input type="color" value={form.pcolor} onChange={(e) => set('pcolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
-              <span className="text-xs text-[var(--color-text2)]">{form.pcolor}</span>
-            </div>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-[var(--color-text2)]">Accent Color</label>
-            <div className="flex gap-2 items-center">
-              <input type="color" value={form.acolor} onChange={(e) => set('acolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
-              <span className="text-xs text-[var(--color-text2)]">{form.acolor}</span>
-            </div>
-          </div>
-        </div>
+        <JodiPicker pcolor={form.pcolor} acolor={form.acolor} set={set} />
       </div>
     </div>
   )
