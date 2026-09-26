@@ -49,6 +49,15 @@ function parseCo(c: Company) {
 const TEMPLATE_OPTIONS = ['classic', 'modern', 'professional', 'minimal', 'elegant', 'bold', 'beirak']
 const WATERMARK_OPTIONS = ['', 'Draft', 'Paid', 'Sample', 'Copy']
 
+const COLOR_JODIS = [
+  { name: 'Original Orange', primary: '#D97706', accent: '#78716C' },
+  { name: 'Black & Gray', primary: '#000000', accent: '#616161' },
+  { name: 'Charcoal & Slate', primary: '#1f2937', accent: '#64748b' },
+  { name: 'Navy & Gray', primary: '#1e3a5f', accent: '#6b7280' },
+  { name: 'Slate & Stone', primary: '#334155', accent: '#78716C' },
+  { name: 'Dark & Medium', primary: '#111827', accent: '#4b5563' },
+]
+
 const IMAGE_INFO = {
   logo: { dim: '200\u00D7200px', desc: 'Square, transparent background', note: 'Displays at 80\u00D780px on documents' },
   seal: { dim: '300\u00D7300px', desc: 'Square, transparent background', note: 'Displays at 120\u00D7120px on documents' },
@@ -580,19 +589,71 @@ export default function Settings() {
                   <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Primary Color</label>
-                  <div className="flex gap-2 items-center">
-                    <input type="color" value={form.pcolor} onChange={(e) => set('pcolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
-                    <span className="text-xs text-[var(--color-text2)]">{form.pcolor}</span>
+              <div>
+                <label className="text-xs font-medium text-[var(--color-text2)]">Color Templates (Jodi) – Matching Pairs</label>
+                <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {COLOR_JODIS.map((jodi) => {
+                    const active = form.pcolor.toLowerCase() === jodi.primary.toLowerCase() && form.acolor.toLowerCase() === jodi.accent.toLowerCase()
+                    return (
+                      <button
+                        key={jodi.name}
+                        type="button"
+                        onClick={() => {
+                          set('pcolor', jodi.primary)
+                          set('acolor', jodi.accent)
+                        }}
+                        className={`p-2.5 rounded-xl border-2 text-left transition-all cursor-pointer group ${
+                          active
+                            ? 'border-[var(--color-primary)] bg-[var(--color-primary-bg)] ring-2 ring-[var(--color-primary-ring)]'
+                            : 'border-[var(--color-border)] bg-[var(--color-input-bg)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-card)]'
+                        }`}
+                      >
+                        <div className="flex gap-1.5 mb-1.5">
+                          <span className="w-6 h-6 rounded-full border border-white/20 shadow-sm" style={{ background: jodi.primary }} />
+                          <span className="w-6 h-6 rounded-full border border-white/20 shadow-sm -ml-2" style={{ background: jodi.accent }} />
+                          {active && (
+                            <span className="ml-auto w-5 h-5 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center">
+                              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] font-medium text-[var(--color-text1)] leading-tight">{jodi.name}</div>
+                        <div className="text-[10px] font-mono text-[var(--color-text3)] mt-0.5">
+                          {jodi.primary} / {jodi.accent}
+                        </div>
+                      </button>
+                    )
+                  })}
+                  <div className="p-2.5 rounded-xl border-2 border-dashed border-[var(--color-border)] bg-[var(--color-input-bg)]">
+                    <div className="text-[11px] font-medium text-[var(--color-text1)] mb-2">Custom Both</div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input type="color" value={form.pcolor} onChange={(e) => set('pcolor', e.target.value)} className="w-6 h-6 rounded-full border border-[var(--color-input-border)] cursor-pointer" title="Primary custom" />
+                        <span className="text-[10px] font-mono text-[var(--color-text2)]">{form.pcolor}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="color" value={form.acolor} onChange={(e) => set('acolor', e.target.value)} className="w-6 h-6 rounded-full border border-[var(--color-input-border)] cursor-pointer" title="Accent custom" />
+                        <span className="text-[10px] font-mono text-[var(--color-text2)]">{form.acolor}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Accent Color</label>
-                  <div className="flex gap-2 items-center">
-                    <input type="color" value={form.acolor} onChange={(e) => set('acolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
-                    <span className="text-xs text-[var(--color-text2)]">{form.acolor}</span>
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg bg-[var(--color-input-bg)] border border-[var(--color-border)]">
+                  <div>
+                    <label className="text-[11px] font-medium text-[var(--color-text2)]">Primary Custom</label>
+                    <div className="mt-1 flex gap-2 items-center">
+                      <input type="color" value={form.pcolor} onChange={(e) => set('pcolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
+                      <span className="text-xs font-mono text-[var(--color-text2)]">{form.pcolor}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-[var(--color-text2)]">Accent Custom</label>
+                    <div className="mt-1 flex gap-2 items-center">
+                      <input type="color" value={form.acolor} onChange={(e) => set('acolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
+                      <span className="text-xs font-mono text-[var(--color-text2)]">{form.acolor}</span>
+                    </div>
                   </div>
                 </div>
               </div>
