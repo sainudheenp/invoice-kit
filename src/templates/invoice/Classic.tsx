@@ -4,7 +4,7 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceClassic(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#1f2937'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:60px;width:auto;max-width:220px;object-fit:contain;" alt="logo"/>` : ''
-  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;max-width:120px;max-height:120px;object-fit:contain;" alt="seal"/>` : ''
+  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:150px;width:auto;max-width:150px;max-height:150px;object-fit:contain;" alt="seal"/>` : ''
   const sigHtml = c.signature ? `<img src="${esc(c.signature)}" style="height:37.5px;width:auto;max-width:180px;max-height:60px;object-fit:contain;" alt="signature"/>` : ''
   const qrHtml = d.qr || ''
 

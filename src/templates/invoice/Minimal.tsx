@@ -4,7 +4,7 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceMinimal(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#94a3b8'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:44px;width:auto;max-width:200px;object-fit:contain;" alt="logo"/>` : ''
-  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;max-width:120px;max-height:120px;object-fit:contain;" alt="seal"/>` : ''
+  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:150px;width:auto;max-width:150px;max-height:150px;object-fit:contain;" alt="seal"/>` : ''
   const qrHtml = d.qr || ''
 
   const rows = d.items.map((item, i) => {
