@@ -4,7 +4,7 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceModern(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#D97706'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:54px;width:auto;max-width:220px;object-fit:contain;" alt="logo"/>` : ''
-  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
+  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;max-width:120px;max-height:120px;object-fit:contain;" alt="seal"/>` : ''
   const qrHtml = d.qr || ''
 
   const rows = d.items.map((item, i) => {
@@ -108,7 +108,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes">
   <div style="display:flex;gap:15px;align-items:center;">
     ${sealHtml}
   </div>
-  ${c.signature ? `<div class="sig-block">${c.signature ? `<img src="${esc(c.signature)}" style="height:35px;width:auto;" alt="sig"/>` : ''}<div class="sig-line"></div><div class="sig-label">Authorized Signature</div></div>` : ''}
+  ${c.signature ? `<div class="sig-block">${c.signature ? `<img src="${esc(c.signature)}" style="height:35px;width:auto;max-width:180px;max-height:60px;object-fit:contain;" alt="sig"/>` : ''}<div class="sig-line"></div><div class="sig-label">Authorized Signature</div></div>` : ''}
   <div class="sig-block" style="text-align:right;">
     <div class="sig-label">${esc(c.name)}</div>
     ${contactLine ? `<div class="sig-label">${esc(contactLine)}</div>` : ''}

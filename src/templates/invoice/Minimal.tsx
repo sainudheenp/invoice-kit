@@ -4,7 +4,7 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceMinimal(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#94a3b8'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:44px;width:auto;max-width:200px;object-fit:contain;" alt="logo"/>` : ''
-  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
+  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;max-width:120px;max-height:120px;object-fit:contain;" alt="seal"/>` : ''
   const qrHtml = d.qr || ''
 
   const rows = d.items.map((item, i) => {
@@ -109,7 +109,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="section">
     ${sealHtml}
   </div>
   <div class="sig-box">
-    ${c.signature ? `<img src="${esc(c.signature)}" style="height:25px;width:auto;" alt="sig"/>` : ''}
+    ${c.signature ? `<img src="${esc(c.signature)}" style="height:25px;width:auto;max-width:180px;max-height:60px;object-fit:contain;" alt="sig"/>` : ''}
     <div class="sig-line"></div>
     <div class="sig-lbl">Authorized Signature</div>
   </div>

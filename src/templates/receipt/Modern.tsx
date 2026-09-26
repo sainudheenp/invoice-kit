@@ -85,7 +85,7 @@ export function ReceiptModern(d:RecTemplateData): string {
 </div>
 
 <div class="sig-section">
-  ${c.signature ? `<div class="sig-block"><img src="${esc(c.signature)}" style="height:32.5px;width:auto;" alt="sig"/><div class="sig-line"></div><div class="sig-label">Authorized Signature</div></div>` : ''}
+  ${c.signature ? `<div class="sig-block"><img src="${esc(c.signature)}" style="height:32.5px;width:auto;max-width:180px;max-height:60px;object-fit:contain;" alt="sig"/><div class="sig-line"></div><div class="sig-label">Authorized Signature</div></div>` : ''}
   ${d.sg ? `<div class="sig-block"><div class="sig-line"></div><div class="sig-label">Signatory</div><div style="font-size:12.5px;font-weight:bold;">${esc(d.sg)}</div></div>` : ''}
 </div>
 

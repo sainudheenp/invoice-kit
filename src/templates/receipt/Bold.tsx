@@ -90,7 +90,7 @@ export function ReceiptBold(d:RecTemplateData): string {
   <div class="sig">
     <div></div>
     <div class="sig-b">
-      ${c.signature ? `<img src="${esc(c.signature)}" style="height:35px;width:auto;" alt="sig"/>` : ''}
+      ${c.signature ? `<img src="${esc(c.signature)}" style="height:35px;width:auto;max-width:180px;max-height:60px;object-fit:contain;" alt="sig"/>` : ''}
       <div class="sig-line"></div>
       <div class="sig-label">Authorized Signature</div>
     </div>

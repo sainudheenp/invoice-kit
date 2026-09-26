@@ -114,7 +114,7 @@ ${d.notes || d.terms ? `<div class="notes-box">
     <div style="font-size:11.25px;font-weight:bold;color:#0f172a;">${esc(c.name)}</div>
   </div>
   <div class="sig-item">
-    ${c.signature ? `<img src="${esc(c.signature)}" style="height:30px;width:auto;" alt="sig"/>` : ''}
+    ${c.signature ? `<img src="${esc(c.signature)}" style="height:30px;width:auto;max-width:180px;max-height:60px;object-fit:contain;" alt="sig"/>` : ''}
     <div class="sig-line"></div>
     <div class="sig-lbl">Authorized Signature</div>
   </div>

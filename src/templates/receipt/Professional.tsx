@@ -100,7 +100,7 @@ export function ReceiptProfessional(d:RecTemplateData): string {
     ${d.rv ? `<div style="font-size:11.25px;font-weight:bold;">${esc(d.rv)}</div>` : ''}
   </div>
   <div class="sig-item">
-    ${c.signature ? `<img src="${esc(c.signature)}" style="height:30px;width:auto;" alt="sig"/>` : ''}
+    ${c.signature ? `<img src="${esc(c.signature)}" style="height:30px;width:auto;max-width:180px;max-height:60px;object-fit:contain;" alt="sig"/>` : ''}
     <div class="sig-line"></div>
     <div class="sig-lbl">Authorized Signature</div>
   </div>

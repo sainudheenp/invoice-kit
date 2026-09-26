@@ -4,7 +4,7 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceBold(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#dc2626'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:60px;width:auto;max-width:220px;object-fit:contain;" alt="logo"/>` : ''
-  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
+  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;max-width:120px;max-height:120px;object-fit:contain;" alt="seal"/>` : ''
   const qrHtml = d.qr || ''
 
   const rows = d.items.map((item, i) => {
@@ -111,7 +111,7 @@ export function InvoiceBold(d:InvTemplateData): string {
     </div>
     <div></div>
     <div class="sig-b">
-      ${c.signature ? `<img src="${esc(c.signature)}" style="height:37.5px;width:auto;" alt="sig"/>` : ''}
+      ${c.signature ? `<img src="${esc(c.signature)}" style="height:37.5px;width:auto;max-width:180px;max-height:60px;object-fit:contain;" alt="sig"/>` : ''}
       <div class="sig-line"></div>
       <div class="sig-label">Authorized Signature</div>
     </div>

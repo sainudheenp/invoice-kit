@@ -91,7 +91,7 @@ export function ReceiptClassic(d:RecTemplateData): string {
     ${d.rv ? `<div class="sig-box" style="text-align:left;"><div class="sig-line" style="margin:5px 0;"></div><div class="sig-lbl">Receiver:${esc(d.rv)}</div></div>` : ''}
   </div>
   <div class="sig-box">
-    ${c.signature ? `<img src="${esc(c.signature)}" style="height:32.5px;width:auto;" alt="sig"/>` : ''}
+    ${c.signature ? `<img src="${esc(c.signature)}" style="height:32.5px;width:auto;max-width:180px;max-height:60px;object-fit:contain;" alt="sig"/>` : ''}
     <div class="sig-line"></div>
     <div class="sig-lbl">Authorized Signature</div>
   </div>

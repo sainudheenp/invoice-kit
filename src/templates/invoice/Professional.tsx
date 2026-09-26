@@ -4,7 +4,7 @@ import type { InvTemplateData } from '@/types/template'
 export function InvoiceProfessional(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#1e3a5f'
   const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:54px;width:auto;max-width:220px;object-fit:contain;" alt="logo"/>` : ''
-  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
+  const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;max-width:120px;max-height:120px;object-fit:contain;" alt="seal"/>` : ''
   const qrHtml = d.qr || ''
 
   const rows = d.items.map((item, i) => {
@@ -125,7 +125,7 @@ ${d.pd || d.notes || c.invTerms ? `<div class="notes-box">
     <div style="font-size:11.25px;font-weight:bold;color:#0f172a;">${esc(c.name)}</div>
   </div>
   <div class="sig-item">
-    ${c.signature ? `<img src="${esc(c.signature)}" style="height:30px;width:auto;" alt="sig"/>` : ''}
+    ${c.signature ? `<img src="${esc(c.signature)}" style="height:30px;width:auto;max-width:180px;max-height:60px;object-fit:contain;" alt="sig"/>` : ''}
     <div class="sig-line"></div>
     <div class="sig-lbl">Authorized Signature</div>
   </div>
