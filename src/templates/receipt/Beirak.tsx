@@ -3,7 +3,7 @@ import type { RecTemplateData } from '@/types/template'
 
 export function ReceiptBeirak(d:RecTemplateData): string {
   const c = d.comp; const DB = '#1e3a5f'; const LB = '#e8edf3'; const p = d.pc || DB
-  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:60px;width:auto;max-width:220px;object-fit:contain;" alt="logo"/>` : ''
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:50px;width:auto;max-width:220px;object-fit:contain;" alt="logo"/>` : ''
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>

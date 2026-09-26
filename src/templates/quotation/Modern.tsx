@@ -3,7 +3,7 @@ import type { QuotTemplateData } from '@/types/template'
 
 export function QuotationModern(d:QuotTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#D97706'
-  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:56px;width:auto;max-width:200px;object-fit:contain;" alt="logo"/>` : ''
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:46px;width:auto;max-width:200px;object-fit:contain;" alt="logo"/>` : ''
 
   const rows = d.items.map((item, i) => `
     <tr${i % 2 === 1 ? ' style="background:#f1f5f9;"' : ''}>

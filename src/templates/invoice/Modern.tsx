@@ -3,7 +3,7 @@ import type { InvTemplateData } from '@/types/template'
 
 export function InvoiceModern(d:InvTemplateData): string {
   const c = d.comp; const p = c.pcolor || '#D97706'
-  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:62px;width:auto;max-width:220px;object-fit:contain;" alt="logo"/>` : ''
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:54px;width:auto;max-width:220px;object-fit:contain;" alt="logo"/>` : ''
   const sealHtml = d.showSeal !== false && c.seal && c.seal !== c.logo ? `<img src="${esc(c.seal)}" style="height:120px;width:auto;" alt="seal"/>` : ''
   const qrHtml = d.qr || ''
 

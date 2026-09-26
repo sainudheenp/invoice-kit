@@ -22,7 +22,7 @@ import {
 } from './quotation'
 
 const SCALE = 1.1
-const LOGO_SCALE = 1.35
+const LOGO_SCALE = 1.25
 
 function scaleTemplate(html: string): string {
   let out = html.replace(/font-size:\s*([\d.]+)px/g, (_m, px) => {

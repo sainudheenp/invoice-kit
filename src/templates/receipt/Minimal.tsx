@@ -3,7 +3,7 @@ import type { RecTemplateData } from '@/types/template'
 
 export function ReceiptMinimal(d:RecTemplateData): string {
   const c = d.comp
-  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:52px;width:auto;max-width:200px;object-fit:contain;" alt="logo"/>` : ''
+  const logoHtml = c.logo ? `<img src="${esc(c.logo)}" style="height:44px;width:auto;max-width:200px;object-fit:contain;" alt="logo"/>` : ''
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
