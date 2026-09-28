@@ -1,4 +1,3 @@
-
 import { resizeImage, IMAGE_MAX_SIZES } from '@/utils/image'
 
 interface Props {
@@ -12,6 +11,77 @@ interface Props {
   formRef: React.MutableRefObject<Record<string, string>>
   setSaving: (v: boolean) => void
   doAutoSave: () => void
+}
+
+const PRIMARY_SWATCHES = ['#000000', '#1e3a5f', '#1f2937', '#8b6914', '#dc2626', '#065f46']
+const ACCENT_SWATCHES = ['#616161', '#78716C', '#64748b', '#6b7280', '#D97706', '#57534e']
+
+function SwatchGroup({
+  label,
+  colors,
+  value,
+  onChange,
+}: {
+  label: string
+  colors: string[]
+  value: string
+  onChange: (c: string) => void
+}) {
+  return (
+    <div>
+      <label className="text-xs font-medium text-[var(--color-text2)] mb-2 block">{label}</label>
+      <div className="flex flex-wrap gap-2.5">
+        {colors.map((col) => {
+          const active = value.toLowerCase() === col.toLowerCase()
+          return (
+            <button
+              key={col}
+              type="button"
+              onClick={() => onChange(col)}
+              title={col}
+              className={`relative w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-sm
+                ${active
+                  ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary-ring)] ring-offset-2 ring-offset-[var(--color-card)] scale-110'
+                  : 'border-white/30 hover:scale-105 hover:border-white/60'
+                }`}
+              style={{ background: col }}
+            >
+              {active && (
+                <span className="w-5 h-5 rounded-full bg-white text-black flex items-center justify-center shadow">
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          )
+        })}
+        {/* Custom picker as extra swatch */}
+        <div className="relative w-9 h-9 rounded-full border-2 border-dashed border-[var(--color-border)] flex items-center justify-center bg-[var(--color-input-bg)] overflow-hidden group hover:border-[var(--color-primary)]/50 transition-colors">
+          <input
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            title="Custom color"
+          />
+          <span className="text-[10px] font-bold text-[var(--color-text3)] group-hover:text-[var(--color-primary)]">+</span>
+        </div>
+      </div>
+      <div className="mt-2.5 flex items-center gap-2">
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer shrink-0"
+        />
+        <span className="text-xs font-mono px-2 py-1 rounded bg-[var(--color-input-bg)] border border-[var(--color-border)] text-[var(--color-text2)]">
+          {value}
+        </span>
+        <span className="text-[11px] text-[var(--color-text3)]">Custom</span>
+      </div>
+    </div>
+  )
 }
 
 export function BrandingSection({ form, set, setUploadField, dragOverField, setDragOverField, showToast, autoSaveTimer, formRef, setSaving, doAutoSave }: Props) {
@@ -38,7 +108,7 @@ export function BrandingSection({ form, set, setUploadField, dragOverField, setD
   return (
     <div id="settings-branding" data-section="branding">
       <h2 className="text-sm font-semibold mb-3">Branding</h2>
-      <div className="space-y-4">
+      <div className="space-y-5">
         {(['logo', 'seal', 'signature'] as const).map((field) => (
           <div key={field}>
             <label className="text-xs font-medium text-[var(--color-text2)] capitalize mb-1.5 block">{field}</label>
@@ -63,7 +133,7 @@ export function BrandingSection({ form, set, setUploadField, dragOverField, setD
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
                   <span className="text-xs">Click or drop an image</span>
-                  <span className="text-[10px]">JPG, PNG, SVG &middot; Max 2MB</span>
+                  <span className="text-[10px]">JPG, PNG, SVG · Max 2MB</span>
                 </div>
               )}
             </div>
@@ -79,28 +149,33 @@ export function BrandingSection({ form, set, setUploadField, dragOverField, setD
               )}
               {form[field] && (
                 <>
-                  <span className="text-xs text-[var(--color-text3)]">&middot;</span>
+                  <span className="text-xs text-[var(--color-text3)]">·</span>
                   <button onClick={() => set(field, '')} className="text-xs text-red hover:brightness-110 transition-colors cursor-pointer">Remove</button>
                 </>
               )}
             </div>
           </div>
         ))}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-medium text-[var(--color-text2)]">Primary Color</label>
-            <div className="flex gap-2 items-center">
-              <input type="color" value={form.pcolor} onChange={(e) => set('pcolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
-              <span className="text-xs text-[var(--color-text2)]">{form.pcolor}</span>
-            </div>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-[var(--color-text2)]">Accent Color</label>
-            <div className="flex gap-2 items-center">
-              <input type="color" value={form.acolor} onChange={(e) => set('acolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
-              <span className="text-xs text-[var(--color-text2)]">{form.acolor}</span>
-            </div>
-          </div>
+
+        {/* Logo size note */}
+        <div className="text-[11px] text-[var(--color-text3)] bg-[var(--color-input-bg)] border border-[var(--color-border)] rounded-lg px-3 py-2">
+          Logo displays at <strong>60px</strong> height (max-width 220px), Seal at <strong>150px</strong> with max-width 150px limit on documents.
+        </div>
+
+        <div className="space-y-5 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-input-bg)]/50">
+          <SwatchGroup
+            label="Primary Color – 6 presets + custom"
+            colors={PRIMARY_SWATCHES}
+            value={form.pcolor}
+            onChange={(c) => set('pcolor', c)}
+          />
+          <div className="h-px bg-[var(--color-border)]" />
+          <SwatchGroup
+            label="Accent Color – 6 presets + custom"
+            colors={ACCENT_SWATCHES}
+            value={form.acolor}
+            onChange={(c) => set('acolor', c)}
+          />
         </div>
       </div>
     </div>

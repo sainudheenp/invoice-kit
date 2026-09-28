@@ -50,10 +50,13 @@ const TEMPLATE_OPTIONS = ['classic', 'modern', 'professional', 'minimal', 'elega
 const WATERMARK_OPTIONS = ['', 'Draft', 'Paid', 'Sample', 'Copy']
 
 const IMAGE_INFO = {
-  logo: { dim: '200\u00D7200px', desc: 'Square, transparent background', note: 'Displays at 80\u00D780px on documents' },
-  seal: { dim: '300\u00D7300px', desc: 'Square, transparent background', note: 'Displays at 120\u00D7120px on documents' },
+  logo: { dim: '200\u00D7200px', desc: 'Square, transparent background', note: 'Displays at 60\u00D760px on documents (max-width 220px)' },
+  seal: { dim: '300\u00D7300px', desc: 'Square, transparent background', note: 'Displays at 150\u00D7150px on documents (max-width 150px limit)' },
   signature: { dim: '400\u00D7150px', desc: 'Wide, transparent background', note: 'Displays at 140\u00D770px on documents' },
 } as const
+
+const PRIMARY_SWATCHES = ['#000000', '#1e3a5f', '#1f2937', '#8b6914', '#dc2626', '#065f46']
+const ACCENT_SWATCHES = ['#616161', '#78716C', '#64748b', '#6b7280', '#D97706', '#57534e']
 
 export default function Settings() {
   const { state, getCo, saveCompany, deleteCompany, setActive, resetAll, restoreBackup } = useApp()
@@ -580,19 +583,92 @@ export default function Settings() {
                   <span className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-[var(--color-card)] shadow-sm transition-transform ${form.showSeal ? 'translate-x-[18px]' : 'translate-x-0'}`} />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="text-[11px] text-[var(--color-text3)] bg-[var(--color-input-bg)] border border-[var(--color-border)] rounded-lg px-3 py-2">
+                Logo displays at <strong>60px</strong> height (max-width 220px), Seal at <strong>150px</strong> with max-width 150px limit on documents.
+              </div>
+
+              <div className="space-y-5 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-input-bg)]/50">
+                {/* Primary Swatches */}
                 <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Primary Color</label>
-                  <div className="flex gap-2 items-center">
-                    <input type="color" value={form.pcolor} onChange={(e) => set('pcolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
-                    <span className="text-xs text-[var(--color-text2)]">{form.pcolor}</span>
+                  <label className="text-xs font-medium text-[var(--color-text2)] mb-2 block">Primary Color – 6 presets + custom</label>
+                  <div className="flex flex-wrap gap-2.5">
+                    {PRIMARY_SWATCHES.map((col) => {
+                      const active = form.pcolor.toLowerCase() === col.toLowerCase()
+                      return (
+                        <button
+                          key={col}
+                          type="button"
+                          onClick={() => set('pcolor', col)}
+                          title={col}
+                          className={`relative w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-sm ${
+                            active
+                              ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary-ring)] ring-offset-2 ring-offset-[var(--color-card)] scale-110'
+                              : 'border-white/30 hover:scale-105 hover:border-white/60'
+                          }`}
+                          style={{ background: col }}
+                        >
+                          {active && (
+                            <span className="w-5 h-5 rounded-full bg-white text-black flex items-center justify-center shadow">
+                              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            </span>
+                          )}
+                        </button>
+                      )
+                    })}
+                    <div className="relative w-9 h-9 rounded-full border-2 border-dashed border-[var(--color-border)] flex items-center justify-center bg-[var(--color-input-bg)] overflow-hidden group hover:border-[var(--color-primary)]/50 transition-colors">
+                      <input type="color" value={form.pcolor} onChange={(e) => set('pcolor', e.target.value)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" title="Custom color" />
+                      <span className="text-[10px] font-bold text-[var(--color-text3)] group-hover:text-[var(--color-primary)]">+</span>
+                    </div>
+                  </div>
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <input type="color" value={form.pcolor} onChange={(e) => set('pcolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer shrink-0" />
+                    <span className="text-xs font-mono px-2 py-1 rounded bg-[var(--color-input-bg)] border border-[var(--color-border)] text-[var(--color-text2)]">{form.pcolor}</span>
+                    <span className="text-[11px] text-[var(--color-text3)]">Custom</span>
                   </div>
                 </div>
+
+                <div className="h-px bg-[var(--color-border)]" />
+
+                {/* Accent Swatches */}
                 <div>
-                  <label className="text-xs font-medium text-[var(--color-text2)]">Accent Color</label>
-                  <div className="flex gap-2 items-center">
-                    <input type="color" value={form.acolor} onChange={(e) => set('acolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer" />
-                    <span className="text-xs text-[var(--color-text2)]">{form.acolor}</span>
+                  <label className="text-xs font-medium text-[var(--color-text2)] mb-2 block">Accent Color – 6 presets + custom</label>
+                  <div className="flex flex-wrap gap-2.5">
+                    {ACCENT_SWATCHES.map((col) => {
+                      const active = form.acolor.toLowerCase() === col.toLowerCase()
+                      return (
+                        <button
+                          key={col}
+                          type="button"
+                          onClick={() => set('acolor', col)}
+                          title={col}
+                          className={`relative w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-sm ${
+                            active
+                              ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary-ring)] ring-offset-2 ring-offset-[var(--color-card)] scale-110'
+                              : 'border-white/30 hover:scale-105 hover:border-white/60'
+                          }`}
+                          style={{ background: col }}
+                        >
+                          {active && (
+                            <span className="w-5 h-5 rounded-full bg-white text-black flex items-center justify-center shadow">
+                              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            </span>
+                          )}
+                        </button>
+                      )
+                    })}
+                    <div className="relative w-9 h-9 rounded-full border-2 border-dashed border-[var(--color-border)] flex items-center justify-center bg-[var(--color-input-bg)] overflow-hidden group hover:border-[var(--color-primary)]/50 transition-colors">
+                      <input type="color" value={form.acolor} onChange={(e) => set('acolor', e.target.value)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" title="Custom color" />
+                      <span className="text-[10px] font-bold text-[var(--color-text3)] group-hover:text-[var(--color-primary)]">+</span>
+                    </div>
+                  </div>
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <input type="color" value={form.acolor} onChange={(e) => set('acolor', e.target.value)} className="w-10 h-10 rounded-lg border border-[var(--color-input-border)] cursor-pointer shrink-0" />
+                    <span className="text-xs font-mono px-2 py-1 rounded bg-[var(--color-input-bg)] border border-[var(--color-border)] text-[var(--color-text2)]">{form.acolor}</span>
+                    <span className="text-[11px] text-[var(--color-text3)]">Custom</span>
                   </div>
                 </div>
               </div>
